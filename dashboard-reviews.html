@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reviews | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .rv-tabs{display:flex;gap:8px;margin-bottom:20px;border-bottom:1px solid var(--line);}
+  .rv-tab{padding:11px 4px;margin-right:22px;font-size:11.5px;letter-spacing:1.2px;color:var(--ink-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;}
+  .rv-tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+  .rv-tab .n{color:var(--ink-soft);font-weight:400;}
+  .rv-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:16px 20px;margin-bottom:12px;}
+  .rv-card-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:6px;flex-wrap:wrap;}
+  .rv-card-head b{font-size:13px;}
+  .rv-card-head span{font-size:11px;color:var(--ink-soft);}
+  .rv-stars{display:flex;gap:2px;margin-bottom:8px;}
+  .rv-stars svg{width:14px;height:14px;fill:none;stroke:var(--gold);stroke-width:1.5;}
+  .rv-stars svg.filled{fill:var(--gold);}
+  .rv-card-title{font-size:13px;font-weight:600;margin-bottom:4px;}
+  .rv-card-body{font-size:12.5px;color:var(--ink-soft);line-height:1.6;margin-bottom:12px;}
+  .rv-card-product{font-size:11px;color:var(--gold);margin-bottom:8px;}
+  .rv-actions{display:flex;gap:8px;}
+  .rv-actions button{
+    font-size:10.5px;letter-spacing:1px;padding:7px 14px;border-radius:2px;border:1px solid var(--line);background:#fff;cursor:pointer;
+  }
+  .rv-actions .approve{border-color:var(--ok);color:var(--ok);}
+  .rv-actions .reject{border-color:var(--err);color:var(--err);}
+  .rv-actions .delete{color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Reviews</h1><p>Customer reviews wait here before they show on the product page.</p></div>
+          <button class="db-refresh" id="rvRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="rv-tabs">
+          <button class="rv-tab active" data-status="pending">PENDING <span class="n" id="cntPending"></span></button>
+          <button class="rv-tab" data-status="approved">APPROVED <span class="n" id="cntApproved"></span></button>
+          <button class="rv-tab" data-status="rejected">REJECTED <span class="n" id="cntRejected"></span></button>
+        </div>
+
+        <div id="rvList"></div>
+        <div class="db-empty" id="rvEmpty" style="display:none">
+          <svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+          <p>Nothing here.</p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { fmtDate, escHtml, toast } = DashUI;
+let currentStatus = 'pending';
+
+const STAR = '<svg viewBox="0 0 24 24"><path d="M12 2.5l3 6.5 7 1-5 5 1.2 7-6.2-3.5-6.2 3.5 1.2-7-5-5 7-1z"/></svg>';
+function stars(n){ let h=''; for(let i=1;i<=5;i++) h += STAR.replace('<svg', `<svg class="${i<=n?'filled':''}"`); return h; }
+
+function reviewCard(r){
+  return `<div class="rv-card" data-id="${r.id}">
+    <div class="rv-card-head"><b>${escHtml(r.name)}</b><span>${fmtDate(r.createdAt)}</span></div>
+    <p class="rv-card-product">${escHtml(r.productName || r.productId)}</p>
+    <div class="rv-stars">${stars(r.rating)}</div>
+    ${r.title ? `<p class="rv-card-title">${escHtml(r.title)}</p>` : ''}
+    <p class="rv-card-body">${escHtml(r.body)}</p>
+    <div class="rv-actions">
+      ${r.status !== 'approved' ? `<button class="approve" data-act="approved">APPROVE</button>` : ''}
+      ${r.status !== 'rejected' ? `<button class="reject" data-act="rejected">REJECT</button>` : ''}
+      <button class="delete" data-act="delete">DELETE</button>
+    </div>
+  </div>`;
+}
+
+async function load(){
+  const btn = $('rvRefresh');
+  btn.classList.add('spin');
+  try {
+    const r = await fetch('/api/admin/products?action=reviews&status=' + currentStatus);
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load reviews.');
+
+    $('cntPending').textContent = d.counts.pending;
+    $('cntApproved').textContent = d.counts.approved;
+    $('cntRejected').textContent = d.counts.rejected;
+
+    const list = $('rvList'), empty = $('rvEmpty');
+    if (!d.reviews.length){ list.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    list.innerHTML = d.reviews.map(reviewCard).join('');
+  } catch(e){ toast(e.message, 'bad'); }
+  finally { btn.classList.remove('spin'); }
+}
+
+document.querySelectorAll('.rv-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.rv-tab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+    currentStatus = tab.dataset.status;
+    load();
+  });
+});
+$('rvRefresh').addEventListener('click', load);
+
+$('rvList').addEventListener('click', async (e)=>{
+  const btn = e.target.closest('button[data-act]');
+  if (!btn) return;
+  const card = btn.closest('.rv-card');
+  const id = card.dataset.id;
+  const act = btn.dataset.act;
+
+  try {
+    if (act === 'delete'){
+      if (!confirm('Delete this review permanently?')) return;
+      const r = await fetch('/api/admin/products?action=review-delete&id=' + id, { method: 'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Review deleted.', 'ok');
+    } else {
+      const r = await fetch('/api/admin/products?action=review-moderate', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, status: act })
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Update failed.');
+      toast(act === 'approved' ? 'Review approved.' : 'Review rejected.', 'ok');
+    }
+    load();
+  } catch(err){ toast(err.message, 'bad'); }
+});
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

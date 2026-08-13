@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .inv-status{font-size:11px;font-weight:600;letter-spacing:.5px;}
+  .inv-status.ok{color:var(--ok);}
+  .inv-status.low{color:var(--warn);}
+  .inv-status.out{color:var(--err);}
+  .inv-adjust-btns{display:flex;gap:6px;}
+  .inv-adjust-btns button{
+    width:26px;height:26px;border:1px solid var(--line);background:#fff;border-radius:4px;
+    font-size:15px;color:var(--gold);cursor:pointer;line-height:1;
+  }
+  .inv-adjust-btns button:hover{border-color:var(--gold);}
+  .inv-log-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .inv-log-row:last-child{border-bottom:none;}
+  .inv-log-row .l span{display:block;color:var(--ink-soft);font-size:11px;margin-top:2px;}
+  .inv-log-row .amt{font-weight:600;}
+  .inv-log-row .amt.pos{color:var(--ok);}
+  .inv-log-row .amt.neg{color:var(--err);}
+  .ov-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Inventory</h1><p>Stock levels for every tracked product, and a history of every change.</p></div>
+          <button class="db-refresh" id="invRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="db-stats" id="invStats"></div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr><th>PRODUCT</th><th>SKU</th><th>CATEGORY</th><th>STOCK</th><th>THRESHOLD</th><th>STATUS</th><th>ADJUST</th></tr>
+            </thead>
+            <tbody id="invTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="invEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            <p>No products have stock tracking enabled yet. Turn it on from a product's edit form.</p>
+          </div>
+        </div>
+
+        <div class="ov-card" style="margin-top:24px">
+          <h3 style="font-family:'Playfair Display',serif;font-weight:400;font-size:16px;margin-bottom:2px">Recent Stock Changes</h3>
+          <p class="sub" style="font-size:11.5px;color:var(--ink-soft);margin-bottom:16px">Last 100 adjustments — from orders, manual edits, and restocks</p>
+          <div id="invLog"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { escHtml, fmtDate, toast } = DashUI;
+
+function statusLabel(s){ return s === 'out' ? 'OUT OF STOCK' : (s === 'low' ? 'LOW STOCK' : 'IN STOCK'); }
+
+function renderTable(items){
+  const empty = $('invEmpty');
+  if (!items.length){ $('invTableBody').innerHTML = ''; empty.style.display = 'block'; return; }
+  empty.style.display = 'none';
+  $('invTableBody').innerHTML = items.map(i => `
+    <tr data-id="${escHtml(i.id)}">
+      <td class="td-name">${escHtml(i.name)}</td>
+      <td>${escHtml(i.sku || '')}</td>
+      <td>${escHtml(i.categoryName || '')}</td>
+      <td><b>${i.stockQuantity}</b></td>
+      <td>${i.lowStockThreshold}</td>
+      <td><span class="inv-status ${i.status}">${statusLabel(i.status)}</span></td>
+      <td>
+        <div class="inv-adjust-btns">
+          <button class="btnAdjust" data-delta="-1" title="Remove 1">&minus;</button>
+          <button class="btnAdjust" data-delta="1" title="Add 1">+</button>
+          <button class="btnAdjustCustom" title="Custom adjustment">&hellip;</button>
+        </div>
+      </td>
+    </tr>`).join('');
+}
+
+async function load(){
+  const btn = $('invRefresh');
+  btn.classList.add('spin');
+  try {
+    const [invR, logR] = await Promise.all([
+      fetch('/api/admin/products?action=inventory'),
+      fetch('/api/admin/products?action=inventory-log')
+    ]);
+    if (invR.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const inv = await invR.json();
+    const log = await logR.json();
+    if (!inv.ok) throw new Error(inv.error || 'Could not load inventory.');
+
+    $('invStats').innerHTML = `
+      <div class="db-stat"><p>TRACKED PRODUCTS</p><h3>${inv.items.length}</h3></div>
+      <div class="db-stat ${inv.lowStockCount ? 'warn' : ''}"><p>LOW STOCK</p><h3>${inv.lowStockCount}</h3></div>
+      <div class="db-stat ${inv.outOfStockCount ? 'err' : ''}"><p>OUT OF STOCK</p><h3>${inv.outOfStockCount}</h3></div>
+    `;
+    renderTable(inv.items);
+
+    $('invLog').innerHTML = (log.entries || []).length ? log.entries.map(e => `
+      <div class="inv-log-row">
+        <div class="l">${escHtml(e.productName || e.productId)}<span>${e.reason === 'order' ? ('Order ' + (e.orderId || '')) : (e.note || (e.reason === 'restock' ? 'Restock' : 'Manual adjustment'))} &middot; ${fmtDate(e.createdAt)}</span></div>
+        <div class="amt ${e.change > 0 ? 'pos' : 'neg'}">${e.change > 0 ? '+' : ''}${e.change}</div>
+      </div>`).join('') : '<p style="font-size:12.5px;color:var(--ink-soft)">No stock changes yet.</p>';
+  } catch(e){
+    $('invStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;
+  } finally {
+    btn.classList.remove('spin');
+  }
+}
+$('invRefresh').addEventListener('click', load);
+
+async function adjust(id, delta, note){
+  try {
+    const r = await fetch('/api/admin/products?action=stock-adjust', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, change: delta, note: note || null })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Adjustment failed.');
+    toast('Stock updated.', 'ok');
+    load();
+  } catch(e){ toast(e.message, 'bad'); }
+}
+
+$('invTableBody').addEventListener('click', (e)=>{
+  const row = e.target.closest('tr');
+  if (!row) return;
+  const id = row.dataset.id;
+
+  const stdBtn = e.target.closest('.btnAdjust');
+  if (stdBtn){ adjust(id, Number(stdBtn.dataset.delta)); return; }
+
+  const customBtn = e.target.closest('.btnAdjustCustom');
+  if (customBtn){
+    const input = prompt('Enter a stock change (e.g. 10 to add, -3 to remove):');
+    if (input === null) return;
+    const delta = Math.round(Number(input));
+    if (!delta || isNaN(delta)) { toast('Enter a non-zero number.', 'bad'); return; }
+    const note = prompt('Optional note for this adjustment:') || null;
+    adjust(id, delta, note);
+  }
+});
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

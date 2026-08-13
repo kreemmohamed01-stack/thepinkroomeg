@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Analytics | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Analytics</h1><p>Traffic, sales trends and what customers are actually looking at.</p></div>
+          <button class="db-refresh" id="anRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="db-stats" id="anStats"></div>
+
+        <div class="an-grid2">
+          <div class="chart-card">
+            <h3>Monthly Sales</h3>
+            <p class="sub">Revenue by month, last 12 months</p>
+            <div id="chartSales"></div>
+          </div>
+          <div class="chart-card">
+            <h3>Visitor Trend</h3>
+            <p class="sub">Unique visitors per day, last 14 days</p>
+            <div id="chartVisitors"></div>
+          </div>
+        </div>
+
+        <div class="db-page-head" style="margin-top:8px">
+          <div><h2 style="font-family:'Playfair Display',serif;font-weight:400;font-size:19px">Business Metrics</h2><p style="font-size:12px;color:var(--ink-soft)" id="rangeLabel"></p></div>
+          <select class="db-filter" id="rangeSelect">
+            <option value="today">Today</option>
+            <option value="7d">Last 7 days</option>
+            <option value="30d" selected>Last 30 days</option>
+            <option value="this_month">This month</option>
+            <option value="last_month">Last month</option>
+            <option value="custom">Custom range&hellip;</option>
+          </select>
+        </div>
+        <div class="db-toolbar" id="customRangeRow" style="display:none">
+          <div class="db-field" style="margin:0"><label style="font-size:10px">From</label><input type="date" id="rangeFrom"></div>
+          <div class="db-field" style="margin:0"><label style="font-size:10px">To</label><input type="date" id="rangeTo"></div>
+          <button class="db-add" id="btnApplyRange" style="height:38px">APPLY</button>
+        </div>
+
+        <div class="db-stats" id="rangeStats"></div>
+
+        <div class="an-grid3">
+          <div class="list-card">
+            <h3>Best Sellers</h3>
+            <p class="sub" id="bestSellersSub">By quantity, selected range</p>
+            <div class="top-list" id="listBestSellers"></div>
+          </div>
+          <div class="list-card">
+            <h3>Slowest Sellers</h3>
+            <p class="sub">Lowest quantity, among products with any sale in range</p>
+            <div class="top-list" id="listWorstSellers"></div>
+          </div>
+          <div class="list-card">
+            <h3>Order &amp; Payment Status</h3>
+            <p class="sub">Selected range</p>
+            <div id="statusBreakdown"></div>
+          </div>
+        </div>
+
+        <div class="an-grid3">
+          <div class="list-card">
+            <h3>Most Viewed Products</h3>
+            <p class="sub">Last 90 days</p>
+            <div class="top-list" id="listTopProducts"></div>
+          </div>
+          <div class="list-card">
+            <h3>Most Viewed Categories</h3>
+            <p class="sub">Last 90 days</p>
+            <div class="top-list" id="listTopCategories"></div>
+          </div>
+          <div class="list-card">
+            <h3>Most Added to Bag</h3>
+            <p class="sub">Last 90 days</p>
+            <div class="top-list" id="listTopCart"></div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, escHtml } = DashUI;
+
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+function renderBarChart(containerId, points){
+  const el = $(containerId);
+  const max = Math.max(1, ...points.map(p => p.value));
+  el.innerHTML = `<div class="chart-bars">` + points.map(p => {
+    const h = p.value > 0 ? Math.max(4, Math.round((p.value / max) * 100)) : 2;
+    return `<div class="chart-bar-col ${p.value === 0 ? 'zero' : ''}">
+      <div class="chart-bar-value">${p.value > 0 ? p.format(p.value) : ''}</div>
+      <div class="chart-bar" style="height:${h}%"></div>
+      <div class="chart-bar-label">${p.label}</div>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+function renderTopList(containerId, rows, opts){
+  const el = $(containerId);
+  if (!rows.length){
+    el.innerHTML = `<p class="top-empty">${opts.emptyText}</p>`;
+    return;
+  }
+  const max = Math.max(1, ...rows.map(r => r.count));
+  el.innerHTML = rows.map((r, i) => `
+    <div class="top-item">
+      <span class="top-item-rank">${i + 1}</span>
+      <div class="top-item-body">
+        <div class="top-item-name">${escHtml(r.name)}${r.sub ? ' <span style="color:var(--ink-soft);font-weight:400">&mdash; ' + escHtml(r.sub) + '</span>' : ''}</div>
+        <div class="top-item-bar-wrap"><div class="top-item-bar" style="width:${Math.round((r.count / max) * 100)}%"></div></div>
+      </div>
+      <span class="top-item-count">${r.count}</span>
+    </div>`).join('');
+}
+
+async function loadAnalytics(){
+  const btn = $('anRefresh');
+  btn.classList.add('spin');
+  try {
+    const r = await fetch('/api/admin/analytics');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load analytics.');
+
+    $('anStats').innerHTML = `
+      <div class="db-stat gold"><p><span class="live-dot"></span>ACTIVE NOW</p><h3 id="anActiveNow">&mdash;</h3></div>
+      <div class="db-stat"><p>VISITORS TODAY</p><h3>${d.visitorsToday}</h3></div>
+      <div class="db-stat"><p>VISITORS THIS WEEK</p><h3>${d.visitorsWeek}</h3></div>
+      <div class="db-stat"><p>VISITORS THIS MONTH</p><h3>${d.visitorsMonth}</h3></div>
+      <div class="db-stat"><p>PAGE VIEWS (30D)</p><h3>${d.pageViews30d}</h3></div>
+    `;
+    refreshLiveCount();
+
+    renderBarChart('chartSales', d.monthlySales.map(m => {
+      const [y, mo] = m.month.split('-');
+      return { label: MONTH_NAMES[Number(mo) - 1], value: m.revenue, format: v => money(v).replace('EGP ', '') };
+    }));
+
+    renderBarChart('chartVisitors', d.visitorTrend.map(v => {
+      const d2 = new Date(v.day + 'T00:00:00');
+      return { label: DAY_NAMES[d2.getDay()], value: v.visitors, format: v2 => String(v2) };
+    }));
+
+    renderTopList('listTopProducts', d.topProducts.map(p => ({ name: p.product_name, count: p.views })), { emptyText: 'No product views yet.' });
+    renderTopList('listTopCategories', d.topCategories.map(c => ({ name: c.category_name, count: c.views })), { emptyText: 'No category views yet.' });
+    renderTopList('listTopCart', d.topAddToCart.map(p => ({ name: p.product_name, count: p.adds })), { emptyText: 'No add-to-bag activity yet.' });
+  } catch(e){
+    $('anStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;
+  } finally {
+    btn.classList.remove('spin');
+  }
+}
+$('anRefresh').addEventListener('click', ()=>{ loadAnalytics(); loadRangeAnalytics(); });
+
+let liveTimer = null;
+async function refreshLiveCount(){
+  try {
+    const r = await fetch('/api/admin/analytics?action=live');
+    const d = await r.json();
+    const el = $('anActiveNow');
+    if (d.ok && el) el.textContent = d.active;
+  } catch(e){}
+}
+function startLivePolling(){
+  if (liveTimer) return;
+  liveTimer = setInterval(refreshLiveCount, 10000);
+}
+
+/* ---------- business metrics (date-range scoped) ---------- */
+function statusRow(label, count, total, cls){
+  const pct = total ? Math.round((count / total) * 100) : 0;
+  return `<div class="top-item">
+    <span class="badge st-${cls}" style="min-width:96px"><i></i>${label.toUpperCase()}</span>
+    <div class="top-item-body"><div class="top-item-bar-wrap"><div class="top-item-bar" style="width:${pct}%"></div></div></div>
+    <span class="top-item-count">${count}</span>
+  </div>`;
+}
+
+async function loadRangeAnalytics(){
+  const range = $('rangeSelect').value;
+  const params = new URLSearchParams({ action: 'range', range });
+  if (range === 'custom'){
+    if (!$('rangeFrom').value || !$('rangeTo').value) return;
+    params.set('from', $('rangeFrom').value);
+    params.set('to', $('rangeTo').value);
+  }
+  try {
+    const r = await fetch('/api/admin/analytics?' + params.toString());
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load business metrics.');
+
+    $('rangeLabel').textContent = d.range.label;
+    $('bestSellersSub').textContent = 'By quantity, ' + d.range.label.toLowerCase();
+
+    $('rangeStats').innerHTML = `
+      <div class="db-stat gold"><p>REVENUE</p><h3>${money(d.revenue)}</h3></div>
+      <div class="db-stat"><p>ORDERS</p><h3>${d.orders}</h3></div>
+      <div class="db-stat"><p>AVG ORDER VALUE</p><h3>${money(d.aov)}</h3></div>
+      <div class="db-stat"><p>CONVERSION (EST.)</p><h3>${d.conversionRate.toFixed(1)}%</h3><span class="db-stat-link">${d.visitors} visitors</span></div>
+      <div class="db-stat"><p>NEW / RETURNING</p><h3 style="font-size:19px">${d.newCustomers} / ${d.returningCustomers}</h3></div>
+    `;
+
+    renderTopList('listBestSellers', d.bestSellers.map(p => ({ name: p.name || p.productId, count: p.qty })), { emptyText: 'No sales in this range.' });
+    renderTopList('listWorstSellers', d.worstSellers.map(p => ({ name: p.name || p.productId, count: p.qty })), { emptyText: 'No sales in this range.' });
+
+    const orderTotal = d.orderStatusBreakdown.reduce((s,r)=>s+r.count, 0);
+    const paymentTotal = d.paymentStatusBreakdown.reduce((s,r)=>s+r.count, 0);
+    const rows = [
+      ...d.orderStatusBreakdown.map(r => statusRow(r.status, r.count, orderTotal, r.status)),
+      ...d.paymentStatusBreakdown.map(r => statusRow(r.status, r.count, paymentTotal, r.status))
+    ];
+    $('statusBreakdown').innerHTML = rows.length ? rows.join('') : '<p class="top-empty">No orders in this range.</p>';
+  } catch(e){
+    $('rangeStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;
+  }
+}
+
+$('rangeSelect').addEventListener('change', ()=>{
+  $('customRangeRow').style.display = $('rangeSelect').value === 'custom' ? 'flex' : 'none';
+  if ($('rangeSelect').value !== 'custom') loadRangeAnalytics();
+});
+$('btnApplyRange').addEventListener('click', loadRangeAnalytics);
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=>{ loadAnalytics(); loadRangeAnalytics(); startLivePolling(); });
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Store Settings | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .ss-tabs{display:flex;gap:8px;margin-bottom:22px;border-bottom:1px solid var(--line);}
+  .ss-tab{padding:11px 4px;margin-right:22px;font-size:11.5px;letter-spacing:1.2px;color:var(--ink-soft);background:none;border:none;border-bottom:2px solid transparent;cursor:pointer;}
+  .ss-tab.active{color:var(--ink);border-bottom-color:var(--gold);}
+  .ss-panel{display:none;}
+  .ss-panel.active{display:block;}
+  .ss-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;margin-bottom:20px;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap" style="max-width:640px">
+        <div class="db-page-head">
+          <div><h1>Store Settings</h1><p>Contact info, social links and SEO — used across the site's nav, footer and search listing.</p></div>
+        </div>
+
+        <div class="ss-tabs">
+          <button class="ss-tab active" data-tab="general">GENERAL</button>
+          <button class="ss-tab" data-tab="social">SOCIAL</button>
+          <button class="ss-tab" data-tab="seo">SEO</button>
+        </div>
+
+        <div class="ss-panel active" id="panelGeneral">
+          <div class="ss-card">
+            <div class="db-field"><label>Store name</label><input type="text" id="fStoreName"></div>
+            <div class="db-field"><label>Contact email</label><input type="email" id="fEmail"></div>
+            <div class="db-field"><label>WhatsApp number (with country code)</label><input type="text" id="fWhatsapp" placeholder="+201207803666"></div>
+            <div class="db-field"><label>Google Maps link</label><input type="text" id="fMaps"></div>
+          </div>
+        </div>
+
+        <div class="ss-panel" id="panelSocial">
+          <div class="ss-card">
+            <div class="db-field"><label>Instagram URL</label><input type="text" id="fInstagram"></div>
+            <div class="db-field"><label>Facebook URL (optional)</label><input type="text" id="fFacebook"></div>
+          </div>
+        </div>
+
+        <div class="ss-panel" id="panelSeo">
+          <div class="ss-card">
+            <div class="db-field"><label>Site title (browser tab / search results)</label><input type="text" id="fSeoTitle"></div>
+            <div class="db-field"><label>Meta description (search results snippet)</label><textarea id="fSeoDesc"></textarea></div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="db-save" id="btnSave" style="width:auto;padding:0 28px">SAVE CHANGES</button>
+          <p class="db-save-msg" id="msg"></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { toast } = DashUI;
+
+document.querySelectorAll('.ss-tab').forEach(tab=>{
+  tab.addEventListener('click', ()=>{
+    document.querySelectorAll('.ss-tab').forEach(t=>t.classList.remove('active'));
+    document.querySelectorAll('.ss-panel').forEach(p=>p.classList.remove('active'));
+    tab.classList.add('active');
+    $('panel' + (tab.dataset.tab === 'general' ? 'General' : tab.dataset.tab === 'social' ? 'Social' : 'Seo')).classList.add('active');
+  });
+});
+
+const DEFAULTS = {
+  storeName: 'The Pink Room',
+  contactEmail: 'thepinkroomeg@gmail.com',
+  whatsapp: '+201207803666',
+  instagramUrl: 'https://www.instagram.com/thepinkroom_eg?igsh=dnZrbW9xazV2dGp5',
+  facebookUrl: '',
+  mapsUrl: 'https://maps.app.goo.gl/s7NcLQyFgrmkZEms6?g_st=ac',
+  seoTitle: 'The Pink Room | Home Accessories',
+  seoDescription: 'Curated home accessories, paintings, lighting and furniture — The Pink Room, an Egyptian home decor brand.'
+};
+
+function fill(s){
+  $('fStoreName').value = s.storeName || '';
+  $('fEmail').value = s.contactEmail || '';
+  $('fWhatsapp').value = s.whatsapp || '';
+  $('fMaps').value = s.mapsUrl || '';
+  $('fInstagram').value = s.instagramUrl || '';
+  $('fFacebook').value = s.facebookUrl || '';
+  $('fSeoTitle').value = s.seoTitle || '';
+  $('fSeoDesc').value = s.seoDescription || '';
+}
+
+async function load(){
+  try {
+    const r = await fetch('/api/admin/settings?key=store_settings');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    if (r.status === 404){ fill(DEFAULTS); return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load settings.');
+    fill({ ...DEFAULTS, ...d.value });
+  } catch(e){ toast(e.message, 'bad'); fill(DEFAULTS); }
+}
+
+$('btnSave').addEventListener('click', async ()=>{
+  const btn = $('btnSave'), msg = $('msg');
+  const value = {
+    storeName: $('fStoreName').value.trim() || DEFAULTS.storeName,
+    contactEmail: $('fEmail').value.trim() || DEFAULTS.contactEmail,
+    whatsapp: $('fWhatsapp').value.trim() || DEFAULTS.whatsapp,
+    mapsUrl: $('fMaps').value.trim() || DEFAULTS.mapsUrl,
+    instagramUrl: $('fInstagram').value.trim(),
+    facebookUrl: $('fFacebook').value.trim(),
+    seoTitle: $('fSeoTitle').value.trim() || DEFAULTS.seoTitle,
+    seoDescription: $('fSeoDesc').value.trim() || DEFAULTS.seoDescription
+  };
+  btn.disabled = true; msg.className = 'db-save-msg';
+  try {
+    const r = await fetch('/api/admin/settings', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'store_settings', value })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved — live on the site now.'; msg.className = 'db-save-msg show ok';
+    toast('Store settings saved.', 'ok');
+  } catch(e){ msg.textContent = e.message; msg.className = 'db-save-msg show bad'; }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

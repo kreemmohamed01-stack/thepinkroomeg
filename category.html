@@ -1,0 +1,1068 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop | The Pink Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared-ui.css">
+<style>
+  :root{
+    --cream:#f5f0e8;
+    --cream-light:#f8f4ee;
+    --beige:#e9dfd0;
+    --beige-soft:#efe6d8;
+    --gold:#c9a97c;
+    --ink:#1c1a17;
+    --ink-soft:#3a362f;
+    --line:#d8cdbb;
+    --shine: rgba(201,169,124,.55);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Poppins',sans-serif;
+    background:var(--cream-light);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+  img{display:block;max-width:100%;}
+  input,select{font-family:inherit;}
+
+  @keyframes floaty{0%,100%{transform:translateY(0);}50%{transform:translateY(-3px);}}
+  @keyframes textShine{0%{background-position:220% 0;}100%{background-position:-220% 0;}}
+  @keyframes heartPulse{0%{transform:scale(1);}45%{transform:scale(1.4);}100%{transform:scale(1);}}
+  @keyframes cardIn{to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- ANNOUNCEMENT ---------- */
+  .announce{
+    background:var(--ink);
+    color:var(--cream-light);
+    text-align:center;
+    padding:9px 16px;
+    font-size:10.5px;
+    letter-spacing:2px;
+    display:flex;align-items:center;justify-content:center;gap:10px;
+  }
+  .announce svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.4;}
+
+  /* ---------- BREADCRUMB + HEADER ---------- */
+  .cat-head{
+    display:flex;align-items:stretch;
+    background:var(--beige-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .cat-head-text{
+    flex:1 1 52%;
+    padding:34px 46px 54px;
+    display:flex;flex-direction:column;justify-content:center;
+  }
+  .crumb{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-soft);margin-bottom:34px;}
+  .crumb a{transition:color .3s ease;}
+  .crumb a:hover{color:var(--gold);}
+  .crumb .sep{opacity:.45;}
+  .crumb .current{color:var(--gold);}
+  .cat-eyebrow{
+    font-size:11px;letter-spacing:3.5px;font-weight:600;color:var(--gold);margin-bottom:14px;
+  }
+  .cat-title{
+    font-family:'Playfair Display', serif;font-weight:400;
+    font-size:56px;line-height:1.06;color:var(--ink);margin-bottom:20px;
+  }
+  .cat-desc{font-size:15px;line-height:1.85;color:var(--ink-soft);max-width:420px;}
+  .cat-head-img{flex:1 1 48%;background-size:cover;background-position:center;min-height:300px;}
+
+  /* ---------- SUBCATEGORY TABS ---------- */
+  .subnav-wrap{
+    border-bottom:1px solid var(--line);
+    background:var(--cream-light);
+    position:relative;
+  }
+  .subnav{
+    display:flex;gap:38px;
+    max-width:1440px;margin:0 auto;padding:0 46px;
+    overflow-x:auto;scrollbar-width:none;
+  }
+  .subnav::-webkit-scrollbar{display:none;}
+  .subnav a{
+    position:relative;
+    padding:18px 0;
+    font-size:14px;
+    color:var(--ink-soft);
+    white-space:nowrap;
+    transition:color .3s ease;
+  }
+  .subnav a::after{
+    content:'';position:absolute;left:0;right:0;bottom:0;height:1.5px;
+    background:var(--gold);transform:scaleX(0);transform-origin:left;
+    transition:transform .35s cubic-bezier(.16,1,.3,1);
+  }
+  .subnav a:hover{color:var(--ink);}
+  .subnav a.active{color:var(--gold);}
+  .subnav a.active::after{transform:scaleX(1);}
+
+  /* ---------- TOOLBAR ---------- */
+  .toolbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    max-width:1440px;margin:0 auto;padding:26px 46px 22px;
+  }
+  .prod-count{font-size:14px;color:var(--ink);}
+  .toolbar-right{display:flex;align-items:center;gap:12px;}
+  .sort-label{font-size:12px;letter-spacing:1.5px;color:var(--ink-soft);}
+  .sort-select{
+    border:1px solid var(--line);
+    background:var(--cream-light);
+    padding:11px 34px 11px 14px;
+    font-size:13px;color:var(--ink);
+    border-radius:2px;cursor:pointer;
+    appearance:none;-webkit-appearance:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233a362f' stroke-width='1.6'><polyline points='6 9 12 15 18 9'/></svg>");
+    background-repeat:no-repeat;background-position:right 12px center;background-size:12px;
+    transition:border-color .3s ease;
+  }
+  .sort-select:hover{border-color:var(--gold);}
+  .toolbar-mobile-btns{display:none;gap:10px;}
+  .tool-btn{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;letter-spacing:1.4px;color:var(--ink);
+  }
+  .tool-btn svg{width:16px;height:16px;stroke:var(--ink);fill:none;stroke-width:1.5;}
+
+  /* ---------- LAYOUT ---------- */
+  .cat-body{
+    display:flex;gap:38px;
+    max-width:1440px;margin:0 auto;padding:0 46px 90px;
+    align-items:flex-start;
+  }
+
+  /* ---------- FILTERS ---------- */
+  .filters{
+    flex:0 0 236px;
+    position:sticky;top:96px;
+    background:var(--beige-soft);
+    border:1px solid var(--line);
+    border-radius:3px;
+    padding:6px 20px;
+    max-height:calc(100vh - 120px);
+    overflow-y:auto;
+  }
+  .filter-group{border-bottom:1px solid var(--line);}
+  .filter-group:last-child{border-bottom:none;}
+  .filter-head{
+    display:flex;align-items:center;justify-content:space-between;
+    width:100%;padding:18px 0;
+    font-size:11px;letter-spacing:2px;font-weight:600;color:var(--ink);
+  }
+  .filter-head svg{width:13px;height:13px;stroke:var(--ink-soft);fill:none;stroke-width:1.6;transition:transform .3s ease;}
+  .filter-group.collapsed .filter-head svg{transform:rotate(-90deg);}
+  .filter-body{padding-bottom:18px;display:block;}
+  .filter-group.collapsed .filter-body{display:none;}
+  .filter-opt{
+    display:flex;align-items:center;gap:10px;
+    padding:6px 0;cursor:pointer;
+    font-size:13px;color:var(--ink-soft);
+    transition:color .25s ease;
+  }
+  .filter-opt:hover{color:var(--ink);}
+  .filter-opt input{position:absolute;opacity:0;pointer-events:none;}
+  .filter-box{
+    width:14px;height:14px;flex-shrink:0;
+    border:1px solid var(--line);border-radius:2px;
+    background:#fff;
+    display:flex;align-items:center;justify-content:center;
+    transition:background .25s ease, border-color .25s ease;
+  }
+  .filter-box::after{
+    content:'';width:7px;height:4px;
+    border-left:1.5px solid #fff;border-bottom:1.5px solid #fff;
+    transform:rotate(-45deg) scale(0);transition:transform .2s ease;
+    margin-top:-2px;
+  }
+  .filter-opt input:checked + .filter-box{background:var(--gold);border-color:var(--gold);}
+  .filter-opt input:checked + .filter-box::after{transform:rotate(-45deg) scale(1);}
+  .filter-opt .swatch{width:15px;height:15px;border-radius:50%;border:1px solid var(--line);flex-shrink:0;}
+  .filter-opt .cnt{margin-left:auto;font-size:11px;opacity:.55;}
+  .filter-more{
+    font-size:12px;color:var(--gold);padding:6px 0;
+    border-bottom:1px solid transparent;transition:border-color .3s ease;
+  }
+  .filter-more:hover{border-color:var(--gold);}
+  .price-row{display:flex;align-items:center;justify-content:space-between;font-size:11px;color:var(--ink-soft);margin-top:12px;}
+  .price-slider{width:100%;accent-color:var(--gold);}
+
+  /* ---------- PRODUCT GRID ---------- */
+  .grid-col{flex:1;min-width:0;}
+  .product-grid{
+    display:grid;
+    grid-template-columns:repeat(4, 1fr);
+    gap:30px 22px;
+  }
+  .product-card{
+    display:block;
+    opacity:0;transform:translateY(12px);
+    animation:cardIn .5s cubic-bezier(.16,1,.3,1) forwards;
+  }
+  .card-media{
+    position:relative;
+    aspect-ratio:1/1;
+    overflow:hidden;
+    background:var(--beige-soft);
+    border:1px solid var(--line);
+    border-radius:3px;
+    margin-bottom:14px;
+  }
+  .card-media img{
+    width:100%;height:100%;object-fit:cover;
+    transition:transform 1s cubic-bezier(.16,1,.3,1);
+  }
+  .product-card:hover .card-media img{transform:scale(1.07);}
+  .card-tag{
+    position:absolute;top:12px;left:12px;z-index:2;
+    padding:6px 12px;
+    font-size:9.5px;letter-spacing:1.6px;font-weight:600;
+    color:#fff;background:var(--ink);
+  }
+  .card-tag.sale{background:#8a6a3c;}
+  .card-wish{
+    position:absolute;top:10px;right:10px;z-index:2;
+    width:32px;height:32px;border-radius:50%;
+    background:rgba(255,255,255,.93);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .3s cubic-bezier(.34,1.56,.64,1);
+  }
+  .card-wish svg{width:14px;height:14px;stroke:var(--ink);fill:none;stroke-width:1.5;transition:fill .3s ease, stroke .3s ease;}
+  .card-wish:hover{transform:scale(1.14);}
+  .card-wish.liked svg{fill:var(--gold);stroke:var(--gold);}
+  .card-add{
+    position:absolute;left:10px;right:10px;bottom:10px;z-index:2;
+    padding:11px;border-radius:2px;
+    background:rgba(28,26,23,.92);color:var(--cream-light);
+    font-size:10.5px;letter-spacing:1.6px;font-weight:500;
+    opacity:0;transform:translateY(8px);
+    transition:opacity .35s ease, transform .35s ease, background .3s ease;
+  }
+  .product-card:hover .card-add{opacity:1;transform:translateY(0);}
+  .card-add:hover{background:var(--gold);color:var(--ink);}
+  .card-add.added{background:var(--gold);color:var(--ink);}
+  @media (hover:none){
+    .card-add{opacity:1;transform:none;position:static;margin-top:10px;left:auto;right:auto;bottom:auto;}
+    .card-media{overflow:visible;}
+  }
+  .card-name{font-size:14px;color:var(--ink);margin-bottom:3px;}
+  .card-cat{font-size:11.5px;color:var(--ink-soft);opacity:.8;margin-bottom:9px;}
+  .card-price{display:flex;align-items:baseline;gap:10px;font-size:13.5px;font-weight:600;color:var(--ink);}
+  .card-price .was{font-weight:400;font-size:12.5px;color:var(--ink-soft);text-decoration:line-through;opacity:.65;}
+  .card-price .tbc{font-weight:400;color:var(--ink-soft);opacity:.7;}
+  .card-price .pct{font-weight:600;font-size:11px;color:#8a6a3c;}
+
+  /* ---------- PAGINATION ---------- */
+  .pagination{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:56px;}
+  .pagination button{
+    min-width:34px;height:34px;padding:0 8px;
+    border:1px solid transparent;border-radius:2px;
+    font-size:13px;color:var(--ink-soft);
+    display:flex;align-items:center;justify-content:center;
+    transition:border-color .3s ease, color .3s ease;
+  }
+  .pagination button svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .pagination button:hover:not(:disabled){color:var(--gold);border-color:var(--line);}
+  .pagination button.active{border-color:var(--gold);color:var(--gold);}
+  .pagination button:disabled{opacity:.3;cursor:default;}
+  .pagination .dots{color:var(--ink-soft);opacity:.5;padding:0 4px;}
+
+  /* ---------- EMPTY STATE ---------- */
+  .empty-state{display:none;text-align:center;padding:90px 20px;}
+  .empty-state.show{display:block;}
+  .empty-state svg{width:42px;height:42px;stroke:var(--gold);fill:none;stroke-width:1.1;margin-bottom:20px;animation:floaty 4s ease-in-out infinite;}
+  .empty-state h3{font-size:12px;letter-spacing:3px;color:var(--gold);font-weight:600;margin-bottom:14px;}
+  .empty-state p{font-family:'Playfair Display', serif;font-size:20px;color:var(--ink);margin-bottom:28px;}
+  .btn-outline{
+    display:inline-flex;align-items:center;gap:10px;
+    border:1px solid var(--ink);color:var(--ink);
+    padding:14px 28px;font-size:11.5px;letter-spacing:1.8px;
+    transition:background .35s ease, color .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .btn-outline:hover{background:var(--ink);color:#fff;transform:scale(1.03);}
+
+  /* ---------- MOBILE FILTER SHEET ---------- */
+  .sheet-overlay{
+    position:fixed;inset:0;background:rgba(20,17,12,.45);
+    z-index:98;opacity:0;pointer-events:none;transition:opacity .35s ease;
+  }
+  .sheet-overlay.active{opacity:1;pointer-events:auto;}
+  .filter-sheet{
+    position:fixed;left:0;right:0;bottom:0;
+    max-height:88vh;
+    background:var(--cream-light);
+    z-index:99;
+    border-radius:14px 14px 0 0;
+    transform:translateY(100%);
+    transition:transform .45s cubic-bezier(.16,1,.3,1);
+    display:flex;flex-direction:column;
+    box-shadow:0 -20px 50px rgba(20,17,12,.2);
+  }
+  .filter-sheet.open{transform:translateY(0);}
+  .sheet-head{
+    display:flex;align-items:center;justify-content:space-between;
+    padding:20px 22px 16px;border-bottom:1px solid var(--line);flex-shrink:0;
+  }
+  .sheet-head h3{font-family:'Playfair Display', serif;font-weight:400;font-size:21px;}
+  .sheet-close{
+    width:30px;height:30px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--ink-soft);
+    transition:background .3s ease, color .3s ease, transform .3s ease;
+  }
+  .sheet-close:hover{background:var(--ink);color:#fff;transform:rotate(90deg);}
+  .sheet-body{flex:1;overflow-y:auto;padding:0 22px;}
+  .sheet-foot{
+    display:flex;gap:10px;padding:16px 22px;
+    padding-bottom:max(16px, env(safe-area-inset-bottom));
+    border-top:1px solid var(--line);flex-shrink:0;
+  }
+  .sheet-foot button{
+    flex:1;padding:15px;font-size:11.5px;letter-spacing:1.6px;border-radius:2px;
+    transition:opacity .3s ease, background .3s ease, color .3s ease;
+  }
+  .btn-clear{border:1px solid var(--line);color:var(--ink-soft);}
+  .btn-clear:hover{border-color:var(--ink);color:var(--ink);}
+  .btn-apply{background:var(--ink);color:var(--cream-light);}
+  .btn-apply:hover{opacity:.88;}
+
+  /* ---------- FOOTER ---------- */
+  .site-footer{background:var(--ink);padding:56px 46px 0;}
+  .footer-grid{
+    display:grid;grid-template-columns:1.5fr 1fr 1fr 1.15fr;gap:24px;
+    max-width:1400px;margin:0 auto;padding-bottom:36px;
+  }
+  .footer-logo{
+    display:flex;flex-direction:column;gap:5px;margin-bottom:18px;align-items:flex-start;
+  }
+  .footer-logo .logo-main{font-size:21px;letter-spacing:3px;}
+  .footer-logo .logo-rule{width:34px;}
+  .footer-logo .logo-tagline span{font-size:7px;letter-spacing:2.4px;}
+  .footer-about{font-size:13px;line-height:1.85;color:rgba(255,255,255,.62);max-width:330px;}
+  .footer-heading{
+    font-size:12.5px;letter-spacing:2.5px;color:#fff;font-weight:500;
+    margin-bottom:14px;position:relative;padding-bottom:14px;
+  }
+  .footer-heading::after{content:'';position:absolute;left:0;bottom:0;width:22px;height:1px;background:var(--gold);}
+  .footer-links{display:flex;flex-direction:column;gap:12px;}
+  .footer-links a{
+    font-size:13px;color:rgba(255,255,255,.7);width:fit-content;
+    transition:color .3s ease, transform .3s ease;
+  }
+  .footer-links a:hover{color:var(--gold);transform:translateX(4px);}
+  .footer-socials{display:flex;gap:12px;margin-bottom:22px;}
+  .footer-social{
+    width:36px;height:36px;border-radius:50%;
+    border:1px solid rgba(255,255,255,.28);
+    display:flex;align-items:center;justify-content:center;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), border-color .3s ease, background .3s ease;
+  }
+  .footer-social svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.5;}
+  .footer-social:hover{transform:scale(1.12) translateY(-2px);border-color:var(--gold);background:rgba(201,169,124,.12);}
+  .footer-contact-item{
+    display:flex;align-items:flex-start;gap:10px;margin-bottom:13px;
+    color:rgba(255,255,255,.72);font-size:12.5px;line-height:1.6;
+    transition:color .3s ease, transform .3s ease;
+  }
+  .footer-contact-item svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.5;flex-shrink:0;margin-top:2px;}
+  .footer-contact-item:hover{color:var(--gold);transform:translateX(3px);}
+  .footer-credit{
+    text-align:center;padding:22px 0;border-top:1px solid rgba(255,255,255,.1);
+    font-size:11px;letter-spacing:2.4px;color:rgba(255,255,255,.5);
+  }
+  .footer-credit-name{
+    margin-left:6px;font-weight:600;
+    background:linear-gradient(90deg,#fff 0%,#fff 40%,var(--gold) 50%,#fff 60%,#fff 100%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:textShine 3.5s linear infinite;
+  }
+  .footer-bottom{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;
+    max-width:1400px;margin:0 auto;padding:18px 0;border-top:1px solid rgba(255,255,255,.08);
+  }
+  .footer-copy{font-size:11.5px;color:rgba(255,255,255,.5);}
+  .footer-legal{display:flex;align-items:center;gap:9px;font-size:11.5px;color:rgba(255,255,255,.4);}
+  .footer-legal a{color:rgba(255,255,255,.6);transition:color .3s ease;}
+  .footer-legal a:hover{color:var(--gold);}
+
+  /* ---------- WHATSAPP FLOAT ---------- */
+  .whatsapp-float{
+    position:fixed;right:20px;bottom:22px;z-index:61;
+    width:46px;height:46px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:var(--ink);box-shadow:0 8px 20px rgba(20,17,12,.28);
+    animation:floaty 3.6s ease-in-out infinite;
+    transition:transform .35s cubic-bezier(.34,1.56,.64,1), background .35s ease;
+  }
+  .whatsapp-float svg{width:22px;height:22px;color:#fff;}
+  .whatsapp-float:hover{transform:scale(1.12) translateY(-3px);background:var(--gold);}
+
+  /* ================= TABLET ================= */
+  @media (max-width:1100px){
+    .product-grid{grid-template-columns:repeat(3, 1fr);}
+    .filters{flex:0 0 210px;}
+    .cat-title{font-size:44px;}
+    .topbar{padding:14px 26px;}
+    .cat-head-text{padding:28px 26px 44px;}
+    .subnav, .toolbar, .cat-body{padding-left:26px;padding-right:26px;}
+    .site-footer{padding:48px 26px 0;}
+    .footer-grid{grid-template-columns:1fr 1fr;gap:32px 24px;}
+  }
+
+  /* ================= MOBILE ================= */
+  @media (max-width:760px){
+    .announce{font-size:9.5px;letter-spacing:1.4px;padding:8px 12px;}
+    .topbar{padding:12px 18px;}
+    .topbar .side{gap:14px;}
+    .logo-main{font-size:19px;letter-spacing:2.4px;}
+    .logo-rule{width:30px;}
+    .logo-tagline span{font-size:6.5px;letter-spacing:2.2px;}
+
+    /* Same side-by-side layout as laptop — image stays on the right, just
+       a smaller share of the row instead of taking over the screen. */
+    .cat-head-text{flex:1 1 60%;padding:18px 14px 18px 20px;justify-content:center;}
+    .cat-head-img{flex:0 0 40%;min-height:0;background-size:cover;background-position:center;}
+    .tpr-back{font-size:9.5px;gap:6px;padding:4px 0;}
+    .tpr-back svg{width:11px;height:11px;}
+    .crumb{margin-bottom:14px;font-size:10px;gap:5px;flex-wrap:wrap;}
+    .cat-eyebrow{font-size:9px;letter-spacing:2px;margin-bottom:8px;}
+    .cat-title{font-size:23px;line-height:1.12;margin-bottom:8px;}
+    .cat-desc{display:none;}   /* no room for body copy beside the photo at this width */
+
+    .subnav{padding:0 20px;gap:26px;}
+    .subnav a{font-size:15px;padding:16px 0;}
+
+    .toolbar{padding:16px 20px;}
+    .toolbar-right{display:none;}
+    .toolbar-mobile-btns{display:flex;}
+    .prod-count{font-size:13px;}
+
+    .cat-body{padding:0 20px 40px;gap:0;}
+    .filters{display:none;}
+    .product-grid{grid-template-columns:repeat(2, 1fr);gap:26px 14px;}
+    .card-name{font-size:13px;}
+    .card-cat{font-size:11px;}
+    .card-price{font-size:13px;}
+    .card-wish{width:28px;height:28px;top:8px;right:8px;}
+    .card-wish svg{width:12px;height:12px;}
+    .card-tag{padding:5px 10px;font-size:8.5px;top:8px;left:8px;}
+
+    .whatsapp-float{bottom:80px;right:16px;width:42px;height:42px;}
+    .whatsapp-float svg{width:20px;height:20px;}
+
+    .site-footer{padding:34px 20px 0;}
+    .footer-grid{grid-template-columns:1fr 1fr;gap:26px 16px;padding-bottom:22px;}
+    .footer-brand{grid-column:1 / -1;}
+    .footer-contact{grid-column:1 / -1;}
+    .footer-bottom{flex-direction:row;flex-wrap:wrap;gap:10px 14px;padding:16px 0;}
+    .footer-copy{font-size:10px;}
+    .footer-legal{font-size:10px;gap:6px;}
+  }
+</style>
+</head>
+<body>
+
+  <div class="announce">
+    <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+    FREE DELIVERY ON ORDERS OVER EGP 5000
+  </div>
+
+  <div data-tpr-nav></div>
+
+  <!-- ===== CATEGORY HEADER ===== -->
+  <section class="cat-head">
+    <div class="cat-head-text">
+      <button class="tpr-back" id="catBack" style="margin-bottom:16px">
+        <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        BACK
+      </button>
+      <nav class="crumb" id="breadcrumb"></nav>
+      <p class="cat-eyebrow">THE COLLECTION</p>
+      <h1 class="cat-title" id="catTitle">Paintings</h1>
+      <p class="cat-desc" id="catDesc"></p>
+    </div>
+    <div class="cat-head-img" id="catHeroImg"></div>
+  </section>
+
+  <!-- ===== SUBCATEGORIES ===== -->
+  <div class="subnav-wrap" id="subnavWrap">
+    <nav class="subnav" id="subnav"></nav>
+  </div>
+
+  <!-- ===== TOOLBAR ===== -->
+  <div class="toolbar">
+    <span class="prod-count"><span id="prodCount">0</span> Products</span>
+    <div class="toolbar-right">
+      <span class="sort-label">Sort by</span>
+      <select class="sort-select" id="sortSelect">
+        <option value="featured">Featured</option>
+        <option value="newest">Newest</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+      </select>
+    </div>
+    <div class="toolbar-mobile-btns">
+      <button class="tool-btn" id="openFilters">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2" fill="var(--cream-light)"/><circle cx="15" cy="12" r="2" fill="var(--cream-light)"/><circle cx="8" cy="17" r="2" fill="var(--cream-light)"/></svg>
+        FILTERS
+      </button>
+      <button class="tool-btn" id="openSort">
+        SORT BY
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- ===== BODY ===== -->
+  <div class="cat-body">
+    <aside class="filters" id="filtersDesktop"></aside>
+
+    <div class="grid-col">
+      <div class="product-grid" id="productGrid"></div>
+
+      <div class="empty-state" id="emptyState">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <h3>NO PRODUCTS FOUND</h3>
+        <p>Try adjusting your filters or explore another collection.</p>
+        <button class="btn-outline" id="clearFiltersEmpty">CLEAR FILTERS</button>
+      </div>
+
+      <div class="pagination" id="pagination"></div>
+    </div>
+  </div>
+
+  <!-- ===== MOBILE FILTER SHEET ===== -->
+  <div class="sheet-overlay" id="sheetOverlay"></div>
+  <div class="filter-sheet" id="filterSheet">
+    <div class="sheet-head">
+      <h3>Filters</h3>
+      <button class="sheet-close" id="sheetClose" aria-label="Close">&times;</button>
+    </div>
+    <div class="sheet-body" id="filtersMobile"></div>
+    <div class="sheet-foot">
+      <button class="btn-clear" id="clearFiltersSheet">CLEAR ALL</button>
+      <button class="btn-apply" id="applyFilters">SHOW RESULTS</button>
+    </div>
+  </div>
+
+  <!-- ===== FOOTER ===== -->
+  <footer class="site-footer">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="footer-logo">
+          <div class="logo-main"><span>T</span><span>H</span><span>E</span><span class="sp"></span><span>P</span><span>I</span><span>N</span><span>K</span><span class="sp"></span><span>R</span><span>O</span><span>O</span><span>M</span></div>
+          <div class="logo-tagline"><i class="logo-rule"></i><span>HOME ACCESSORIES</span></div>
+        </div>
+        <p class="footer-about">Curated elegance for every home. Timeless pieces, selected with love.</p>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">SHOP</h4>
+        <ul class="footer-links">
+          <li><a href="category.html?cat=paintings">Paintings</a></li>
+          <li><a href="category.html?cat=accessories">Accessories</a></li>
+          <li><a href="category.html?cat=lighting">Lighting</a></li>
+          <li><a href="category.html?cat=furniture">Furniture</a></li>
+          <li><a href="category.html?cat=wall-art">Wall Art</a></li>
+          <li><a href="category.html?cat=sale-offers">Sale</a></li>
+        </ul>
+      </div>
+
+      <div>
+        <h4 class="footer-heading">CUSTOMER CARE</h4>
+        <ul class="footer-links">
+          <li><a href="refund-return-policy.html">Refund &amp; Return Policy</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-contact">
+        <h4 class="footer-heading">FOLLOW US</h4>
+        <div class="footer-socials">
+          <a href="https://www.instagram.com/thepinkroom_eg?igsh=dnZrbW9xazV2dGp5" target="_blank" rel="noopener" class="footer-social" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
+          </a>
+          <a href="https://maps.app.goo.gl/s7NcLQyFgrmkZEms6?g_st=ac" target="_blank" rel="noopener" class="footer-social" aria-label="Google Maps">
+            <svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          </a>
+          <a href="https://wa.me/201207803666" target="_blank" rel="noopener" class="footer-social" aria-label="WhatsApp">
+            <svg viewBox="0 0 32 32" fill="#fff" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Zm0 22.9h-.004a10.4 10.4 0 0 1-5.3-1.45l-.38-.22-4.12 1.33 1.35-4.02-.25-.41a10.35 10.35 0 0 1-1.6-5.53c0-5.75 4.68-10.42 10.44-10.42 2.79 0 5.4 1.09 7.37 3.06a10.34 10.34 0 0 1 3.05 7.36c0 5.75-4.68 10.3-10.53 10.3Zm5.72-7.72c-.31-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.72.16-.21.31-.83 1.03-1.02 1.25-.19.21-.38.24-.7.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.19.21-.31.31-.52.1-.21.05-.4-.03-.55-.08-.16-.72-1.75-.99-2.39-.26-.63-.53-.54-.72-.55-.19-.01-.4-.01-.61-.01-.21 0-.55.08-.84.4-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.22 3.42 5.39 4.79.75.32 1.34.52 1.8.66.76.24 1.44.21 1.99.13.61-.09 1.87-.76 2.13-1.5.26-.73.26-1.36.18-1.5-.08-.13-.28-.21-.6-.36Z"/></svg>
+          </a>
+        </div>
+        <a href="mailto:thepinkroomeg@gmail.com" class="footer-contact-item">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
+          <span>thepinkroomeg@gmail.com</span>
+        </a>
+        <a href="https://maps.app.goo.gl/s7NcLQyFgrmkZEms6?g_st=ac" target="_blank" rel="noopener" class="footer-contact-item">
+          <svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
+          <span>Find us on Google Maps</span>
+        </a>
+      </div>
+    </div>
+
+    <div class="footer-credit">
+      BUILT WITH <span style="color:var(--gold)">&hearts;</span> BY
+      <a href="https://wa.me/201211179625" target="_blank" rel="noopener" class="footer-credit-name">KREEM ALI STUDIO</a>
+    </div>
+
+    <div class="footer-bottom">
+      <p class="footer-copy">&copy; 2025 The Pink Room. All rights reserved.</p>
+      <div class="footer-legal">
+        <a href="#">Terms &amp; Conditions</a><span>|</span>
+        <a href="#">Privacy Policy</a><span>|</span>
+        <a href="refund-return-policy.html">Refund &amp; Return Policy</a>
+      </div>
+    </div>
+  </footer>
+
+  <a href="https://wa.me/201207803666" target="_blank" rel="noopener" class="whatsapp-float" aria-label="Chat on WhatsApp">
+    <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Zm0 22.9h-.004a10.4 10.4 0 0 1-5.3-1.45l-.38-.22-4.12 1.33 1.35-4.02-.25-.41a10.35 10.35 0 0 1-1.6-5.53c0-5.75 4.68-10.42 10.44-10.42 2.79 0 5.4 1.09 7.37 3.06a10.34 10.34 0 0 1 3.05 7.36c0 5.75-4.68 10.3-10.53 10.3Zm5.72-7.72c-.31-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.72.16-.21.31-.83 1.03-1.02 1.25-.19.21-.38.24-.7.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.19.21-.31.31-.52.1-.21.05-.4-.03-.55-.08-.16-.72-1.75-.99-2.39-.26-.63-.53-.54-.72-.55-.19-.01-.4-.01-.61-.01-.21 0-.55.08-.84.4-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.22 3.42 5.39 4.79.75.32 1.34.52 1.8.66.76.24 1.44.21 1.99.13.61-.09 1.87-.76 2.13-1.5.26-.73.26-1.36.18-1.5-.08-.13-.28-.21-.6-.36Z"/></svg>
+  </a>
+
+<script src="analytics.js"></script>
+<script src="catalog.js"></script>
+<script src="shared-ui.js"></script>
+<script>
+/* ============================================================
+   CATEGORY PAGE CONTROLLER
+   Everything below is category-agnostic — the page renders itself
+   from ?cat= and ?sub= plus the data in catalog.js.
+   ============================================================ */
+
+const PER_PAGE = 12;
+const COLOR_HEX = {
+  'Beige':'#d8c5a8','White':'#f4f1ec','Black':'#2b2b2b','Gold':'#c9a97c',
+  'Silver':'#c7c7c7','Green':'#7e8a6d','Blue':'#6d7f96','Brown':'#7a5c43'
+};
+
+const params   = new URLSearchParams(location.search);
+const roomSlug = params.get('room') || null;
+let   catSlug  = params.get('cat') || 'all';
+const subSlug  = params.get('sub') || null;
+const room     = roomSlug && typeof ROOMS !== 'undefined' ? ROOMS[roomSlug] : null;
+
+/* "all" is a virtual category: every product, with the main categories as its tabs */
+const ALL_CATEGORY = {
+  name: 'All Products',
+  description: 'The complete collection — every piece we carry, from paintings and lighting to accessories and furniture.',
+  hero: 'collectionnnn/pinksummer.jpeg',
+  subcategories: Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => ({ slug:k, name:CATEGORIES[k].name, isCategory:true }))
+};
+
+if (catSlug !== 'all' && !CATEGORIES[catSlug]) catSlug = 'all';
+
+/* a room page is "all products, scoped to that room", with categories as its tabs */
+const ROOM_CATEGORY = room ? {
+  name: room.name,
+  description: room.description,
+  hero: room.hero,
+  subcategories: Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => ({ slug:k, name:CATEGORIES[k].name, isCategory:true }))
+} : null;
+
+const category = room ? ROOM_CATEGORY : (catSlug === 'all' ? ALL_CATEGORY : CATEGORIES[catSlug]);
+const isAll = !room && catSlug === 'all';
+const isRoom = !!room;
+
+// a real category page — not "all", not a room, not a dead slug that
+// fell back to "all" — is the only case worth counting as a category view
+if (!isAll && !isRoom && window.TPRAnalytics){
+  window.TPRAnalytics.trackEvent('category_view', { category: catSlug, categoryName: category.name });
+}
+
+const state = {
+  sort: 'featured',
+  page: 1,
+  filters: { category:[], color:[], material:[], size:[], availability:[], collection:[] },
+  maxPrice: null
+};
+
+/* ---------- header ---------- */
+document.title = category.name + ' | The Pink Room';
+document.getElementById('catTitle').textContent = subSlug
+  ? (category.subcategories.find(s => s.slug === subSlug) || {}).name || category.name
+  : category.name;
+document.getElementById('catDesc').textContent = category.description;
+if ((params.get('q') || '').trim()){
+  document.getElementById('catTitle').textContent = '“' + params.get('q').trim() + '”';
+  document.getElementById('catDesc').textContent = 'Showing everything matching your search.';
+  document.querySelector('.cat-eyebrow').textContent = 'SEARCH RESULTS';
+} else if (params.get('collection')){
+  const COLLECTION_COPY = {
+    'New Arrivals':  'Fresh pieces to elevate your home, added to the collection most recently.',
+    'Sale':          'Beautiful pieces at special prices, for a limited time.',
+    'Summer':        'Light, fresh and perfect for the season.',
+    'Hand-Painted':  'Artisanal pieces with unique character, painted by hand.'
+  };
+  const c = params.get('collection');
+  document.getElementById('catTitle').textContent = c;
+  document.getElementById('catDesc').textContent = COLLECTION_COPY[c] || category.description;
+  document.querySelector('.cat-eyebrow').textContent = 'CURATED COLLECTION';
+}
+document.getElementById('catHeroImg').style.backgroundImage = `url('${category.hero}')`;
+
+/* ---------- breadcrumb ---------- */
+(function renderCrumb(){
+  const el = document.getElementById('breadcrumb');
+  let html = `<a href="index.html">Home</a><span class="sep">/</span>`;
+  if (isRoom){
+    html += `<span class="current">${room.name}</span>`;
+    el.innerHTML = html;
+    return;
+  }
+  if (subSlug){
+    const sub = category.subcategories.find(s => s.slug === subSlug);
+    html += `<a href="category.html?cat=${catSlug}">${category.name}</a><span class="sep">/</span>`;
+    html += `<span class="current">${sub ? sub.name : ''}</span>`;
+  } else {
+    html += `<span class="current">${category.name}</span>`;
+  }
+  el.innerHTML = html;
+})();
+
+/* ---------- subcategory nav ---------- */
+(function renderSubnav(){
+  const wrap = document.getElementById('subnavWrap');
+  const nav  = document.getElementById('subnav');
+  if (!category.subcategories.length){ wrap.style.display = 'none'; return; }
+  nav.innerHTML = category.subcategories.map(s =>
+    s.isCategory
+      ? `<a href="category.html?cat=${s.slug}">${s.name}</a>`
+      : `<a href="category.html?cat=${catSlug}&sub=${s.slug}" class="${s.slug === subSlug ? 'active' : ''}">${s.name}</a>`
+  ).join('');
+  if (isRoom) document.querySelector('.cat-eyebrow').textContent = 'SHOP BY ROOM';
+})();
+
+/* ---------- scope ---------- */
+const searchQuery = (params.get('q') || '').trim().toLowerCase();
+const collectionParam = params.get('collection');
+
+function scopedProducts(){
+  let list;
+  if (isRoom)              list = PRODUCTS.filter(p => p.rooms && p.rooms.includes(roomSlug));
+  else if (isAll)          list = PRODUCTS;
+  else if (category.virtual === 'sale') list = PRODUCTS.filter(p => p.salePrice);
+  else                     list = PRODUCTS.filter(p => p.category === catSlug && (!subSlug || p.subcategory === subSlug));
+
+  if (collectionParam) list = list.filter(p => p.collection.includes(collectionParam));
+
+  if (searchQuery){
+    list = list.filter(p =>
+      p.name.toLowerCase().includes(searchQuery) ||
+      p.categoryName.toLowerCase().includes(searchQuery) ||
+      (p.subcategoryName || '').toLowerCase().includes(searchQuery) ||
+      p.material.toLowerCase().includes(searchQuery) ||
+      p.color.toLowerCase().includes(searchQuery)
+    );
+  }
+  return list;
+}
+
+/* ---------- filtering ---------- */
+function applyFilters(list){
+  const f = state.filters;
+  return list.filter(p => {
+    if (f.category.length && !f.category.includes((isAll || isRoom || category.virtual) ? p.categoryName : (p.subcategoryName || p.categoryName))) return false;
+    if (f.color.length && !f.color.includes(p.color)) return false;
+    if (f.material.length && !f.material.includes(p.material)) return false;
+    if (f.size.length && !f.size.includes(p.size)) return false;
+    if (f.availability.length && !f.availability.includes(p.availability)) return false;
+    if (f.collection.length && !f.collection.some(c => p.collection.includes(c))) return false;
+    // products still awaiting a price aren't excluded by the price slider
+    const effective = p.salePrice || p.price;
+    if (state.maxPrice !== null && effective != null && effective > state.maxPrice) return false;
+    return true;
+  });
+}
+
+function sortProducts(list){
+  const out = [...list];
+  switch(state.sort){
+    case 'newest':     out.sort((a,b) => b.createdAt - a.createdAt); break;
+    case 'price-asc':  out.sort((a,b) => (a.salePrice||a.price) - (b.salePrice||b.price)); break;
+    case 'price-desc': out.sort((a,b) => (b.salePrice||b.price) - (a.salePrice||a.price)); break;
+    default: break; // featured = catalogue order
+  }
+  return out;
+}
+
+/* ---------- filter panel ---------- */
+function countFor(group, value){
+  return scopedProducts().filter(p => {
+    if (group === 'category') return (isAll || isRoom || category.virtual)
+      ? p.categoryName === value
+      : (p.subcategoryName || p.categoryName) === value;
+    const v = p[group];
+    return Array.isArray(v) ? v.includes(value) : v === value;   // works for any future array field
+  }).length;
+}
+
+/* Filter options are DERIVED from the products actually on this page, so any
+   product added to catalog.js shows up in the filters automatically — including
+   brand-new colours or materials that aren't in FILTER_GROUPS yet. */
+function optionsFor(key){
+  const found = new Set();
+  scopedProducts().forEach(p => {
+    const v = p[key];
+    if (Array.isArray(v)) v.forEach(x => x && found.add(x));
+    else if (v) found.add(v);
+  });
+  const canonical = FILTER_GROUPS[key] || [];
+  const known = canonical.filter(x => found.has(x));                 // house order first
+  const extra = [...found].filter(x => !canonical.includes(x)).sort(); // then anything new
+  return known.concat(extra);
+}
+
+function buildFilterMarkup(){
+  const groups = [];
+
+  const catOptions = (isAll || isRoom || category.virtual)
+    ? Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => CATEGORIES[k].name)
+    : (category.subcategories.length ? category.subcategories.map(s => s.name) : [category.name]);
+
+  groups.push({ key:'category', label:'CATEGORY', options:catOptions });
+  groups.push({ key:'color', label:'COLOR', options:optionsFor('color'), swatch:true });
+  groups.push({ key:'material', label:'MATERIAL', options:optionsFor('material') });
+  groups.push({ key:'size', label:'SIZE', options:optionsFor('size') });
+  groups.push({ key:'availability', label:'AVAILABILITY', options:optionsFor('availability') });
+  groups.push({ key:'collection', label:'COLLECTION', options:optionsFor('collection') });
+
+  const prices = scopedProducts().map(p => p.salePrice || p.price).filter(n => n != null);
+  const min = prices.length ? Math.min(...prices) : 0;
+  const max = prices.length ? Math.max(...prices) : 15000;
+
+  let html = groups.filter(g => g.options.length).map(g => {
+    const visible = g.options.slice(0, 5);
+    const hidden  = g.options.slice(5);
+    const row = (opt) => {
+      const n = countFor(g.key, opt);
+      const checked = state.filters[g.key].includes(opt) ? 'checked' : '';
+      return `<label class="filter-opt">
+        <input type="checkbox" data-group="${g.key}" value="${opt}" ${checked}>
+        <span class="filter-box"></span>
+        ${g.swatch ? `<span class="swatch" style="background:${COLOR_HEX[opt]||'#ccc'}"></span>` : ''}
+        <span>${opt}</span><span class="cnt">(${n})</span>
+      </label>`;
+    };
+    return `<div class="filter-group">
+      <button class="filter-head">${g.label}<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+      <div class="filter-body">
+        ${visible.map(row).join('')}
+        <div class="more-wrap" style="display:none">${hidden.map(row).join('')}</div>
+        ${hidden.length ? `<button class="filter-more">+ More</button>` : ''}
+      </div>
+    </div>`;
+  }).join('');
+
+  html += `<div class="filter-group">
+    <button class="filter-head">PRICE<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <div class="filter-body">
+      <input type="range" class="price-slider" min="${min}" max="${max}" value="${state.maxPrice ?? max}" step="50">
+      <div class="price-row"><span>EGP ${min.toLocaleString()}</span><span class="price-max">EGP ${(state.maxPrice ?? max).toLocaleString()}</span></div>
+    </div>
+  </div>`;
+
+  return html;
+}
+
+function wireFilterPanel(root){
+  root.querySelectorAll('.filter-head').forEach(btn=>{
+    btn.addEventListener('click', ()=> btn.closest('.filter-group').classList.toggle('collapsed'));
+  });
+  root.querySelectorAll('.filter-more').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      const wrap = btn.previousElementSibling;
+      const open = wrap.style.display !== 'none';
+      wrap.style.display = open ? 'none' : 'block';
+      btn.textContent = open ? '+ More' : '– Less';
+    });
+  });
+  root.querySelectorAll('input[type="checkbox"]').forEach(box=>{
+    box.addEventListener('change', ()=>{
+      const g = box.dataset.group, v = box.value;
+      const arr = state.filters[g];
+      if (box.checked){ if(!arr.includes(v)) arr.push(v); }
+      else { state.filters[g] = arr.filter(x => x !== v); }
+      state.page = 1;
+      syncPanels(box);
+      render();
+    });
+  });
+  const slider = root.querySelector('.price-slider');
+  if (slider){
+    slider.addEventListener('input', ()=>{
+      state.maxPrice = +slider.value;
+      root.querySelector('.price-max').textContent = 'EGP ' + state.maxPrice.toLocaleString();
+    });
+    slider.addEventListener('change', ()=>{ state.page = 1; render(); });
+  }
+}
+
+/* keep the desktop panel and the mobile sheet in agreement */
+function syncPanels(source){
+  document.querySelectorAll('input[type="checkbox"][data-group]').forEach(box=>{
+    if (box === source) return;
+    box.checked = state.filters[box.dataset.group].includes(box.value);
+  });
+}
+
+function mountFilters(){
+  const desktop = document.getElementById('filtersDesktop');
+  const mobile  = document.getElementById('filtersMobile');
+  desktop.innerHTML = buildFilterMarkup();
+  mobile.innerHTML  = buildFilterMarkup();
+  wireFilterPanel(desktop);
+  wireFilterPanel(mobile);
+}
+
+function clearAllFilters(){
+  Object.keys(state.filters).forEach(k => state.filters[k] = []);
+  state.maxPrice = null;
+  state.page = 1;
+  mountFilters();
+  render();
+}
+
+/* ---------- product grid ---------- */
+function money(n){ return 'EGP ' + n.toLocaleString(); }
+
+function cardMarkup(p, i){
+  const tag = p.salePrice ? `<span class="card-tag sale">SALE</span>`
+            : (p.isNew ? `<span class="card-tag">NEW</span>` : '');
+  // price is optional — products awaiting pricing show a neutral placeholder
+  const pct = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
+  const price = p.salePrice
+    ? `${money(p.salePrice)} <span class="was">${money(p.price)}</span> <span class="pct">-${pct}%</span>`
+    : (p.price != null ? money(p.price) : `<span class="tbc">EGP &mdash;</span>`);
+  return `<a class="product-card" href="product.html?slug=${p.slug}" style="animation-delay:${i*0.035}s">
+    <div class="card-media">
+      ${tag}
+      <button class="card-wish ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" aria-label="Add to wishlist" data-id="${p.id}">
+        <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+      <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
+      <button class="card-add" data-add="${p.id}">ADD TO BAG</button>
+    </div>
+    <h3 class="card-name">${p.name}</h3>
+    <p class="card-cat">${p.subcategoryName || p.categoryName}</p>
+    <p class="card-price">${price}</p>
+  </a>`;
+}
+
+function renderPagination(total){
+  const pages = Math.ceil(total / PER_PAGE);
+  const el = document.getElementById('pagination');
+  if (pages <= 1){ el.innerHTML = ''; return; }
+
+  let html = `<button ${state.page===1?'disabled':''} data-go="${state.page-1}" aria-label="Previous"><svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg></button>`;
+  const push = (n) => { html += `<button class="${n===state.page?'active':''}" data-go="${n}">${n}</button>`; };
+
+  if (pages <= 7){ for(let i=1;i<=pages;i++) push(i); }
+  else {
+    push(1);
+    if (state.page > 3) html += `<span class="dots">…</span>`;
+    const from = Math.max(2, state.page-1), to = Math.min(pages-1, state.page+1);
+    for(let i=from;i<=to;i++) push(i);
+    if (state.page < pages-2) html += `<span class="dots">…</span>`;
+    push(pages);
+  }
+  html += `<button ${state.page===pages?'disabled':''} data-go="${state.page+1}" aria-label="Next"><svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg></button>`;
+  el.innerHTML = html;
+
+  el.querySelectorAll('button[data-go]').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      state.page = +b.dataset.go;
+      render();
+      document.querySelector('.toolbar').scrollIntoView({ behavior:'smooth', block:'start' });
+    });
+  });
+}
+
+function render(){
+  const filtered = sortProducts(applyFilters(scopedProducts()));
+  document.getElementById('prodCount').textContent = filtered.length;
+
+  const grid  = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+
+  if (!filtered.length){
+    grid.innerHTML = '';
+    document.getElementById('pagination').innerHTML = '';
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  const start = (state.page - 1) * PER_PAGE;
+  grid.innerHTML = filtered.slice(start, start + PER_PAGE).map(cardMarkup).join('');
+
+  grid.querySelectorAll('.card-wish').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const liked = window.TPR ? window.TPR.toggleWishlist(btn.dataset.id) : btn.classList.toggle('liked');
+      btn.classList.toggle('liked', liked);
+    });
+  });
+
+  grid.querySelectorAll('.card-add').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.preventDefault(); e.stopPropagation();
+      const product = PRODUCTS.find(p => String(p.id) === btn.dataset.add);
+      if (product && window.TPR) window.TPR.addToCart(product);
+      btn.classList.add('added');
+      btn.textContent = 'ADDED';
+      setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = 'ADD TO BAG'; }, 1400);
+    });
+  });
+
+  renderPagination(filtered.length);
+}
+
+/* ---------- controls ---------- */
+document.getElementById('sortSelect').addEventListener('change', (e)=>{
+  state.sort = e.target.value; state.page = 1; render();
+});
+document.getElementById('openSort').addEventListener('click', ()=>{
+  const opts = ['featured','newest','price-asc','price-desc'];
+  const idx = opts.indexOf(state.sort);
+  state.sort = opts[(idx + 1) % opts.length];
+  document.getElementById('sortSelect').value = state.sort;
+  state.page = 1; render();
+});
+
+const sheet = document.getElementById('filterSheet');
+const sheetOverlay = document.getElementById('sheetOverlay');
+function openSheet(){ sheet.classList.add('open'); sheetOverlay.classList.add('active'); document.body.style.overflow='hidden'; }
+function closeSheet(){ sheet.classList.remove('open'); sheetOverlay.classList.remove('active'); document.body.style.overflow=''; }
+document.getElementById('openFilters').addEventListener('click', openSheet);
+document.getElementById('sheetClose').addEventListener('click', closeSheet);
+sheetOverlay.addEventListener('click', closeSheet);
+document.getElementById('applyFilters').addEventListener('click', closeSheet);
+document.getElementById('clearFiltersSheet').addEventListener('click', clearAllFilters);
+document.getElementById('clearFiltersEmpty').addEventListener('click', clearAllFilters);
+document.addEventListener('keydown', (e)=>{
+  if (e.key === 'Escape' && sheet.classList.contains('open')) closeSheet();
+});
+
+document.getElementById('catBack').addEventListener('click', ()=>{
+  if (history.length > 1) history.back();
+  else location.href = 'index.html';
+});
+
+/* ---------- go ---------- */
+// products now come from the database (see catalog.js) — wait for the
+// fetch to land before the first render, same pattern used everywhere
+// else in the site an async data source replaced a hardcoded one.
+PRODUCTS_READY.then(()=>{
+  mountFilters();
+  render();
+});
+</script>
+</body>
+</html>

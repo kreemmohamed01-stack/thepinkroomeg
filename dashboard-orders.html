@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Orders | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Orders</h1><p>Every order placed on the storefront.</p></div>
+        </div>
+
+        <div class="db-stats" id="dbStats"></div>
+
+        <div class="db-toolbar">
+          <div class="db-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="dbSearch" placeholder="Search by order #, name, phone or email...">
+          </div>
+          <select class="db-filter" id="dbStatusFilter">
+            <option value="">All statuses</option>
+            <option value="confirmed">Confirmed</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+          <button class="db-refresh" id="dbRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>ORDER</th><th>DATE</th><th>CUSTOMER</th><th>PHONE</th>
+                <th>TOTAL</th><th>PAYMENT</th><th>STATUS</th>
+              </tr>
+            </thead>
+            <tbody id="dbTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="dbEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            <p>No orders match this search.</p>
+          </div>
+          <div class="db-pagination" id="dbPagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="db-overlay" id="dbOverlay"></div>
+  <aside class="db-drawer" id="dbDrawer">
+    <div class="db-drawer-head">
+      <h2 id="dbDrawerTitle">Order</h2>
+      <button class="db-drawer-close" id="dbDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="dbDrawerBody"></div>
+  </aside>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, fmtDate, escHtml, toast } = DashUI;
+
+const ORDER_STATUSES = ['confirmed','processing','shipped','delivered','cancelled'];
+const PAYMENT_STATUSES = ['pending','processing','paid','failed','cancelled'];
+
+const state = { page: 1, q: '', status: '', searchTimer: null };
+
+/* ---------- stats ---------- */
+function renderStats(s){
+  const cards = [
+    { label:'TOTAL ORDERS', value: s.total_orders, gold:false },
+    { label:'TOTAL REVENUE', value: money(s.total_revenue), gold:true },
+    { label:'AWAITING PAYMENT', value: s.pending_payment_count, gold:false },
+    { label:'SHIPPED', value: s.shipped_count, gold:false },
+    { label:'DELIVERED', value: s.delivered_count, gold:false }
+  ];
+  $('dbStats').innerHTML = cards.map(c => `
+    <div class="db-stat ${c.gold?'gold':''}"><p>${c.label}</p><h3>${c.value}</h3></div>
+  `).join('');
+}
+
+/* ---------- table ---------- */
+function statusBadge(status){
+  return `<span class="badge st-${status}"><i></i>${status.toUpperCase()}</span>`;
+}
+function renderTable(orders){
+  const empty = $('dbEmpty');
+  if (!orders.length){
+    $('dbTableBody').innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  $('dbTableBody').innerHTML = orders.map(o => `
+    <tr data-id="${o.id}">
+      <td class="td-id">#${o.id}</td>
+      <td class="td-date">${fmtDate(o.createdAt)}</td>
+      <td>${escHtml(o.customerName || '')}</td>
+      <td>${escHtml(o.customerPhone || '')}</td>
+      <td class="td-total">${money(o.total)}</td>
+      <td>${statusBadge(o.paymentStatus)}</td>
+      <td>${statusBadge(o.orderStatus)}</td>
+    </tr>
+  `).join('');
+  document.querySelectorAll('#dbTableBody tr').forEach(tr=>{
+    tr.addEventListener('click', ()=> openDrawer(tr.dataset.id));
+  });
+}
+
+function renderPagination(total, page, pageSize){
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total ? (page-1)*pageSize + 1 : 0;
+  const to = Math.min(total, page*pageSize);
+  $('dbPagination').innerHTML = `
+    <span>${from}&ndash;${to} of ${total} order${total===1?'':'s'}</span>
+    <div class="db-pagination-btns">
+      <button id="dbPrev" ${page<=1?'disabled':''}>&larr; Previous</button>
+      <button id="dbNext" ${page>=pages?'disabled':''}>Next &rarr;</button>
+    </div>
+  `;
+  $('dbPrev').addEventListener('click', ()=>{ if(state.page>1){ state.page--; load(); } });
+  $('dbNext').addEventListener('click', ()=>{ if(state.page<pages){ state.page++; load(); } });
+}
+
+/* ---------- load list ---------- */
+async function load(){
+  const btn = $('dbRefresh');
+  btn.classList.add('spin');
+  const params = new URLSearchParams({ page: state.page, q: state.q, status: state.status });
+  try {
+    const r = await fetch('/api/admin/orders?' + params.toString());
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Failed to load orders.');
+    renderStats(d.stats);
+    renderTable(d.orders);
+    renderPagination(d.total, d.page, d.pageSize);
+  } catch(e){
+    $('dbTableBody').innerHTML = '';
+    $('dbEmpty').style.display = 'block';
+    $('dbEmpty').querySelector('p').textContent = e.message || 'Could not load orders.';
+  } finally {
+    btn.classList.remove('spin');
+  }
+}
+
+$('dbSearch').addEventListener('input', (e)=>{
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(()=>{ state.q = e.target.value.trim(); state.page = 1; load(); }, 350);
+});
+$('dbStatusFilter').addEventListener('change', (e)=>{ state.status = e.target.value; state.page = 1; load(); });
+$('dbRefresh').addEventListener('click', load);
+
+/* ---------- detail drawer ---------- */
+const overlay = $('dbOverlay'), drawer = $('dbDrawer');
+function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
+overlay.addEventListener('click', closeDrawer);
+$('dbDrawerClose').addEventListener('click', closeDrawer);
+
+async function openDrawer(id){
+  drawer.classList.add('open'); overlay.classList.add('open');
+  $('dbDrawerTitle').textContent = 'Order #' + id;
+  $('dbDrawerBody').innerHTML = '<p style="color:var(--ink-soft);font-size:13px">Loading…</p>';
+
+  const r = await fetch('/api/admin/orders?id=' + encodeURIComponent(id));
+  const d = await r.json();
+  if (!d.ok){ $('dbDrawerBody').innerHTML = `<p style="color:var(--err);font-size:13px">${escHtml(d.error||'Could not load this order.')}</p>`; return; }
+  renderDrawer(d.order);
+}
+
+function renderDrawer(o){
+  const c = o.customer, a = o.shippingAddress, p = o.pricing;
+  $('dbDrawerBody').innerHTML = `
+    <div class="db-section">
+      <h4>UPDATE STATUS</h4>
+      <div class="db-status-grid">
+        <div class="db-field">
+          <label>Order Status</label>
+          <select id="fldOrderStatus">${ORDER_STATUSES.map(s=>`<option value="${s}" ${s===o.orderStatus?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}</select>
+        </div>
+        <div class="db-field">
+          <label>Payment Status</label>
+          <select id="fldPaymentStatus">${PAYMENT_STATUSES.map(s=>`<option value="${s}" ${s===o.paymentStatus?'selected':''}>${s[0].toUpperCase()+s.slice(1)}</option>`).join('')}</select>
+        </div>
+      </div>
+      <button class="db-save" id="dbSaveBtn">SAVE CHANGES</button>
+      <p class="db-save-msg" id="dbSaveMsg"></p>
+    </div>
+
+    <div class="db-section">
+      <h4>CUSTOMER</h4>
+      <div class="db-row"><span>Name</span><span>${escHtml(c.name||'')}</span></div>
+      <div class="db-row"><span>Phone</span><span>${escHtml(c.phone||'')}</span></div>
+      <div class="db-row"><span>Email</span><span>${escHtml(c.email||'')}</span></div>
+      <a class="db-edit-link" href="dashboard-customers.html?email=${encodeURIComponent(c.email||'')}" style="display:inline-flex;align-items:center;gap:6px;font-size:11.5px;color:var(--gold);margin-top:8px">View customer profile &rarr;</a>
+    </div>
+
+    <div class="db-section">
+      <h4>SHIPPING</h4>
+      <div class="db-row"><span>Address</span><span>${escHtml([a.street,a.apt].filter(Boolean).join(', '))}</span></div>
+      <div class="db-row"><span>City</span><span>${escHtml([a.city,a.governorate].filter(Boolean).join(', '))}</span></div>
+      <div class="db-row"><span>Method</span><span>${escHtml(o.shippingMethod.label)}</span></div>
+      <div class="db-row"><span>Delivery</span><span>${escHtml(o.delivery ? o.delivery.label : '')}</span></div>
+      ${o.notes ? `<div class="db-row"><span>Notes</span><span>${escHtml(o.notes)}</span></div>` : ''}
+    </div>
+
+    <div class="db-section">
+      <h4>PAYMENT</h4>
+      <div class="db-row"><span>Method</span><span>${escHtml(o.paymentMethod.label)}</span></div>
+      ${o.promo ? `<div class="db-row"><span>Promo</span><span>${escHtml(o.promo.code)}</span></div>` : ''}
+    </div>
+
+    <div class="db-section">
+      <h4>ITEMS</h4>
+      ${o.items.map(i => `
+        <div class="db-item">
+          <div class="db-item-img"><img src="${i.img}" alt="${escHtml(i.name)}"></div>
+          <div class="db-item-info"><b>${escHtml(i.name)}</b><span>${escHtml(i.variant||'')} &middot; Qty ${i.qty}</span></div>
+          <div class="db-item-price">${money(i.price*i.qty)}</div>
+        </div>`).join('')}
+      <div class="db-row" style="margin-top:10px"><span>Subtotal</span><span>${money(p.subtotal)}</span></div>
+      ${p.discount ? `<div class="db-row"><span>Discount</span><span>&minus;${money(p.discount)}</span></div>` : ''}
+      <div class="db-row"><span>Shipping</span><span>${money(p.shipping)}</span></div>
+      <div class="db-row" style="font-weight:700;font-size:15px;margin-top:6px;padding-top:8px;border-top:1px solid var(--line)"><span>Total</span><span>${money(p.total)}</span></div>
+    </div>
+
+    <div class="db-section db-links">
+      <a href="receipt.html?order=${encodeURIComponent(o.id)}" target="_blank">
+        <svg viewBox="0 0 24 24"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2Z"/></svg>
+        View Receipt
+      </a>
+      <a href="https://wa.me/${(c.phone||'').replace(/[^0-9]/g,'')}" target="_blank">
+        <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Z"/></svg>
+        WhatsApp Customer
+      </a>
+    </div>
+  `;
+
+  $('dbSaveBtn').addEventListener('click', async ()=>{
+    const btn = $('dbSaveBtn');
+    const msg = $('dbSaveMsg');
+    btn.disabled = true;
+    msg.className = 'db-save-msg';
+    try {
+      const r = await fetch('/api/admin/orders', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: o.id,
+          orderStatus: $('fldOrderStatus').value,
+          paymentStatus: $('fldPaymentStatus').value
+        })
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Save failed.');
+      msg.textContent = 'Saved.'; msg.className = 'db-save-msg show ok';
+      toast('Order updated.', 'ok');
+      load();
+    } catch(e){
+      msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+      toast(e.message, 'bad');
+    } finally {
+      btn.disabled = false;
+    }
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

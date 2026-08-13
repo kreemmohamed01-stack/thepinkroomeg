@@ -1,0 +1,14 @@
+{
+  "name": "the-pink-room",
+  "version": "1.0.0",
+  "private": true,
+  "description": "The Pink Room — static storefront + Vercel serverless functions for order notifications (email + WhatsApp).",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "nodemailer": "^9.0.5",
+    "@neondatabase/serverless": "^0.10.4",
+    "@vercel/blob": "^2.8.0"
+  }
+}

@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Customers | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .cust-name-cell b{display:block;font-size:13px;}
+  .cust-name-cell span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .cust-profile-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
+  .cust-avatar{
+    width:52px;height:52px;border-radius:50%;background:var(--beige-soft);color:var(--gold);
+    display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;
+    font-size:20px;flex-shrink:0;
+  }
+  .cust-profile-head h3{font-family:'Playfair Display',serif;font-weight:400;font-size:19px;}
+  .cust-profile-head p{font-size:12px;color:var(--ink-soft);margin-top:2px;}
+  .cust-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:24px;}
+  .cust-kpi{background:var(--beige-soft);border-radius:4px;padding:12px 14px;}
+  .cust-kpi p{font-size:9.5px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:5px;}
+  .cust-kpi h4{font-family:'Playfair Display',serif;font-weight:400;font-size:17px;}
+  .cust-order-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:11px 0;border-bottom:1px solid var(--line);cursor:pointer;
+  }
+  .cust-order-row:last-child{border-bottom:none;}
+  .cust-order-row .l b{display:block;font-size:12.5px;color:var(--gold);}
+  .cust-order-row .l span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .cust-order-row .r{text-align:right;}
+  .cust-order-row .r b{display:block;font-size:12.5px;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Customers</h1><p>Every customer who has placed an order, built from real order history.</p></div>
+        </div>
+
+        <div class="db-toolbar">
+          <div class="db-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="custSearch" placeholder="Search by name, email or phone...">
+          </div>
+          <button class="db-refresh" id="custRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>CUSTOMER</th><th>PHONE</th><th>ORDERS</th><th>TOTAL SPENT</th><th>AVG ORDER</th><th>LAST ORDER</th><th>TYPE</th>
+              </tr>
+            </thead>
+            <tbody id="custTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="custEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <p>No customers found.</p>
+          </div>
+          <div class="db-pagination" id="custPagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="db-overlay" id="custOverlay"></div>
+  <aside class="db-drawer" id="custDrawer">
+    <div class="db-drawer-head">
+      <h2 id="custDrawerTitle">Customer</h2>
+      <button class="db-drawer-close" id="custDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="custDrawerBody"></div>
+  </aside>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, fmtDate, fmtDateShort, escHtml } = DashUI;
+
+const state = { page: 1, q: '', searchTimer: null };
+
+function initials(name){
+  return (name || '?').trim().split(/\s+/).slice(0,2).map(w => w[0]).join('').toUpperCase();
+}
+function typeBadge(type){
+  return `<span class="badge st-${type}"><i></i>${type === 'new' ? 'NEW' : 'RETURNING'}</span>`;
+}
+
+function renderTable(customers){
+  const empty = $('custEmpty');
+  if (!customers.length){
+    $('custTableBody').innerHTML = '';
+    empty.style.display = 'block';
+    return;
+  }
+  empty.style.display = 'none';
+  $('custTableBody').innerHTML = customers.map(c => `
+    <tr data-email="${escHtml(c.email)}">
+      <td class="cust-name-cell"><b>${escHtml(c.name || 'Unnamed')}</b><span>${escHtml(c.email)}</span></td>
+      <td>${escHtml(c.phone || '')}</td>
+      <td>${c.totalOrders}</td>
+      <td class="td-total">${money(c.totalSpent)}</td>
+      <td>${money(c.avgOrderValue)}</td>
+      <td class="td-date">${fmtDateShort(c.lastOrderAt)}</td>
+      <td>${typeBadge(c.type)}</td>
+    </tr>
+  `).join('');
+  document.querySelectorAll('#custTableBody tr').forEach(tr=>{
+    tr.addEventListener('click', ()=> openCustomer(tr.dataset.email));
+  });
+}
+
+function renderPagination(total, page, pageSize){
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total ? (page-1)*pageSize + 1 : 0;
+  const to = Math.min(total, page*pageSize);
+  $('custPagination').innerHTML = `
+    <span>${from}&ndash;${to} of ${total} customer${total===1?'':'s'}</span>
+    <div class="db-pagination-btns">
+      <button id="custPrev" ${page<=1?'disabled':''}>&larr; Previous</button>
+      <button id="custNext" ${page>=pages?'disabled':''}>Next &rarr;</button>
+    </div>
+  `;
+  $('custPrev').addEventListener('click', ()=>{ if(state.page>1){ state.page--; load(); } });
+  $('custNext').addEventListener('click', ()=>{ if(state.page<pages){ state.page++; load(); } });
+}
+
+async function load(){
+  const btn = $('custRefresh');
+  btn.classList.add('spin');
+  const params = new URLSearchParams({ page: state.page, q: state.q });
+  try {
+    const r = await fetch('/api/admin/customers?' + params.toString());
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Failed to load customers.');
+    renderTable(d.customers);
+    renderPagination(d.total, d.page, d.pageSize);
+  } catch(e){
+    $('custTableBody').innerHTML = '';
+    $('custEmpty').style.display = 'block';
+    $('custEmpty').querySelector('p').textContent = e.message || 'Could not load customers.';
+  } finally {
+    btn.classList.remove('spin');
+  }
+}
+$('custSearch').addEventListener('input', (e)=>{
+  clearTimeout(state.searchTimer);
+  state.searchTimer = setTimeout(()=>{ state.q = e.target.value.trim(); state.page = 1; load(); }, 350);
+});
+$('custRefresh').addEventListener('click', load);
+
+/* ---------- profile drawer ---------- */
+const overlay = $('custOverlay'), drawer = $('custDrawer');
+function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
+overlay.addEventListener('click', closeDrawer);
+$('custDrawerClose').addEventListener('click', closeDrawer);
+
+function statusBadge(status){ return `<span class="badge st-${status}"><i></i>${status.toUpperCase()}</span>`; }
+
+async function openCustomer(email){
+  drawer.classList.add('open'); overlay.classList.add('open');
+  $('custDrawerTitle').textContent = 'Customer Profile';
+  $('custDrawerBody').innerHTML = '<p style="color:var(--ink-soft);font-size:13px">Loading…</p>';
+
+  const r = await fetch('/api/admin/customers?email=' + encodeURIComponent(email));
+  const d = await r.json();
+  if (!d.ok){ $('custDrawerBody').innerHTML = `<p style="color:var(--err);font-size:13px">${escHtml(d.error||'Could not load this customer.')}</p>`; return; }
+
+  const c = d.customer;
+  $('custDrawerBody').innerHTML = `
+    <div class="cust-profile-head">
+      <div class="cust-avatar">${initials(c.name)}</div>
+      <div>
+        <h3>${escHtml(c.name || 'Unnamed customer')}</h3>
+        <p>${typeBadge(c.type)} &middot; Customer since ${fmtDateShort(c.firstOrderAt)}</p>
+      </div>
+    </div>
+
+    <div class="db-section">
+      <h4>CONTACT</h4>
+      <div class="db-row"><span>Email</span><span>${escHtml(c.email)}</span></div>
+      <div class="db-row"><span>Phone</span><span>${escHtml(c.phone || '')}</span></div>
+      ${c.address ? `<div class="db-row"><span>Address</span><span>${escHtml(c.address)}</span></div>` : ''}
+      ${c.city ? `<div class="db-row"><span>City</span><span>${escHtml(c.city)}</span></div>` : ''}
+    </div>
+
+    <div class="cust-kpis">
+      <div class="cust-kpi"><p>TOTAL ORDERS</p><h4>${c.totalOrders}</h4></div>
+      <div class="cust-kpi"><p>TOTAL SPENT</p><h4>${money(c.totalSpent)}</h4></div>
+      <div class="cust-kpi"><p>AVG ORDER VALUE</p><h4>${money(c.avgOrderValue)}</h4></div>
+      <div class="cust-kpi"><p>LAST ORDER</p><h4 style="font-size:13px">${fmtDateShort(c.lastOrderAt)}</h4></div>
+    </div>
+
+    <div class="db-section">
+      <h4>ORDER HISTORY</h4>
+      ${d.orders.map(o => `
+        <a class="cust-order-row" href="dashboard-orders.html" onclick="return false;" data-order="${escHtml(o.id)}">
+          <div class="l"><b>#${escHtml(o.id)}</b><span>${fmtDate(o.createdAt)}</span></div>
+          <div class="r"><b>${money(o.total)}</b>${statusBadge(o.orderStatus)}</div>
+        </a>`).join('')}
+    </div>
+
+    <div class="db-section db-links">
+      <a href="https://wa.me/${(c.phone||'').replace(/[^0-9]/g,'')}" target="_blank">
+        <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Z"/></svg>
+        WhatsApp Customer
+      </a>
+      <a href="mailto:${escHtml(c.email)}">
+        <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
+        Email Customer
+      </a>
+    </div>
+  `;
+
+  document.querySelectorAll('.cust-order-row').forEach(row=>{
+    row.addEventListener('click', (e)=>{
+      e.preventDefault();
+      window.open('receipt.html?order=' + encodeURIComponent(row.dataset.order), '_blank');
+    });
+  });
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=>{
+  load();
+  const deepLinkEmail = new URLSearchParams(location.search).get('email');
+  if (deepLinkEmail) openCustomer(deepLinkEmail);
+});
+</script>
+</body>
+</html>

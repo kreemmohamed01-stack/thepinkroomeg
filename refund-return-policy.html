@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Refund &amp; Return Policy | The Pink Room</title>
+<meta name="description" content="The Pink Room Refund &amp; Return Policy — returns, exchanges, refunds and eligibility.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f0e8;
+    --cream-light:#f8f4ee;
+    --beige:#e9dfd0;
+    --beige-soft:#efe6d8;
+    --gold:#c9a97c;
+    --ink:#1c1a17;
+    --ink-soft:#3a362f;
+    --line:#d8cdbb;
+    --shine: rgba(201,169,124,.55);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Poppins',sans-serif;
+    background:var(--cream-light);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    overflow-x:hidden;
+  }
+  a{text-decoration:none;color:inherit;}
+  ul{list-style:none;}
+
+  /* ---------- HEADER ---------- */
+  .policy-topbar{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:16px;
+    padding:26px 46px 10px;
+    background:var(--beige-soft);
+  }
+  .policy-back{
+    background:none;border:none;cursor:pointer;font-family:inherit;
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:11px;letter-spacing:2px;color:var(--ink-soft);
+    transition:color .3s ease, gap .3s ease;
+  }
+  .policy-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .policy-back:hover{color:var(--gold);gap:13px;}
+  .policy-logo{
+    position:relative;display:block;width:290px;overflow:hidden;
+  }
+  .policy-logo::after{
+    content:'';position:absolute;top:0;left:-170%;
+    width:60%;height:100%;
+    background:linear-gradient(115deg,transparent 0%,transparent 32%,rgba(255,255,255,.45) 45%,rgba(255,241,214,.95) 50%,rgba(201,169,124,.8) 55%,transparent 68%,transparent 100%);
+    transform:skewX(-20deg);mix-blend-mode:screen;pointer-events:none;
+    animation:policyLogoShine 3.2s ease-in-out infinite;
+  }
+  @keyframes policyLogoShine{0%{left:-170%;}55%{left:170%;}100%{left:170%;}}
+  .policy-logo img{width:100%;height:auto;display:block;}
+  .logo-main{
+    display:flex;align-items:center;
+    font-family:'Playfair Display', serif;
+    font-weight:500;
+    font-size:26px;
+    letter-spacing:4px;
+    line-height:1;
+    white-space:nowrap;
+    color:#b98f4f;
+  }
+  .logo-main .sp{width:.42em;}
+  .logo-tagline{display:flex;align-items:center;gap:10px;white-space:nowrap;}
+  .logo-rule{display:block;width:44px;height:1px;background:rgba(185,143,79,.7);}
+  .logo-tagline span{
+    font-family:'Poppins', sans-serif;
+    font-size:8px;font-weight:400;letter-spacing:3px;color:#b98f4f;
+  }
+  .policy-topbar-spacer{flex:0 0 90px;}
+
+  /* ---------- HERO ---------- */
+  .policy-hero{
+    text-align:center;
+    padding:26px 24px 62px;
+    background:var(--beige-soft);
+    border-bottom:1px solid var(--line);
+  }
+  .policy-eyebrow{
+    position:relative;
+    display:inline-block;
+    font-size:11.5px;
+    letter-spacing:4px;
+    font-weight:600;
+    color:var(--gold);
+    margin-bottom:22px;
+    padding:10px 24px;
+    border:1px solid rgba(201,169,124,.45);
+    background:rgba(255,255,255,.35);
+    backdrop-filter:blur(8px);
+    -webkit-backdrop-filter:blur(8px);
+    border-radius:3px;
+    overflow:hidden;
+    animation:policyBadgeGlow 3s ease-in-out infinite;
+  }
+  @keyframes policyBadgeGlow{
+    0%,100%{box-shadow:0 0 0 rgba(201,169,124,0); border-color:rgba(201,169,124,.4);}
+    50%{box-shadow:0 0 20px rgba(201,169,124,.45); border-color:rgba(201,169,124,.95);}
+  }
+  .policy-eyebrow::before{
+    content:'';
+    position:absolute;top:0;left:-140%;
+    width:60%;height:100%;
+    background:linear-gradient(115deg,transparent 0%,transparent 35%,rgba(255,255,255,.75) 50%,transparent 65%,transparent 100%);
+    transform:skewX(-20deg);
+    animation:policyBadgeShine 3s ease-in-out infinite;
+  }
+  @keyframes policyBadgeShine{
+    0%{left:-140%;} 55%{left:140%;} 100%{left:140%;}
+  }
+  .policy-hero h1{
+    font-family:'Playfair Display', serif;
+    font-weight:400;
+    font-size:46px;
+    line-height:1.15;
+    color:var(--ink);
+  }
+  .policy-hero-rule{
+    width:54px;height:1px;
+    background:var(--gold);
+    margin:24px auto 0;
+  }
+
+  /* ---------- BODY ---------- */
+  .policy-wrap{
+    max-width:820px;
+    margin:0 auto;
+    padding:70px 28px 100px;
+  }
+  .policy-intro{
+    font-size:16px;
+    line-height:1.95;
+    color:var(--ink-soft);
+    padding-bottom:44px;
+    border-bottom:1px solid var(--line);
+  }
+  .policy-section{padding:44px 0;border-bottom:1px solid var(--line);}
+  .policy-section:last-of-type{border-bottom:none;}
+  .policy-section h2{
+    font-family:'Playfair Display', serif;
+    font-weight:400;
+    font-size:27px;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+  .policy-section p{
+    font-size:15px;
+    line-height:1.95;
+    color:var(--ink-soft);
+    margin-bottom:16px;
+  }
+  .policy-section p:last-child{margin-bottom:0;}
+  .policy-list{margin:18px 0 20px;}
+  .policy-list li{
+    position:relative;
+    font-size:15px;
+    line-height:1.9;
+    color:var(--ink-soft);
+    padding-left:24px;
+    margin-bottom:11px;
+  }
+  .policy-list li::before{
+    content:'';
+    position:absolute;
+    left:0;top:.72em;
+    width:7px;height:1px;
+    background:var(--gold);
+  }
+  .policy-section a{
+    color:var(--ink);
+    border-bottom:1px solid var(--gold);
+    padding-bottom:1px;
+    transition:color .3s ease;
+  }
+  .policy-section a:hover{color:var(--gold);}
+  .policy-note{
+    background:rgba(201,169,124,.09);
+    border:1px solid rgba(201,169,124,.35);
+    border-radius:4px;
+    padding:20px 24px;
+    font-size:14.5px;
+    line-height:1.85;
+    color:var(--ink-soft);
+    margin-top:6px;
+  }
+
+  .policy-contact{
+    margin-top:56px;
+    text-align:center;
+    padding:44px 28px;
+    background:var(--beige-soft);
+    border:1px solid var(--line);
+    border-radius:4px;
+  }
+  .policy-contact p{
+    font-family:'Playfair Display', serif;
+    font-size:20px;
+    color:var(--ink);
+    margin-bottom:20px;
+  }
+  .policy-contact-actions{
+    display:flex;flex-wrap:wrap;gap:12px;justify-content:center;
+  }
+  .policy-btn{
+    display:inline-flex;align-items:center;gap:9px;
+    border:1px solid var(--ink);
+    color:var(--ink);
+    padding:14px 26px;
+    font-size:11px;
+    letter-spacing:1.8px;
+    transition:background .35s ease, color .35s ease, transform .35s cubic-bezier(.34,1.56,.64,1);
+  }
+  .policy-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .policy-btn:hover{background:var(--ink);color:#fff;transform:translateY(-2px);}
+  .policy-btn.filled{background:var(--ink);color:#fff;}
+  .policy-btn.filled:hover{background:transparent;color:var(--ink);}
+
+  /* ---------- FOOTER ---------- */
+  .policy-footer{
+    background:var(--ink);
+    text-align:center;
+    padding:34px 24px;
+    color:rgba(255,255,255,.5);
+    font-size:12px;
+  }
+  .policy-footer a{color:rgba(255,255,255,.68);transition:color .3s ease;}
+  .policy-footer a:hover{color:var(--gold);}
+
+  @media (max-width:760px){
+    .policy-topbar{padding:18px 20px 6px;}
+    .policy-topbar-spacer{display:none;}
+    .policy-logo{width:190px;}
+    .policy-back span{display:none;}
+    .policy-hero{padding:18px 20px 44px;}
+    .policy-hero h1{font-size:31px;}
+    .policy-wrap{padding:46px 20px 70px;}
+    .policy-intro{font-size:14.5px;padding-bottom:34px;}
+    .policy-section{padding:34px 0;}
+    .policy-section h2{font-size:22px;margin-bottom:16px;}
+    .policy-section p, .policy-list li{font-size:14px;}
+    .policy-contact{padding:34px 20px;margin-top:42px;}
+    .policy-contact p{font-size:17px;}
+    .policy-btn{width:100%;justify-content:center;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="policy-topbar">
+    <button class="policy-back" onclick="history.length>1?history.back():location.href='index.html'">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>BACK</span>
+    </button>
+    <a class="policy-logo" href="index.html" aria-label="The Pink Room">
+      <img src="logo-beige.png" alt="The Pink Room">
+    </a>
+    <div class="policy-topbar-spacer"></div>
+  </header>
+
+  <section class="policy-hero">
+    <p class="policy-eyebrow">CUSTOMER CARE</p>
+    <h1>Refund &amp; Return Policy</h1>
+    <div class="policy-hero-rule"></div>
+  </section>
+
+  <main class="policy-wrap">
+    <p class="policy-intro">At The Pink Room, we are committed to ensure your optimum satisfaction with every purchase. If for any reason you are not fully satisfied, you may request a return within 14 days of receiving your order based on the below.</p>
+
+    <section class="policy-section">
+      <h2>Returns</h2>
+      <p>To be eligible for a return, the following conditions must be met:</p>
+      <ul class="policy-list">
+        <li>The item must be in the same condition as received</li>
+        <li>The item must be unused and undamaged</li>
+        <li>The item must be returned in its original packaging</li>
+        <li>A receipt or proof of purchase is required</li>
+      </ul>
+      <p>Please contact The Pink Room team <a href="mailto:thepinkroomeg@gmail.com">thepinkroomeg@gmail.com</a> prior to returning any item. Once your return request has been approved, you will receive detailed instructions on how to send back your order.</p>
+      <div class="policy-note">Returns sent without prior authorization will not be accepted.</div>
+    </section>
+
+    <section class="policy-section">
+      <h2>Damaged, Defective, or Incorrect Items</h2>
+      <p>We kindly ask that you inspect your order upon receipt.</p>
+      <p>If the item arrives damaged, defective, or incorrect, please contact us immediately and include clear photos of the product and the packaging. This will allow us to assess the issue and provide an appropriate resolution as quickly as possible.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2>Non-Returnable Items</h2>
+      <p>We will not be able to accept returns for the following items:</p>
+      <ul class="policy-list">
+        <li>Custom-made or specially ordered products</li>
+        <li>Personalized items</li>
+        <li>Plants or other perishable goods</li>
+        <li>Items that have been used, damaged, or altered after delivery</li>
+        <li>Items returned without original packaging</li>
+        <li>Sale or clearance items</li>
+        <li>Gift cards</li>
+      </ul>
+      <p>If you are unsure whether your item is eligible for return, please contact us before initiating a return.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2>Exchanges</h2>
+      <p>If you wish to exchange an item, please contact us ASAP.</p>
+      <p>The original item must meet our return eligibility criteria. Once the return has been approved.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2>Refunds</h2>
+      <p>Once your returned item has been received and inspected, we will notify you of the approval status of your refund.</p>
+      <p>If approved, the refund will be issued to your original payment method, where applicable ASAP.</p>
+      <p>Please note that processing times may vary depending on your bank, card issuer, or payment provider.</p>
+    </section>
+
+    <section class="policy-section">
+      <h2>Important Information</h2>
+      <p>Shipping and delivery fees are non-refundable as it&rsquo;s a third party service.</p>
+      <p>For any questions regarding returns, exchanges, or refunds, please contact The Pink Room team.</p>
+    </section>
+
+    <div class="policy-contact">
+      <p>Still have a question about your order?</p>
+      <div class="policy-contact-actions">
+        <a class="policy-btn filled" href="https://wa.me/201207803666" target="_blank" rel="noopener">
+          <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Zm0 22.9h-.004a10.4 10.4 0 0 1-5.3-1.45l-.38-.22-4.12 1.33 1.35-4.02-.25-.41a10.35 10.35 0 0 1-1.6-5.53c0-5.75 4.68-10.42 10.44-10.42 2.79 0 5.4 1.09 7.37 3.06a10.34 10.34 0 0 1 3.05 7.36c0 5.75-4.68 10.3-10.53 10.3Zm5.72-7.72c-.31-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.72.16-.21.31-.83 1.03-1.02 1.25-.19.21-.38.24-.7.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.19.21-.31.31-.52.1-.21.05-.4-.03-.55-.08-.16-.72-1.75-.99-2.39-.26-.63-.53-.54-.72-.55-.19-.01-.4-.01-.61-.01-.21 0-.55.08-.84.4-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.22 3.42 5.39 4.79.75.32 1.34.52 1.8.66.76.24 1.44.21 1.99.13.61-.09 1.87-.76 2.13-1.5.26-.73.26-1.36.18-1.5-.08-.13-.28-.21-.6-.36Z"/></svg>
+          CHAT ON WHATSAPP
+        </a>
+        <a class="policy-btn" href="mailto:thepinkroomeg@gmail.com">
+          <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
+          EMAIL US
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <footer class="policy-footer">
+    &copy; 2024 The Pink Room. All rights reserved. &nbsp;&middot;&nbsp; <a href="index.html">Back to shop</a>
+  </footer>
+
+</body>
+</html>

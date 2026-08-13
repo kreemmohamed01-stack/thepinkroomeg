@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dashboard Login | The Pink Room</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f0e8; --cream-light:#f8f4ee; --beige:#e9dfd0; --beige-soft:#efe6d8;
+    --gold:#c9a97c; --ink:#1c1a17; --ink-soft:#3a362f; --line:#d8cdbb; --shine: rgba(201,169,124,.55);
+    --err:#b0473f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{
+    font-family:'Poppins',sans-serif;background:var(--ink);color:var(--ink);
+    -webkit-font-smoothing:antialiased;min-height:100vh;
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    position:relative;overflow:hidden;
+  }
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+
+  .glow{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none;animation:glowPulse 7s ease-in-out infinite;}
+  .glow-a{width:360px;height:360px;background:var(--gold);top:-140px;left:-100px;opacity:.28;}
+  .glow-b{width:300px;height:300px;background:var(--shine);bottom:-120px;right:-80px;opacity:.28;animation-delay:2s;}
+  @keyframes glowPulse{0%,100%{opacity:.22;transform:scale(1);}50%{opacity:.4;transform:scale(1.1);}}
+
+  .card{
+    position:relative;z-index:2;width:100%;max-width:380px;
+    background:var(--cream-light);border-radius:6px;padding:38px 34px 32px;
+    box-shadow:0 30px 70px rgba(0,0,0,.4);
+  }
+  .logo{position:relative;display:block;width:190px;margin:0 auto 28px;overflow:hidden;}
+  .logo::after{
+    content:'';position:absolute;top:0;left:-170%;width:60%;height:100%;
+    background:linear-gradient(115deg,transparent 0%,transparent 32%,rgba(255,255,255,.45) 45%,rgba(255,241,214,.95) 50%,rgba(201,169,124,.8) 55%,transparent 68%,transparent 100%);
+    transform:skewX(-20deg);mix-blend-mode:screen;pointer-events:none;
+    animation:logoShine 3.4s ease-in-out infinite;
+  }
+  @keyframes logoShine{0%{left:-170%;}55%{left:170%;}100%{left:170%;}}
+  .logo img{width:100%;height:auto;display:block;}
+
+  h1{font-family:'Playfair Display',serif;font-weight:400;font-style:italic;font-size:22px;text-align:center;margin-bottom:6px;}
+  .sub{font-size:12.5px;color:var(--ink-soft);text-align:center;margin-bottom:28px;}
+
+  .field{margin-bottom:16px;}
+  .field label{display:block;font-size:11px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;}
+  .field input{
+    width:100%;border:1px solid var(--line);background:#fff;
+    padding:13px 14px;border-radius:2px;font-size:14px;color:var(--ink);
+    transition:border-color .25s ease, box-shadow .25s ease;
+  }
+  .field input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,124,.14);}
+
+  .error{
+    display:none;align-items:center;gap:9px;
+    background:rgba(176,71,63,.08);border:1px solid rgba(176,71,63,.35);
+    color:var(--err);font-size:12.5px;padding:11px 13px;border-radius:3px;margin-bottom:16px;
+  }
+  .error.show{display:flex;}
+  .error svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+
+  .btn{
+    position:relative;width:100%;
+    display:flex;align-items:center;justify-content:center;gap:9px;
+    background:var(--ink);color:var(--cream-light);
+    padding:15px;font-size:11.5px;letter-spacing:2px;font-weight:500;border-radius:2px;
+    transition:opacity .3s ease;margin-top:6px;
+  }
+  .btn:hover{opacity:.9;}
+  .btn:disabled{opacity:.6;cursor:default;}
+  .btn .spin{
+    position:absolute;left:50%;top:50%;width:15px;height:15px;margin:-7.5px 0 0 -7.5px;
+    border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;
+    opacity:0;animation:spin .7s linear infinite;
+  }
+  .btn.loading .btn-txt{opacity:0;}
+  .btn.loading .spin{opacity:1;}
+  @keyframes spin{to{transform:rotate(360deg);}}
+</style>
+</head>
+<body>
+  <div class="glow glow-a"></div>
+  <div class="glow glow-b"></div>
+
+  <form class="card" id="loginForm" autocomplete="off">
+    <a class="logo" href="index.html" aria-label="The Pink Room"><img src="logo-beige.png" alt="The Pink Room"></a>
+    <h1>Dashboard</h1>
+    <p class="sub">Sign in to manage orders</p>
+
+    <div class="error" id="loginError">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>
+      <span id="loginErrorText"></span>
+    </div>
+
+    <div class="field">
+      <label>Username</label>
+      <input type="text" id="inUser" autocomplete="username" required>
+    </div>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="inPass" autocomplete="current-password" required>
+    </div>
+
+    <button class="btn" type="submit" id="loginBtn">
+      <span class="btn-txt">SIGN IN</span>
+      <span class="spin"></span>
+    </button>
+  </form>
+
+<script>
+const form = document.getElementById('loginForm');
+const btn = document.getElementById('loginBtn');
+const errEl = document.getElementById('loginError');
+const errText = document.getElementById('loginErrorText');
+
+function showError(msg){ errText.textContent = msg; errEl.classList.add('show'); }
+function hideError(){ errEl.classList.remove('show'); }
+
+// already signed in? skip straight to the dashboard
+fetch('/api/admin/auth?action=session').then(r => r.json()).then(d => {
+  if (d.signedIn) location.href = 'dashboard.html';
+}).catch(()=>{});
+
+form.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  hideError();
+  btn.classList.add('loading');
+  btn.disabled = true;
+
+  try {
+    const resp = await fetch('/api/admin/auth?action=login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        username: document.getElementById('inUser').value,
+        password: document.getElementById('inPass').value
+      })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.ok) {
+      showError(data.error || 'Sign in failed.');
+      btn.classList.remove('loading');
+      btn.disabled = false;
+      return;
+    }
+    location.href = 'dashboard.html';
+  } catch (e) {
+    showError('Could not reach the server. Check your connection and try again.');
+    btn.classList.remove('loading');
+    btn.disabled = false;
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receipt | The Pink Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1c1a17; --ink-soft:#4a453d; --gold:#b98f4f; --line:#e2d8c6; --cream-light:#f8f4ee; --beige-soft:#efe6d8;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Poppins',sans-serif;color:var(--ink);background:#d8d0c2;-webkit-font-smoothing:antialiased;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;border:none;cursor:pointer;}
+  img{display:block;max-width:100%;}
+  table{border-collapse:collapse;width:100%;}
+
+  /* ---------- on-screen toolbar (never printed / never in the PDF) ---------- */
+  .rcpt-toolbar{
+    position:sticky;top:0;z-index:5;
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    padding:16px 26px;background:var(--ink);color:#fff;
+  }
+  .rcpt-toolbar a{display:flex;align-items:center;gap:8px;font-size:11.5px;letter-spacing:1.4px;color:rgba(255,255,255,.75);transition:color .25s ease;}
+  .rcpt-toolbar a:hover{color:var(--gold);}
+  .rcpt-toolbar a svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .rcpt-toolbar-actions{display:flex;gap:10px;}
+  .rcpt-btn{display:flex;align-items:center;gap:8px;padding:11px 18px;font-size:11px;letter-spacing:1.4px;border-radius:2px;transition:opacity .25s ease;}
+  .rcpt-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .rcpt-btn-gold{background:var(--gold);color:#fff;}
+  .rcpt-btn-outline{border:1px solid rgba(255,255,255,.35);color:#fff;}
+  .rcpt-btn:hover{opacity:.85;}
+  .rcpt-btn.loading{opacity:.6;pointer-events:none;}
+
+  /* ---------- invoice sheet (A4) ---------- */
+  .rcpt-page-wrap{padding:34px 16px 60px;display:flex;justify-content:center;}
+  #rcptSheet{
+    width:210mm;min-height:297mm;background:#fff;
+    box-shadow:0 20px 50px rgba(20,17,12,.25);
+    padding:16mm 16mm 14mm;
+  }
+  .rcpt-brand-row{display:flex;align-items:flex-start;justify-content:space-between;border-bottom:2px solid var(--ink);padding-bottom:16px;margin-bottom:22px;}
+  .rcpt-brand h1{font-family:'Playfair Display',serif;font-weight:500;font-size:24px;letter-spacing:1px;}
+  .rcpt-brand span{display:block;font-size:9px;letter-spacing:3px;color:var(--ink-soft);margin-top:4px;}
+  .rcpt-doc-type{text-align:right;}
+  .rcpt-doc-type b{display:block;font-size:12px;letter-spacing:2.5px;color:var(--gold);margin-bottom:6px;}
+  .rcpt-doc-type div{font-size:11.5px;color:var(--ink-soft);line-height:1.7;}
+  .rcpt-doc-type div b{display:inline;color:var(--ink);letter-spacing:0;font-size:11.5px;}
+
+  .rcpt-info-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:22px;margin-bottom:26px;}
+  .rcpt-info-block h4{font-size:9.5px;letter-spacing:1.8px;color:var(--gold);margin-bottom:9px;border-bottom:1px solid var(--line);padding-bottom:6px;}
+  .rcpt-info-block p{font-size:11.5px;line-height:1.85;color:var(--ink-soft);}
+  .rcpt-info-block p b{color:var(--ink);}
+
+  .rcpt-items{margin-bottom:22px;}
+  .rcpt-items table th{
+    text-align:left;font-size:9.5px;letter-spacing:1.4px;color:#fff;background:var(--ink);
+    padding:10px 12px;
+  }
+  .rcpt-items table th:last-child, .rcpt-items table td:last-child{text-align:right;}
+  .rcpt-items table th:nth-child(2), .rcpt-items table td:nth-child(2){text-align:center;}
+  .rcpt-items table th:nth-child(3), .rcpt-items table td:nth-child(3){text-align:right;}
+  .rcpt-items table td{font-size:11.5px;padding:10px 12px;border-bottom:1px solid var(--line);color:var(--ink-soft);}
+  .rcpt-items table td b{color:var(--ink);font-weight:500;}
+  .rcpt-items table tr:last-child td{border-bottom:1px solid var(--ink);}
+
+  .rcpt-summary{display:flex;justify-content:flex-end;margin-bottom:30px;}
+  .rcpt-summary table{width:280px;}
+  .rcpt-summary td{font-size:11.5px;color:var(--ink-soft);padding:6px 0;}
+  .rcpt-summary td:last-child{text-align:right;color:var(--ink);}
+  .rcpt-summary tr.grand td{
+    font-family:'Playfair Display',serif;font-size:16px;color:var(--ink);
+    border-top:1.5px solid var(--ink);padding-top:12px;
+  }
+
+  .rcpt-footer{border-top:1px solid var(--line);padding-top:18px;text-align:center;}
+  .rcpt-footer p{font-size:12px;font-style:italic;color:var(--ink-soft);margin-bottom:6px;}
+  .rcpt-footer span{font-size:9.5px;letter-spacing:1.4px;color:var(--gold);}
+
+  .rcpt-notfound{max-width:480px;margin:80px auto;text-align:center;color:#fff;}
+  .rcpt-notfound a{display:inline-flex;margin-top:18px;padding:12px 22px;background:var(--gold);color:#fff;border-radius:2px;font-size:12px;letter-spacing:1.4px;}
+
+  @media print{
+    .rcpt-toolbar{display:none !important;}
+    body{background:#fff;}
+    .rcpt-page-wrap{padding:0;}
+    #rcptSheet{box-shadow:none;width:auto;min-height:0;margin:0;padding:6mm 4mm;}
+    @page{size:A4;margin:12mm;}
+  }
+  @media (max-width:760px){
+    #rcptSheet{width:100%;padding:22px 18px;}
+    .rcpt-info-grid{grid-template-columns:1fr;gap:16px;}
+    .rcpt-toolbar{flex-wrap:wrap;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="rcpt-toolbar">
+    <a href="javascript:history.length>1?history.back():location.href='index.html'">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      BACK
+    </a>
+    <div class="rcpt-toolbar-actions">
+      <button class="rcpt-btn rcpt-btn-outline" id="btnPrint">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        PRINT RECEIPT
+      </button>
+      <button class="rcpt-btn rcpt-btn-gold" id="btnDownload">
+        <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 21h14"/></svg>
+        DOWNLOAD PDF
+      </button>
+    </div>
+  </header>
+
+  <div class="rcpt-page-wrap" id="rcptWrap">
+    <div id="rcptSheet"></div>
+  </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script src="checkout.js"></script>
+<script>
+const CO = window.TPRCheckout;
+const params = new URLSearchParams(location.search);
+const action = params.get('action');
+
+function buildReceipt(order){
+  const c = order.customer, a = order.shippingAddress, p = order.pricing;
+  const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'long', year:'numeric' });
+  return `
+    <div class="rcpt-brand-row">
+      <div class="rcpt-brand">
+        <h1>THE PINK ROOM</h1>
+        <span>HOME DECOR</span>
+      </div>
+      <div class="rcpt-doc-type">
+        <b>ORDER RECEIPT</b>
+        <div><b>Order Number:</b> #${order.id}</div>
+        <div><b>Order Date:</b> ${orderDate}</div>
+      </div>
+    </div>
+
+    <div class="rcpt-info-grid">
+      <div class="rcpt-info-block">
+        <h4>CUSTOMER INFORMATION</h4>
+        <p><b>${c.name || ''}</b><br>${c.email || ''}<br>${c.phone || ''}</p>
+      </div>
+      <div class="rcpt-info-block">
+        <h4>SHIPPING INFORMATION</h4>
+        <p>${[a.street, a.apt].filter(Boolean).join(', ')}<br>${[a.city, a.governorate].filter(Boolean).join(', ')}, Egypt<br>
+        ${order.shippingMethod.label} (${order.shippingMethod.sub})<br>
+        Est. delivery: ${order.delivery.label}</p>
+      </div>
+      <div class="rcpt-info-block">
+        <h4>PAYMENT</h4>
+        <p><b>Method:</b> ${order.paymentMethod.label}<br><b>Status:</b> ${order.paymentStatus.charAt(0).toUpperCase()+order.paymentStatus.slice(1)}</p>
+      </div>
+    </div>
+
+    <div class="rcpt-items">
+      <table>
+        <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+        <tbody>
+          ${order.items.map(i => `<tr>
+            <td><b>${i.name}</b>${i.variant ? '<br><span style="font-size:10px">'+i.variant+'</span>' : ''}</td>
+            <td>${i.qty}</td>
+            <td>${CO.money(i.price)}</td>
+            <td>${CO.money(i.price * i.qty)}</td>
+          </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>
+
+    <div class="rcpt-summary">
+      <table>
+        <tr><td>Subtotal</td><td>${CO.money(p.subtotal)}</td></tr>
+        ${p.discount ? `<tr><td>Discount ${order.promo ? '(' + order.promo.code + ')' : ''}</td><td>&minus;${CO.money(p.discount)}</td></tr>` : ''}
+        <tr><td>Shipping</td><td>${CO.money(p.shipping)}</td></tr>
+        ${p.tax ? `<tr><td>Tax</td><td>${CO.money(p.tax)}</td></tr>` : `<tr><td style="font-style:italic">VAT</td><td style="font-style:italic">Included</td></tr>`}
+        <tr class="grand"><td>Grand Total</td><td>${CO.money(p.total)}</td></tr>
+      </table>
+    </div>
+
+    <div class="rcpt-footer">
+      <p>Thank you for shopping with The Pink Room.</p>
+      <span>THEPINKROOMEG@GMAIL.COM &middot; WHATSAPP +20 120 780 3666</span>
+    </div>
+  `;
+}
+
+(async function render(){
+// this browser's own cache first, then the server — so a receipt link
+// opened from an email (any device) still resolves correctly
+const order = await CO.getOrderAnywhere(params.get('order'));
+
+if (!order){
+  document.getElementById('rcptWrap').innerHTML = `<div class="rcpt-notfound">
+    <h2 style="font-family:'Playfair Display',serif;font-weight:400;font-size:24px;margin-bottom:10px">Receipt not found</h2>
+    <p style="font-size:13px;opacity:.8">This order could not be located.</p>
+    <a href="index.html">RETURN HOME</a>
+  </div>`;
+} else {
+  document.title = 'Receipt #' + order.id + ' | The Pink Room';
+  document.getElementById('rcptSheet').innerHTML = buildReceipt(order);
+
+  document.getElementById('btnPrint').addEventListener('click', ()=> window.print());
+
+  function downloadPdf(){
+    const btn = document.getElementById('btnDownload');
+    btn.classList.add('loading');
+    const opt = {
+      margin: 0,
+      filename: 'ThePinkRoom-Receipt-' + order.id + '.pdf',
+      image: { type:'jpeg', quality:0.98 },
+      html2canvas: { scale:2, useCORS:true },
+      jsPDF: { unit:'mm', format:'a4', orientation:'portrait' }
+    };
+    html2pdf().set(opt).from(document.getElementById('rcptSheet')).save()
+      .then(()=> btn.classList.remove('loading'))
+      .catch(()=> btn.classList.remove('loading'));
+  }
+  document.getElementById('btnDownload').addEventListener('click', downloadPdf);
+
+  if (action === 'print') setTimeout(()=> window.print(), 500);
+  if (action === 'download') setTimeout(downloadPdf, 600);
+}
+})();
+</script>
+</body>
+</html>

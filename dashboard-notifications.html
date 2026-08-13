@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Notifications | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .nt-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;margin-bottom:20px;}
+  .nt-card h3{font-family:'Playfair Display',serif;font-weight:400;font-size:16px;margin-bottom:2px;}
+  .nt-card .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .nt-vars{font-size:11px;color:var(--ink-soft);margin-top:6px;line-height:1.7;}
+  .nt-vars code{background:var(--beige-soft);padding:1px 5px;border-radius:3px;color:var(--gold);font-family:monospace;}
+  textarea#fWhatsapp{min-height:220px;font-family:monospace;font-size:12px;line-height:1.6;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap" style="max-width:720px">
+        <div class="db-page-head">
+          <div><h1>Notifications</h1><p>Wording for order emails and the shop's WhatsApp alert — no code changes needed to reword these.</p></div>
+        </div>
+
+        <div class="nt-card">
+          <h3>Shop Order Email</h3>
+          <p class="sub">Sent to the shop's own inbox every time an order comes in.</p>
+          <div class="db-field"><label>Subject</label><input type="text" id="fShopSubject"></div>
+          <p class="nt-vars">Available: <code>{orderId}</code> <code>{total}</code></p>
+        </div>
+
+        <div class="nt-card">
+          <h3>Customer Confirmation Email</h3>
+          <p class="sub">Sent to the customer right after they place an order.</p>
+          <div class="db-field"><label>Subject</label><input type="text" id="fCustSubject"></div>
+          <p class="nt-vars">Available: <code>{orderId}</code> <code>{total}</code></p>
+          <div class="db-field"><label>Intro line (under "Thank you, [Name]!")</label><input type="text" id="fCustIntro"></div>
+          <div class="db-field"><label>Footer line (bottom of the email)</label><input type="text" id="fCustFooter"></div>
+          <p class="nt-vars">Available: <code>{shopWhatsapp}</code> (becomes a clickable WhatsApp link)</p>
+        </div>
+
+        <div class="nt-card">
+          <h3>Shop WhatsApp Message</h3>
+          <p class="sub">Sent to the shop's WhatsApp for every new order (via CallMeBot).</p>
+          <div class="db-field"><label>Message template</label><textarea id="fWhatsapp"></textarea></div>
+          <p class="nt-vars">Available:
+            <code>{orderId}</code> <code>{customerName}</code> <code>{customerPhone}</code> <code>{customerEmail}</code>
+            <code>{address}</code> <code>{items}</code> <code>{subtotal}</code> <code>{discountLine}</code>
+            <code>{shipping}</code> <code>{total}</code> <code>{paymentMethod}</code> <code>{paymentStatus}</code>
+            <code>{shippingMethod}</code> <code>{deliveryLabel}</code> <code>{notesLine}</code>
+            — <code>{discountLine}</code>/<code>{notesLine}</code> are blank when there's no discount/notes.
+          </p>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="db-save" id="btnSave" style="width:auto;padding:0 28px">SAVE TEMPLATES</button>
+          <button class="db-save outline" id="btnReset" style="width:auto;padding:0 20px">RESET TO DEFAULTS</button>
+          <p class="db-save-msg" id="msg"></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { toast } = DashUI;
+
+// mirrors DEFAULT_TEMPLATES in api/_lib/notify.js — used for the "Reset
+// to defaults" button and as a fallback if nothing's saved yet
+const DEFAULTS = {
+  shopEmailSubject: '🔔 New Order #{orderId} — {total}',
+  customerEmailSubject: 'Your Pink Room order #{orderId} is confirmed',
+  customerEmailIntro: 'Your order has been placed and is being prepared.',
+  customerEmailFooter: 'Questions about your order? WhatsApp us at {shopWhatsapp} or reply to this email.',
+  whatsappTemplate: [
+    '🛍️ *New Order — The Pink Room*',
+    'Order #{orderId}',
+    '',
+    '👤 {customerName}',
+    '📞 {customerPhone}',
+    '✉️ {customerEmail}',
+    '📍 {address}',
+    '',
+    '{items}',
+    '',
+    'Subtotal: {subtotal}',
+    '{discountLine}',
+    'Shipping: {shipping}',
+    '*Total: {total}*',
+    '',
+    '💳 {paymentMethod} ({paymentStatus})',
+    '🚚 {shippingMethod} — {deliveryLabel}',
+    '{notesLine}'
+  ].join('\n')
+};
+
+function fill(tpl){
+  $('fShopSubject').value = tpl.shopEmailSubject || '';
+  $('fCustSubject').value = tpl.customerEmailSubject || '';
+  $('fCustIntro').value = tpl.customerEmailIntro || '';
+  $('fCustFooter').value = tpl.customerEmailFooter || '';
+  $('fWhatsapp').value = tpl.whatsappTemplate || '';
+}
+
+async function load(){
+  try {
+    const r = await fetch('/api/admin/settings?key=notification_templates');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    if (r.status === 404){ fill(DEFAULTS); return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load templates.');
+    fill({ ...DEFAULTS, ...d.value });
+  } catch(e){ toast(e.message, 'bad'); fill(DEFAULTS); }
+}
+
+$('btnReset').addEventListener('click', ()=>{
+  if (!confirm('Reset all fields to the original defaults? (Won\'t save until you click Save Templates.)')) return;
+  fill(DEFAULTS);
+});
+
+$('btnSave').addEventListener('click', async ()=>{
+  const btn = $('btnSave'), msg = $('msg');
+  const value = {
+    shopEmailSubject: $('fShopSubject').value.trim() || DEFAULTS.shopEmailSubject,
+    customerEmailSubject: $('fCustSubject').value.trim() || DEFAULTS.customerEmailSubject,
+    customerEmailIntro: $('fCustIntro').value.trim() || DEFAULTS.customerEmailIntro,
+    customerEmailFooter: $('fCustFooter').value.trim() || DEFAULTS.customerEmailFooter,
+    whatsappTemplate: $('fWhatsapp').value || DEFAULTS.whatsappTemplate
+  };
+  btn.disabled = true; msg.className = 'db-save-msg';
+  try {
+    const r = await fetch('/api/admin/settings', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'notification_templates', value })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved — used on the next order.'; msg.className = 'db-save-msg show ok';
+    toast('Notification templates saved.', 'ok');
+  } catch(e){ msg.textContent = e.message; msg.className = 'db-save-msg show bad'; }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout | The Pink Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f0e8;
+    --cream-light:#f8f4ee;
+    --beige:#e9dfd0;
+    --beige-soft:#efe6d8;
+    --gold:#c9a97c;
+    --ink:#1c1a17;
+    --ink-soft:#3a362f;
+    --line:#d8cdbb;
+    --shine: rgba(201,169,124,.55);
+    --err:#b0473f;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    font-family:'Poppins',sans-serif;
+    background:var(--cream-light);
+    color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+  }
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+  img{display:block;max-width:100%;}
+  input,select,textarea{font-family:inherit;font-size:14px;color:var(--ink);}
+
+  /* ---------- TOPBAR (logo styled like the Refund & Return Policy page) ---------- */
+  .co-topbar{
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+    padding:22px 40px;background:var(--beige-soft);border-bottom:1px solid var(--line);
+  }
+  .co-back{
+    display:inline-flex;align-items:center;gap:9px;
+    font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);
+    flex:0 0 auto;min-width:150px;
+    transition:color .3s ease, gap .3s ease;
+  }
+  .co-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .co-back:hover{color:var(--gold);gap:13px;}
+  .co-logo{position:relative;display:block;width:230px;overflow:hidden;flex:0 0 auto;}
+  .co-logo::after{
+    content:'';position:absolute;top:0;left:-170%;width:60%;height:100%;
+    background:linear-gradient(115deg,transparent 0%,transparent 32%,rgba(255,255,255,.45) 45%,rgba(255,241,214,.95) 50%,rgba(201,169,124,.8) 55%,transparent 68%,transparent 100%);
+    transform:skewX(-20deg);mix-blend-mode:screen;pointer-events:none;
+    animation:coLogoShine 3.4s ease-in-out infinite;
+  }
+  @keyframes coLogoShine{0%{left:-170%;}55%{left:170%;}100%{left:170%;}}
+  .co-logo img{width:100%;height:auto;display:block;}
+  .co-secure{
+    display:flex;align-items:center;gap:8px;
+    font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);
+    flex:0 0 auto;min-width:150px;justify-content:flex-end;
+  }
+  .co-secure svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.6;}
+  /* tablet keeps the full desktop bar, just a touch tighter */
+  @media (max-width:900px){
+    .co-topbar{padding:18px 24px;}
+    .co-back, .co-secure{min-width:120px;font-size:10px;letter-spacing:1.4px;}
+    .co-logo{width:190px;}
+  }
+  @media (max-width:560px){
+    .co-topbar{padding:14px 14px;gap:8px;}
+    .co-back, .co-secure{min-width:0;font-size:8.5px;letter-spacing:.8px;gap:5px;}
+    .co-back svg, .co-secure svg{width:11px;height:11px;}
+    .co-logo{width:118px;}
+  }
+
+  /* ---------- PROGRESS ---------- */
+  .co-progress{
+    display:flex;align-items:flex-start;justify-content:center;gap:0;
+    max-width:640px;margin:0 auto;padding:26px 24px 10px;
+  }
+  .co-step-pill{display:flex;align-items:center;flex:1;min-width:0;}
+  .co-step-pill:last-child{flex:0 0 auto;}
+  .co-step-dot{
+    width:30px;height:30px;border-radius:50%;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+    font-size:12px;font-weight:600;color:var(--ink-soft);
+    border:1px solid var(--line);background:var(--cream-light);
+    transition:background .35s ease, border-color .35s ease, color .35s ease;
+  }
+  .co-step-pill.done .co-step-dot{background:var(--gold);border-color:var(--gold);color:#fff;}
+  .co-step-pill.active .co-step-dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(201,169,124,.16);}
+  .co-step-dot svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.4;}
+  .co-step-label{margin-left:10px;white-space:nowrap;}
+  .co-step-label b{display:block;font-size:10.5px;letter-spacing:1.6px;color:var(--ink-soft);}
+  .co-step-pill.active .co-step-label b{color:var(--gold);}
+  .co-step-pill.done .co-step-label b{color:var(--ink);}
+  .co-step-label span{display:block;font-size:9.5px;color:var(--ink-soft);opacity:.7;}
+  .co-step-line{flex:1;height:1px;background:var(--line);margin:0 12px;transition:background .35s ease;}
+  .co-step-pill.done + .co-step-pill .co-step-line, .co-step-pill.done .co-step-line{background:var(--gold);}
+  /* the progress bar keeps its desktop shape — labels stay visible on every
+     screen, they just scale down so all four steps still fit a phone */
+  @media (max-width:900px){
+    .co-progress{padding:22px 20px 8px;}
+    .co-step-label{margin-left:8px;}
+    .co-step-label b{font-size:9px;letter-spacing:1px;}
+    .co-step-label span{font-size:8.5px;}
+    .co-step-line{margin:0 8px;}
+  }
+  @media (max-width:560px){
+    .co-progress{padding:16px 10px 4px;}
+    .co-step-dot{width:24px;height:24px;font-size:10px;}
+    .co-step-dot svg{width:11px;height:11px;}
+    .co-step-label{margin-left:5px;}
+    .co-step-label b{font-size:7px;letter-spacing:.2px;}
+    .co-step-label span{display:none;}          /* sub-caption only; the step name stays */
+    .co-step-line{margin:0 4px;min-width:6px;}
+  }
+
+  /* ---------- LAYOUT ---------- */
+  .co-layout{
+    display:grid;grid-template-columns:1fr 400px;gap:44px;
+    max-width:1280px;margin:0 auto;padding:34px 40px 90px;align-items:flex-start;
+  }
+  .co-form-col{min-width:0;}
+  .co-summary-col{position:sticky;top:24px;}
+
+  .co-error{
+    display:flex;align-items:center;gap:10px;
+    background:rgba(176,71,63,.08);border:1px solid rgba(176,71,63,.35);
+    color:var(--err);font-size:13px;padding:14px 16px;border-radius:3px;margin-bottom:22px;
+  }
+  .co-error svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
+
+  .co-step{display:none;}
+  .co-step.show{display:block;animation:coStepIn .4s cubic-bezier(.16,1,.3,1);}
+  @keyframes coStepIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+  .co-h1{font-family:'Playfair Display', serif;font-weight:400;font-size:34px;margin-bottom:6px;}
+  .co-lead{font-size:13.5px;color:var(--gold);margin-bottom:28px;}
+
+  .co-block{margin-bottom:34px;}
+  .co-block-title{
+    font-size:11px;letter-spacing:2px;font-weight:600;color:var(--ink-soft);
+    margin-bottom:16px;padding-bottom:10px;border-bottom:1px solid var(--line);
+  }
+  .co-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+  .co-field{margin-bottom:14px;}
+  .co-field label{display:block;font-size:11px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:7px;}
+  .co-input-wrap{position:relative;}
+  .co-input-wrap svg{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    width:15px;height:15px;stroke:var(--ink-soft);fill:none;stroke-width:1.6;pointer-events:none;
+  }
+  .co-field input, .co-field select, .co-field textarea{
+    width:100%;border:1px solid var(--line);background:#fff;
+    padding:13px 14px;border-radius:2px;transition:border-color .25s ease, box-shadow .25s ease;
+  }
+  .co-input-wrap input, .co-input-wrap select{padding-left:40px;}
+  .co-field input:focus, .co-field select:focus, .co-field textarea:focus{
+    outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,124,.14);
+  }
+  .co-field.err input, .co-field.err select{border-color:var(--err);}
+  .co-field-msg{font-size:11px;color:var(--err);margin-top:6px;display:none;}
+  .co-field.err .co-field-msg{display:block;}
+  .co-field textarea{resize:vertical;min-height:84px;}
+  .co-check{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--ink-soft);cursor:pointer;}
+  .co-check input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;}
+
+  /* option "cards" — used for shipping / payment radios */
+  .co-option{
+    display:flex;align-items:center;gap:14px;
+    border:1px solid var(--line);border-radius:3px;padding:15px 16px;margin-bottom:12px;
+    cursor:pointer;transition:border-color .25s ease, background .25s ease;
+  }
+  .co-option:hover{border-color:var(--gold);}
+  .co-option.selected{border-color:var(--gold);background:rgba(201,169,124,.06);}
+  .co-option.disabled{opacity:.5;cursor:not-allowed;}
+  .co-option-radio{
+    width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;transition:border-color .25s ease;
+  }
+  .co-option.selected .co-option-radio{border-color:var(--gold);}
+  .co-option-radio i{width:9px;height:9px;border-radius:50%;background:var(--gold);opacity:0;transform:scale(.4);transition:opacity .2s ease, transform .2s ease;}
+  .co-option.selected .co-option-radio i{opacity:1;transform:scale(1);}
+  /* one uniform icon frame for every payment method, so a hand-drawn line
+     icon and a full-colour brand mark still read as the same family */
+  .co-option-icon{
+    width:44px;height:30px;flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .co-option-icon .pm-ico{width:100%;height:100%;}
+  /* line-art methods (cash, card, bank) share one stroke weight + colour */
+  .co-option-icon .pm-ico.line{
+    stroke:var(--ink);fill:none;stroke-width:1.2;
+    stroke-linecap:round;stroke-linejoin:round;
+  }
+  .co-option.selected .co-option-icon .pm-ico.line{stroke:#6b5433;}
+
+  /* accepted-network marks — identical chip treatment everywhere they appear */
+  .brand-row{display:flex;align-items:center;gap:6px;flex-shrink:0;}
+  .brand-chip{
+    width:36px;height:24px;flex-shrink:0;
+    border:1px solid var(--line);border-radius:3px;background:#fff;
+    display:flex;align-items:center;justify-content:center;padding:3px 4px;
+  }
+  .brand-chip.wide{width:52px;}
+  .brand-chip svg{width:100%;height:100%;display:block;}
+
+  .co-option-body{flex:1;min-width:0;}
+  .co-option-body b{display:block;font-size:13.5px;font-weight:500;}
+  .co-option-body span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .co-option-price{font-size:13px;font-weight:600;color:var(--gold);white-space:nowrap;}
+  .co-option-badge{
+    font-size:9px;letter-spacing:1.4px;font-weight:600;color:#fff;background:var(--gold);
+    padding:4px 9px;border-radius:2px;white-space:nowrap;
+  }
+  .co-option-soon{font-size:9px;letter-spacing:1.4px;font-weight:600;color:var(--ink-soft);background:var(--beige-soft);padding:4px 9px;border-radius:2px;white-space:nowrap;}
+  .co-card-fields{
+    display:none;grid-template-columns:1fr 1fr;gap:14px;
+    padding:16px 16px 2px;margin:-4px 0 12px;border:1px dashed var(--line);border-top:none;border-radius:0 0 3px 3px;
+  }
+  .co-card-fields.show{display:grid;}
+  .co-card-fields .co-field:first-child{grid-column:1 / -1;}
+  .co-secure-note{
+    display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-soft);
+    background:var(--beige-soft);padding:12px 14px;border-radius:2px;margin-top:6px;
+  }
+  .co-secure-note svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0;}
+
+  /* saved-address display card (step 2) */
+  .co-addr-card{
+    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
+    border:1px solid var(--line);border-radius:3px;padding:18px;margin-bottom:14px;background:#fff;
+  }
+  .co-addr-card p{font-size:13.5px;line-height:1.75;color:var(--ink-soft);}
+  .co-addr-card p b{color:var(--ink);}
+  .co-edit-link{
+    display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;color:var(--gold);
+    flex-shrink:0;white-space:nowrap;transition:opacity .25s ease;
+  }
+  .co-edit-link:hover{opacity:.7;}
+  .co-edit-link svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .co-add-addr{
+    display:flex;align-items:center;justify-content:center;gap:8px;
+    border:1px dashed var(--line);border-radius:3px;padding:16px;
+    font-size:12px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:26px;
+    transition:border-color .25s ease, color .25s ease;
+  }
+  .co-add-addr:hover{border-color:var(--gold);color:var(--gold);}
+  .co-add-addr svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+  /* review cards (step 4) */
+  .co-review-card{
+    border:1px solid var(--line);border-radius:3px;padding:18px 20px;margin-bottom:14px;background:#fff;
+    display:flex;gap:14px;
+  }
+  .co-review-icon{
+    width:36px;height:36px;border-radius:50%;background:var(--beige-soft);flex-shrink:0;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .co-review-icon svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.6;}
+  .co-review-body{flex:1;min-width:0;}
+  .co-review-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
+  .co-review-head h4{font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);}
+  .co-review-body p{font-size:13.5px;line-height:1.7;color:var(--ink);}
+  .co-review-body p.muted{color:var(--ink-soft);}
+
+  .co-btn-row{display:flex;gap:12px;margin-top:30px;}
+  .co-btn-primary{
+    flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
+    background:var(--ink);color:var(--cream-light);
+    padding:16px;font-size:12px;letter-spacing:2px;font-weight:500;border-radius:2px;
+    transition:opacity .3s ease, transform .3s ease;
+  }
+  .co-btn-primary svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .co-btn-primary:hover{opacity:.9;}
+  .co-btn-primary:disabled{opacity:.55;cursor:default;}
+  .co-btn-primary.loading .co-btn-txt{opacity:0;}
+  .co-btn-primary{position:relative;}
+  .co-spin{
+    position:absolute;left:50%;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;
+    border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;
+    opacity:0;animation:coSpin .7s linear infinite;
+  }
+  .co-btn-primary.loading .co-spin{opacity:1;}
+  @keyframes coSpin{to{transform:rotate(360deg);}}
+  .co-btn-secondary{
+    flex:0 0 auto;display:flex;align-items:center;gap:8px;
+    border:1px solid var(--line);color:var(--ink);
+    padding:16px 22px;font-size:12px;letter-spacing:1.6px;border-radius:2px;
+    transition:border-color .3s ease, color .3s ease;
+  }
+  .co-btn-secondary svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .co-btn-secondary:hover{border-color:var(--ink);}
+  .co-place-note{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:7px;}
+  .co-place-note svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
+  /* ---------- ORDER SUMMARY ---------- */
+  .co-summary{border:1px solid var(--line);border-radius:4px;background:#fff;padding:22px;}
+  .co-summary-title{font-size:11px;letter-spacing:2px;font-weight:600;color:var(--ink-soft);margin-bottom:16px;}
+  .co-summary-items{max-height:340px;overflow-y:auto;margin-bottom:16px;}
+  .co-summary-item{display:flex;gap:12px;padding:10px 0;}
+  .co-summary-item-img{position:relative;width:56px;height:56px;flex-shrink:0;border-radius:3px;overflow:hidden;border:1px solid var(--line);}
+  .co-summary-item-img img{width:100%;height:100%;object-fit:cover;}
+  .co-summary-item-qty{
+    position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 4px;
+    background:var(--ink);color:#fff;font-size:10px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .co-summary-item-info{flex:1;min-width:0;}
+  .co-summary-item-info b{display:block;font-size:12.5px;font-weight:500;line-height:1.35;}
+  .co-summary-item-info span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .co-summary-item-price{font-size:12.5px;font-weight:600;white-space:nowrap;}
+  .co-summary-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;}
+
+  .co-promo{display:flex;gap:8px;margin-bottom:18px;}
+  .co-promo input{flex:1;border:1px solid var(--line);padding:11px 13px;border-radius:2px;font-size:12.5px;}
+  .co-promo input:focus{outline:none;border-color:var(--gold);}
+  .co-promo button{background:var(--ink);color:#fff;padding:0 18px;font-size:11px;letter-spacing:1.4px;border-radius:2px;transition:opacity .25s ease;}
+  .co-promo button:hover{opacity:.88;}
+  .co-promo-msg{font-size:11.5px;margin:-10px 0 14px;display:none;}
+  .co-promo-msg.show{display:block;}
+  .co-promo-msg.ok{color:#5a7a52;}
+  .co-promo-msg.bad{color:var(--err);}
+
+  .co-totals{border-top:1px solid var(--line);padding-top:14px;}
+  .co-totals-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--ink-soft);margin-bottom:9px;}
+  .co-totals-row.discount span:last-child{color:#5a7a52;}
+  .co-totals-row.grand{
+    border-top:1px solid var(--line);margin-top:8px;padding-top:12px;
+    font-size:17px;color:var(--ink);font-family:'Playfair Display',serif;
+  }
+  .co-totals-row.grand .co-vat{display:block;font-family:'Poppins',sans-serif;font-size:10.5px;color:var(--ink-soft);margin-top:2px;}
+
+  .co-trust{margin-top:18px;background:var(--beige-soft);border-radius:3px;padding:14px 16px;}
+  .co-trust-item{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:11.5px;color:var(--ink-soft);}
+  .co-trust-item:not(:last-child){border-bottom:1px solid rgba(216,205,187,.6);}
+  .co-trust-item svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.5;flex-shrink:0;}
+  .co-trust-item b{color:var(--ink);display:block;}
+  .co-trust-item span{display:block;opacity:.85;}
+  .co-pay-icons{display:flex;align-items:center;gap:7px;margin-top:16px;flex-wrap:wrap;}
+
+  /* ---------- RESPONSIVE ----------
+     Tablet keeps the exact desktop two-column layout (form left, sticky
+     summary right) — only the summary column narrows. Phones stack in the
+     same reading order as the desktop columns: form first, summary under it. */
+  @media (max-width:1100px){
+    .co-layout{grid-template-columns:1fr 330px;gap:28px;padding:28px 26px 76px;}
+  }
+  @media (max-width:860px){
+    .co-layout{grid-template-columns:1fr;gap:34px;padding:26px 22px 70px;}
+    .co-form-col{order:1;}
+    .co-summary-col{position:static;order:2;}
+    .co-summary-items{max-height:none;}
+  }
+  @media (max-width:560px){
+    .co-layout{padding:22px 16px 64px;}
+    .co-h1{font-size:27px;}
+    .co-lead{font-size:12.5px;margin-bottom:24px;}
+    .co-grid{grid-template-columns:1fr;}      /* side-by-side inputs get unusable below this */
+    .co-card-fields{grid-template-columns:1fr;}
+    .co-summary{padding:18px;}
+    .co-btn-row{flex-direction:column-reverse;}
+    .co-btn-secondary{justify-content:center;}
+    .co-option{padding:13px 13px;gap:11px;}
+    .co-option-icon{width:38px;height:26px;}
+    .co-option-body b{font-size:12.5px;}
+    .co-option-body span{font-size:10.5px;}
+    /* the card row's network marks would crowd a phone — they still show in
+       the "we accept" strip in the order summary just below */
+    .co-option .brand-row{display:none;}
+    .co-pay-icons{gap:6px;}
+    .co-review-card{padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="co-topbar">
+    <a class="co-back" href="javascript:void(0)" id="coBack">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>CONTINUE SHOPPING</span>
+    </a>
+    <a class="co-logo" href="index.html" aria-label="The Pink Room">
+      <img src="logo-beige.png" alt="The Pink Room">
+    </a>
+    <div class="co-secure">
+      <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>SECURE CHECKOUT</span>
+    </div>
+  </header>
+
+  <nav class="co-progress" id="coProgress"></nav>
+
+  <main class="co-layout">
+    <section class="co-form-col">
+      <div class="co-error" id="coError">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>
+        <span id="coErrorText"></span>
+      </div>
+
+      <!-- ============ STEP 1 — INFORMATION ============ -->
+      <div class="co-step" id="step-information">
+        <h1 class="co-h1">Checkout</h1>
+        <p class="co-lead">We&rsquo;re almost there. Please complete your order.</p>
+
+        <div class="co-block">
+          <p class="co-block-title">CONTACT INFORMATION</p>
+          <div class="co-grid">
+            <div class="co-field" id="f-name">
+              <label>Full Name</label>
+              <div class="co-input-wrap">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+                <input type="text" id="inName" autocomplete="name" placeholder="Full Name">
+              </div>
+              <p class="co-field-msg">Please enter your name.</p>
+            </div>
+            <div class="co-field" id="f-email">
+              <label>Email Address</label>
+              <div class="co-input-wrap">
+                <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
+                <input type="email" id="inEmail" autocomplete="email" placeholder="Email Address">
+              </div>
+              <p class="co-field-msg">Please enter a valid email.</p>
+            </div>
+          </div>
+          <div class="co-field" id="f-phone">
+            <label>Phone Number</label>
+            <div class="co-input-wrap">
+              <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z"/></svg>
+              <input type="tel" id="inPhone" autocomplete="tel" placeholder="e.g. +20 100 123 4567">
+            </div>
+            <p class="co-field-msg">Please enter a valid phone number.</p>
+          </div>
+          <label class="co-check">
+            <input type="checkbox" id="inNewsletter">
+            Email me with news and offers
+          </label>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">SHIPPING ADDRESS</p>
+          <div class="co-field" id="f-country">
+            <label>Country / Region</label>
+            <select id="inCountry"><option>Egypt</option></select>
+          </div>
+          <div class="co-field" id="f-street">
+            <label>Street Address</label>
+            <input type="text" id="inStreet" autocomplete="address-line1" placeholder="Street Address">
+            <p class="co-field-msg">Please enter your street address.</p>
+          </div>
+          <div class="co-field">
+            <label>Apartment, suite, unit, etc. (optional)</label>
+            <input type="text" id="inApt" autocomplete="address-line2">
+          </div>
+          <div class="co-grid">
+            <div class="co-field" id="f-city">
+              <label>City</label>
+              <input type="text" id="inCity" autocomplete="address-level2" placeholder="City">
+              <p class="co-field-msg">Please enter your city.</p>
+            </div>
+            <div class="co-field" id="f-gov">
+              <label>Governorate</label>
+              <select id="inGov"><option value="">Select Governorate</option></select>
+              <p class="co-field-msg">Please select your governorate.</p>
+            </div>
+          </div>
+          <div class="co-grid">
+            <div class="co-field">
+              <label>Postal Code</label>
+              <input type="text" id="inPostal" autocomplete="postal-code">
+            </div>
+            <div class="co-field">
+              <label>Additional Notes (optional)</label>
+              <input type="text" id="inNotes1" placeholder="Additional notes">
+            </div>
+          </div>
+          <label class="co-check">
+            <input type="checkbox" id="inSaveAddr" checked>
+            Save this address for next time
+          </label>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">SHIPPING METHOD</p>
+          <div id="shipOptions1"></div>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">PAYMENT METHOD</p>
+          <div id="payPreview1"></div>
+        </div>
+
+        <div class="co-btn-row">
+          <button class="co-btn-primary" data-next="shipping"><span class="co-btn-txt">CONTINUE TO SHIPPING <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
+        </div>
+      </div>
+
+      <!-- ============ STEP 2 — SHIPPING ============ -->
+      <div class="co-step" id="step-shipping">
+        <h1 class="co-h1">Shipping Address</h1>
+        <p class="co-lead">Please confirm your delivery address and shipping method.</p>
+
+        <div class="co-block">
+          <p class="co-block-title">DELIVERY ADDRESS</p>
+          <div id="savedAddrCard"></div>
+          <button class="co-add-addr" data-edit="information">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ADD A NEW ADDRESS
+          </button>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">SHIPPING METHOD</p>
+          <div id="shipOptions2"></div>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">ORDER NOTES (OPTIONAL)</p>
+          <textarea id="inNotes2" maxlength="250" placeholder="Add a note about your order (optional)"></textarea>
+        </div>
+
+        <div class="co-btn-row">
+          <button class="co-btn-secondary" data-back="information"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>BACK TO INFORMATION</button>
+          <button class="co-btn-primary" data-next="payment"><span class="co-btn-txt">CONTINUE TO PAYMENT <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
+        </div>
+      </div>
+
+      <!-- ============ STEP 3 — PAYMENT ============ -->
+      <div class="co-step" id="step-payment">
+        <h1 class="co-h1">Payment Method</h1>
+        <p class="co-lead">Choose your preferred payment option.</p>
+
+        <div class="co-block">
+          <p class="co-block-title">PAYMENT OPTIONS</p>
+          <div id="payOptions3"></div>
+        </div>
+
+        <div class="co-block">
+          <p class="co-block-title">BILLING ADDRESS</p>
+          <label class="co-check" style="margin-bottom:10px">
+            <input type="checkbox" id="inSameBilling" checked>
+            Same as shipping address
+          </label>
+          <label class="co-check" style="margin-bottom:16px">
+            <input type="radio" name="billingChoice" id="inDiffBilling">
+            Use a different billing address
+          </label>
+          <div id="billingFields" style="display:none">
+            <div class="co-grid">
+              <div class="co-field"><label>Street Address</label><input type="text" id="inBillStreet"></div>
+              <div class="co-field"><label>City</label><input type="text" id="inBillCity"></div>
+            </div>
+            <div class="co-field"><label>Governorate</label><select id="inBillGov"><option value="">Select Governorate</option></select></div>
+          </div>
+        </div>
+
+        <div class="co-btn-row">
+          <button class="co-btn-secondary" data-back="shipping"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>BACK TO SHIPPING</button>
+          <button class="co-btn-primary" data-next="review"><span class="co-btn-txt">CONTINUE TO REVIEW ORDER <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
+        </div>
+      </div>
+
+      <!-- ============ STEP 4 — REVIEW ============ -->
+      <div class="co-step" id="step-review">
+        <h1 class="co-h1">Review Your Order</h1>
+        <p class="co-lead">Please review all details below before placing your order.</p>
+
+        <div id="reviewBlocks"></div>
+
+        <div class="co-secure-note" style="margin-bottom:26px">
+          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          Your personal information and payment details are protected with 256-bit SSL encryption.
+        </div>
+
+        <div class="co-btn-row">
+          <button class="co-btn-secondary" data-back="payment"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>BACK TO PAYMENT</button>
+          <button class="co-btn-primary" id="placeOrderBtn"><span class="co-btn-txt">PLACE ORDER <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="co-spin"></span></button>
+        </div>
+        <p class="co-place-note">
+          <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          By placing your order, you agree to our <a href="#" style="color:var(--gold);border-bottom:1px solid var(--gold)">Terms &amp; Conditions</a> and <a href="refund-return-policy.html" style="color:var(--gold);border-bottom:1px solid var(--gold)">Privacy Policy</a>.
+        </p>
+      </div>
+    </section>
+
+    <aside class="co-summary-col">
+      <div class="co-summary" id="coSummary"></div>
+    </aside>
+  </main>
+
+<script src="analytics.js"></script>
+<script src="checkout.js"></script>
+<script>
+const CO = window.TPRCheckout;
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+
+const STEP_META = {
+  information: { n:1, label:'INFORMATION', sub:'Shipping & Contact' },
+  shipping:    { n:2, label:'SHIPPING',    sub:'Delivery Address' },
+  payment:     { n:3, label:'PAYMENT',     sub:'Payment Method' },
+  review:      { n:4, label:'REVIEW',      sub:'Order Review' }
+};
+
+let cart = CO.loadCart();
+let state = CO.loadCheckoutState();
+state.customer = state.customer || {};
+state.shippingAddress = state.shippingAddress || {};
+state.shippingMethod = state.shippingMethod || { id:'standard' };
+state.paymentMethod = state.paymentMethod || null;
+state.billingAddress = state.billingAddress || { sameAsShipping:true };
+state.notes = state.notes || '';
+state.promo = state.promo || null;
+
+function persist(){ CO.saveCheckoutState(state); }
+
+/* empty cart anywhere in checkout -> nothing to check out */
+if (!cart.length){ location.href = 'category.html?cat=all'; }
+
+/* ---------- governorate <select> options ---------- */
+['inGov','inBillGov'].forEach(id=>{
+  const sel = $(id);
+  CO.GOVERNORATES.forEach(g=>{
+    const o = document.createElement('option'); o.value = g; o.textContent = g; sel.appendChild(o);
+  });
+});
+
+/* ---------- prefill from saved state ---------- */
+(function prefill(){
+  inName.value = state.customer.name || '';
+  inEmail.value = state.customer.email || '';
+  inPhone.value = state.customer.phone || '';
+  inStreet.value = state.shippingAddress.street || '';
+  inApt.value = state.shippingAddress.apt || '';
+  inCity.value = state.shippingAddress.city || '';
+  inGov.value = state.shippingAddress.governorate || '';
+  inPostal.value = state.shippingAddress.postal || '';
+  inNotes1.value = state.notes || '';
+  inNotes2.value = state.notes || '';
+  inSaveAddr.checked = state.saveAddress !== false;
+  inSameBilling.checked = !state.billingAddress || state.billingAddress.sameAsShipping !== false;
+  inDiffBilling.checked = !inSameBilling.checked;
+  billingFields.style.display = inSameBilling.checked ? 'none' : 'block';
+  if (state.billingAddress && state.billingAddress.street){
+    inBillStreet.value = state.billingAddress.street || '';
+    inBillCity.value = state.billingAddress.city || '';
+    inBillGov.value = state.billingAddress.governorate || '';
+  }
+})();
+
+/* keep the two notes fields + name/email/phone in sync as the user types */
+function syncField(el, fn){ el.addEventListener('input', fn); }
+syncField(inName, ()=>{ state.customer.name = inName.value; persist(); });
+syncField(inEmail, ()=>{ state.customer.email = inEmail.value; persist(); });
+syncField(inPhone, ()=>{ state.customer.phone = inPhone.value; persist(); });
+syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
+syncField(inApt, ()=>{ state.shippingAddress.apt = inApt.value; persist(); });
+syncField(inCity, ()=>{ state.shippingAddress.city = inCity.value; persist(); });
+inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
+syncField(inPostal, ()=>{ state.shippingAddress.postal = inPostal.value; persist(); });
+syncField(inNotes1, ()=>{ state.notes = inNotes1.value; inNotes2.value = state.notes; persist(); });
+syncField(inNotes2, ()=>{ state.notes = inNotes2.value; inNotes1.value = state.notes; persist(); });
+inSaveAddr.addEventListener('change', ()=>{ state.saveAddress = inSaveAddr.checked; persist(); });
+
+function setBillingMode(same){
+  inSameBilling.checked = same; inDiffBilling.checked = !same;
+  billingFields.style.display = same ? 'none' : 'block';
+  state.billingAddress = state.billingAddress || {};
+  state.billingAddress.sameAsShipping = same;
+  persist();
+}
+inSameBilling.addEventListener('change', ()=> setBillingMode(inSameBilling.checked));
+inDiffBilling.addEventListener('change', ()=> setBillingMode(!inDiffBilling.checked));
+[inBillStreet, inBillCity].forEach(el => el.addEventListener('input', ()=>{
+  state.billingAddress.street = inBillStreet.value;
+  state.billingAddress.city = inBillCity.value;
+  persist();
+}));
+inBillGov.addEventListener('change', ()=>{ state.billingAddress.governorate = inBillGov.value; persist(); });
+
+/* ---------- shipping method option cards (rendered twice: step1 preview + step2) ---------- */
+function shipOptionMarkup(m){
+  const selected = state.shippingMethod && state.shippingMethod.id === m.id;
+  return `<div class="co-option ${selected?'selected':''}" data-ship="${m.id}">
+    <div class="co-option-radio"><i></i></div>
+    <div class="co-option-icon"><svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg></div>
+    <div class="co-option-body"><b>${m.label}</b><span>${m.sub}</span></div>
+    <div class="co-option-price">${CO.money(m.price)}</div>
+  </div>`;
+}
+function renderShipOptions(){
+  const html = Object.values(CO.SHIPPING_METHODS).map(shipOptionMarkup).join('');
+  shipOptions1.innerHTML = html;
+  shipOptions2.innerHTML = html;
+  [shipOptions1, shipOptions2].forEach(wrap=>{
+    wrap.querySelectorAll('[data-ship]').forEach(el=>{
+      el.addEventListener('click', ()=>{
+        state.shippingMethod = { id: el.dataset.ship };
+        persist(); renderShipOptions(); renderSummary();
+      });
+    });
+  });
+}
+
+/* ---------- payment brand marks ----------
+   Real network/wallet logos drawn inline (no external requests), all sized to
+   the same 36×24 chip so every mark reads as one consistent set. */
+const BRAND = {
+  visa: `<svg viewBox="0 0 48 16" role="img" aria-label="Visa"><text x="24" y="13" text-anchor="middle" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="13" font-weight="900" font-style="italic" letter-spacing="-.3" fill="#1434CB">VISA</text></svg>`,
+  mastercard: `<svg viewBox="0 0 44 28" role="img" aria-label="Mastercard"><circle cx="17" cy="14" r="9.6" fill="#EB001B"/><circle cx="27" cy="14" r="9.6" fill="#F79E1B"/><path d="M22 6.5a9.6 9.6 0 0 0 0 15 9.6 9.6 0 0 0 0-15Z" fill="#FF5F00"/></svg>`,
+  mada: `<svg viewBox="0 0 48 22" role="img" aria-label="mada"><rect x="7" y="4" width="13" height="2.2" rx="1.1" fill="#84BD41"/><rect x="28" y="4" width="13" height="2.2" rx="1.1" fill="#1BA0DA"/><text x="24" y="18" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="10.5" font-weight="700" fill="#231F20">mada</text></svg>`,
+  paypal: `<svg viewBox="0 0 30 30" role="img" aria-label="PayPal"><path d="M3.4 22.6a.55.55 0 0 1-.54-.64L5.9 2.9a.85.85 0 0 1 .84-.72h6.2c3.5 0 5.75 1.9 5.24 5.3-.6 3.95-3.5 5.75-7.1 5.75H8.66a.85.85 0 0 0-.84.72l-1.06 7.4a.85.85 0 0 1-.84.72Z" fill="#009CDE"/><path d="M10.6 27.9a.55.55 0 0 1-.54-.64l3.04-19.06a.85.85 0 0 1 .84-.72h6.2c3.5 0 5.75 1.9 5.24 5.3-.6 3.95-3.5 5.75-7.1 5.75h-2.42a.85.85 0 0 0-.84.72l-1.06 7.4a.85.85 0 0 1-.84.72Z" fill="#003087"/></svg>`,
+  applepay: `<svg viewBox="0 0 44 22" role="img" aria-label="Apple Pay"><path d="M9.9 4.9c.5-.62 1.36-1.08 2.07-1.11.09.83-.24 1.66-.73 2.27-.5.6-1.31 1.07-2.11 1-.1-.8.3-1.63.77-2.16Z" fill="#000"/><path d="M12.6 7.3c-1.16-.07-2.15.66-2.7.66-.56 0-1.41-.63-2.32-.61-1.19.01-2.3.69-2.91 1.77-1.25 2.15-.33 5.34.89 7.09.6.86 1.3 1.82 2.24 1.79.89-.04 1.24-.58 2.31-.58 1.08 0 1.39.58 2.33.56.97-.02 1.58-.87 2.17-1.74.68-.99.96-1.95.98-2-.02-.01-1.87-.72-1.89-2.84-.02-1.78 1.45-2.63 1.52-2.68-.83-1.22-2.13-1.36-2.58-1.39l-.04-.03Z" fill="#000"/><text x="30" y="16" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="11.5" font-weight="500" fill="#000">Pay</text></svg>`,
+  ssl: `<svg viewBox="0 0 56 22" role="img" aria-label="SSL Secured"><path d="M9 2.6 4 4.5v4.6c0 3.2 2.1 6.1 5 7.1 2.9-1 5-3.9 5-7.1V4.5L9 2.6Z" fill="#2E9E5B"/><path d="m6.7 9.2 1.6 1.6 3.1-3.3" stroke="#fff" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/><text x="35" y="9.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="6.6" font-weight="700" fill="#231F20">SSL</text><text x="35" y="16.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="5" fill="#7a7268">SECURED</text></svg>`
+};
+const chip = (name, wide) => `<span class="brand-chip${wide ? ' wide' : ''}">${BRAND[name]}</span>`;
+const CARD_BRANDS = `<div class="brand-row">${chip('visa')}${chip('mastercard')}${chip('mada')}</div>`;
+
+/* ---------- payment method icons ----------
+   Line-art methods all share one stroke weight/box; brand methods use their
+   real logo. Same 44×30 frame for every one. */
+const PAY_ICON = {
+  cash_on_delivery: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5.5" width="35" height="17" rx="2.5"/><circle cx="20" cy="14" r="4.5"/><circle cx="7.6" cy="14" r="1.1"/><circle cx="32.4" cy="14" r="1.1"/></svg>`,
+  card: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5" width="35" height="18" rx="2.5"/><path d="M2.5 10.6h35"/><rect x="6.5" y="15" width="6.5" height="4.4" rx="1.1"/></svg>`,
+  paypal: `<svg class="pm-ico" viewBox="0 0 40 28"><g transform="translate(11 4.5) scale(.63)">${BRAND.paypal.replace(/^<svg[^>]*>|<\/svg>$/g,'')}</g></svg>`,
+  bank_transfer: `<svg class="pm-ico line" viewBox="0 0 40 28"><path d="M20 4.6 4.6 11.6h30.8L20 4.6Z"/><path d="M8.4 12.8v8.2M15 12.8v8.2M25 12.8v8.2M31.6 12.8v8.2"/><path d="M4.2 23.4h31.6"/></svg>`,
+  paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`
+};
+
+function payOptionMarkup(p, opts){
+  opts = opts || {};
+  const selected = state.paymentMethod && state.paymentMethod.id === p.id;
+  const disabled = !p.enabled;
+  const badge = disabled ? `<span class="co-option-soon">COMING SOON</span>`
+              : (opts.showSelected && selected ? `<span class="co-option-badge">SELECTED</span>` : '');
+  const brands = p.id === 'card' ? CARD_BRANDS : '';
+  return `<div class="co-option ${selected?'selected':''} ${disabled?'disabled':''}" data-pay="${p.id}">
+    <div class="co-option-radio"><i></i></div>
+    <div class="co-option-icon">${PAY_ICON[p.id]||''}</div>
+    <div class="co-option-body"><b>${p.label}</b><span>${p.description}</span></div>
+    ${brands}${badge}
+  </div>`;
+}
+function renderPayPreview1(){
+  const list = ['cash_on_delivery','card','paypal'].map(id => CO.PaymentProviders[id]);
+  payPreview1.innerHTML = list.map(p => payOptionMarkup(p, {})).join('');
+  payPreview1.querySelectorAll('[data-pay]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.paymentMethod = { id: el.dataset.pay };
+      persist(); renderPayPreview1(); renderPayOptions3(); renderSummary();
+    });
+  });
+}
+function renderPayOptions3(){
+  const list = Object.values(CO.PaymentProviders);
+  payOptions3.innerHTML = list.map(p => payOptionMarkup(p, { showSelected:true })).join('');
+  payOptions3.querySelectorAll('[data-pay]').forEach(el=>{
+    const provider = CO.PaymentProviders[el.dataset.pay];
+    if (!provider.enabled) return;
+    el.addEventListener('click', ()=>{
+      state.paymentMethod = { id: el.dataset.pay };
+      persist(); renderPayOptions3(); renderPayPreview1(); renderSummary(); renderCardFields();
+    });
+  });
+  renderCardFields();
+}
+function renderCardFields(){
+  let box = document.getElementById('cardFieldsBox');
+  if (box) box.remove();
+  if (!state.paymentMethod || state.paymentMethod.id !== 'card') return;
+  const cardEl = payOptions3.querySelector('[data-pay="card"]');
+  box = document.createElement('div');
+  box.className = 'co-card-fields show';
+  box.id = 'cardFieldsBox';
+  box.innerHTML = `
+    <div class="co-field"><label>Card Number</label><input type="text" inputmode="numeric" maxlength="19" placeholder="1234 5678 9012 3456" id="ccNumber"></div>
+    <div class="co-field"><label>Cardholder Name</label><input type="text" placeholder="Name on card" id="ccName"></div>
+    <div class="co-field"><label>Expires</label><input type="text" placeholder="MM / YY" maxlength="7" id="ccExpiry"></div>
+    <div class="co-field" style="grid-column:1/-1"><div class="co-secure-note"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>Your card details stay on this device — they are never saved or sent anywhere until a payment gateway is connected.</div></div>`;
+  cardEl.insertAdjacentElement('afterend', box);
+}
+
+/* ---------- promo code ---------- */
+async function applyPromo(code){
+  const msg = document.getElementById('promoMsg');
+  const btn = document.getElementById('promoApply');
+  if (!code || !code.trim()) return;
+
+  if (btn) btn.disabled = true;
+  msg.textContent = 'Checking…'; msg.className = 'co-promo-msg show';
+
+  const cartNow = CO.loadCart();
+  const subtotal = cartNow.reduce((s,i)=> s + (i.price * i.qty), 0);
+  const result = await CO.checkPromo(code, subtotal);
+
+  if (btn) btn.disabled = false;
+  if (result === false){
+    msg.textContent = 'That code isn’t valid.'; msg.className = 'co-promo-msg show bad';
+    return;
+  }
+  state.promo = result; persist();
+  msg.textContent = `“${result.code}” applied — ${result.label}.`; msg.className = 'co-promo-msg show ok';
+  renderSummary();
+}
+
+/* ---------- order summary (renders on every step) ---------- */
+function renderSummary(){
+  cart = CO.loadCart();
+  const shippingMethod = CO.SHIPPING_METHODS[state.shippingMethod.id] || CO.SHIPPING_METHODS.standard;
+  const pricing = CO.calculatePricing(cart, shippingMethod, state.promo);
+
+  const itemsHtml = cart.length ? cart.map(i => `
+    <div class="co-summary-item">
+      <div class="co-summary-item-img"><img src="${i.img}" alt="${i.name}"><span class="co-summary-item-qty">${i.qty}</span></div>
+      <div class="co-summary-item-info"><b>${i.name}</b><span>${i.variant || ''}</span></div>
+      <div class="co-summary-item-price">${CO.money(i.price * i.qty)}</div>
+    </div>`).join('') : `<p class="co-summary-empty">Your bag is empty.</p>`;
+
+  coSummary.innerHTML = `
+    <p class="co-summary-title">ORDER SUMMARY</p>
+    <div class="co-summary-items">${itemsHtml}</div>
+    <div class="co-promo">
+      <input type="text" id="promoInput" placeholder="Enter promo code" value="${state.promo ? state.promo.code : ''}">
+      <button id="promoApply">APPLY</button>
+    </div>
+    <p class="co-promo-msg" id="promoMsg"></p>
+    <div class="co-totals">
+      <div class="co-totals-row"><span>Subtotal</span><span>${CO.money(pricing.subtotal)}</span></div>
+      ${pricing.discount ? `<div class="co-totals-row discount"><span>Discount</span><span>&minus;${CO.money(pricing.discount)}</span></div>` : ''}
+      <div class="co-totals-row"><span>Shipping</span><span>${CO.money(pricing.shipping)}</span></div>
+      <div class="co-totals-row grand"><span>Total</span><span>${CO.money(pricing.total)}<span class="co-vat">Including VAT</span></span></div>
+    </div>
+    <div class="co-trust">
+      <div class="co-trust-item"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg><div><b>Secure Checkout</b><span>Your data is 100% protected</span></div></div>
+      <div class="co-trust-item"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9"/><polyline points="3 4 3 12 11 12"/></svg><div><b>Easy Returns</b><span>14-day return policy</span></div></div>
+      <div class="co-trust-item"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div><b>Customer Support</b><span>We&rsquo;re here to help</span></div></div>
+    </div>
+    <div class="co-pay-icons">${chip('ssl', true)}${chip('visa')}${chip('mastercard')}${chip('mada')}${chip('applepay')}</div>
+  `;
+  document.getElementById('promoApply').addEventListener('click', ()=> applyPromo(document.getElementById('promoInput').value));
+  document.getElementById('promoInput').addEventListener('keydown', e=>{ if (e.key === 'Enter') applyPromo(e.target.value); });
+}
+
+/* ---------- step 2: saved address summary card ---------- */
+function renderSavedAddress(){
+  const a = state.shippingAddress, c = state.customer;
+  savedAddrCard.innerHTML = `
+    <div class="co-addr-card">
+      <p>
+        <b>${c.name || 'Your name'}</b><br>
+        ${[a.street, a.apt].filter(Boolean).join(', ') || 'Street address'}<br>
+        ${[a.city, a.governorate].filter(Boolean).join(', ')}<br>
+        Egypt<br>
+        ${c.phone || ''}
+      </p>
+      <a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>EDIT</a>
+    </div>`;
+}
+
+/* ---------- step 4: review cards ---------- */
+function renderReview(){
+  const c = state.customer, a = state.shippingAddress;
+  const shippingMethod = CO.SHIPPING_METHODS[state.shippingMethod.id];
+  const payment = CO.PaymentProviders[state.paymentMethod && state.paymentMethod.id];
+  reviewBlocks.innerHTML = `
+    <div class="co-review-card">
+      <div class="co-review-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
+      <div class="co-review-body">
+        <div class="co-review-head"><h4>CONTACT INFORMATION</h4><a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>EDIT</a></div>
+        <p>${c.name || ''}</p><p class="muted">${c.email || ''}</p><p class="muted">${c.phone || ''}</p>
+      </div>
+    </div>
+    <div class="co-review-card">
+      <div class="co-review-icon"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
+      <div class="co-review-body">
+        <div class="co-review-head"><h4>SHIPPING ADDRESS</h4><a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>EDIT</a></div>
+        <p>${c.name || ''}</p>
+        <p class="muted">${[a.street, a.apt].filter(Boolean).join(', ')}</p>
+        <p class="muted">${[a.city, a.governorate].filter(Boolean).join(', ')}, Egypt</p>
+        <p class="muted">${c.phone || ''}</p>
+        <p style="margin-top:8px">${shippingMethod.label} <span class="muted">(${shippingMethod.sub})</span> &mdash; ${CO.money(shippingMethod.price)}</p>
+      </div>
+    </div>
+    <div class="co-review-card">
+      <div class="co-review-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
+      <div class="co-review-body">
+        <div class="co-review-head"><h4>PAYMENT METHOD</h4><a class="co-edit-link" data-edit="payment"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>EDIT</a></div>
+        <p>${payment ? payment.label : 'Not selected'}</p>
+      </div>
+    </div>
+    ${state.notes ? `<div class="co-review-card">
+      <div class="co-review-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></svg></div>
+      <div class="co-review-body">
+        <div class="co-review-head"><h4>ORDER NOTES</h4><a class="co-edit-link" data-edit="shipping"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>EDIT</a></div>
+        <p class="muted">${state.notes}</p>
+      </div>
+    </div>` : ''}
+  `;
+}
+
+/* ---------- validation per step ---------- */
+function setFieldError(id, hasErr){ $(id).classList.toggle('err', !!hasErr); }
+function validateInformation(){
+  let ok = true;
+  const nameOk = CO.isFilled(inName.value); setFieldError('f-name', !nameOk); ok = ok && nameOk;
+  const emailOk = CO.isEmail(inEmail.value); setFieldError('f-email', !emailOk); ok = ok && emailOk;
+  const phoneOk = CO.isPhone(inPhone.value); setFieldError('f-phone', !phoneOk); ok = ok && phoneOk;
+  const streetOk = CO.isFilled(inStreet.value); setFieldError('f-street', !streetOk); ok = ok && streetOk;
+  const cityOk = CO.isFilled(inCity.value); setFieldError('f-city', !cityOk); ok = ok && cityOk;
+  const govOk = CO.isFilled(inGov.value); setFieldError('f-gov', !govOk); ok = ok && govOk;
+  if (!ok) showError('Please fill in every required field correctly.');
+  return ok;
+}
+function showError(msg){
+  coErrorText.textContent = msg;
+  coError.style.display = 'flex';
+  coError.scrollIntoView({ behavior:'smooth', block:'center' });
+}
+function hideError(){ coError.style.display = 'none'; }
+
+/* ---------- step routing ---------- */
+function renderProgress(active){
+  const idx = STEPS_ORDER.indexOf(active);
+  coProgress.innerHTML = STEPS_ORDER.map((s,i)=>{
+    const meta = STEP_META[s];
+    const done = i < idx;
+    const isActive = i === idx;
+    return `<div class="co-step-pill ${done?'done':''} ${isActive?'active':''}">
+      <div class="co-step-dot">${done ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : meta.n}</div>
+      <div class="co-step-label"><b>${meta.label}</b><span>${meta.sub}</span></div>
+      ${i < STEPS_ORDER.length-1 ? '<div class="co-step-line"></div>' : ''}
+    </div>`;
+  }).join('');
+}
+const STEPS_ORDER = CO.STEPS;
+
+function goStep(step, opts){
+  opts = opts || {};
+  if (!STEPS_ORDER.includes(step)) step = 'information';
+  const allowed = CO.stepAllowed(step, state, cart);
+  if (!allowed) step = CO.furthestAllowedStep(state, cart);
+
+  document.querySelectorAll('.co-step').forEach(el => el.classList.remove('show'));
+  $('step-' + step).classList.add('show');
+  renderProgress(step);
+  hideError();
+
+  if (step === 'shipping') renderSavedAddress();
+  if (step === 'review') renderReview();
+
+  const url = new URL(location.href);
+  url.searchParams.set('step', step);
+  if (opts.replace) history.replaceState({ step }, '', url);
+  else history.pushState({ step }, '', url);
+  window.scrollTo({ top:0, behavior:'smooth' });
+}
+
+document.querySelectorAll('[data-edit]').forEach(el=>{
+  el.addEventListener('click', ()=> goStep(el.dataset.edit));
+});
+
+document.querySelectorAll('[data-back]').forEach(el=>{
+  el.addEventListener('click', ()=> goStep(el.dataset.back));
+});
+
+document.querySelectorAll('[data-next]').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const target = btn.dataset.next;
+    if (target === 'shipping' && !validateInformation()) return;
+    if (target === 'payment' && !state.shippingMethod){ showError('Please choose a shipping method.'); return; }
+    if (target === 'review' && (!state.paymentMethod || !CO.PaymentProviders[state.paymentMethod.id].enabled)){ showError('Please choose a payment method.'); return; }
+    btn.classList.add('loading'); btn.disabled = true;
+    setTimeout(()=>{ btn.classList.remove('loading'); btn.disabled = false; goStep(target); }, 260);
+  });
+});
+
+window.addEventListener('popstate', (e)=>{
+  const step = (e.state && e.state.step) || new URLSearchParams(location.search).get('step') || 'information';
+  goStep(step, { replace:true });
+});
+
+$('coBack').addEventListener('click', ()=>{
+  if (document.referrer && document.referrer.includes(location.host)) history.back();
+  else location.href = 'category.html?cat=all';
+});
+
+/* ---------- place order ---------- */
+let placing = false;
+placeOrderBtn.addEventListener('click', async ()=>{
+  if (placing) return;
+  placing = true;
+  placeOrderBtn.classList.add('loading'); placeOrderBtn.disabled = true;
+  hideError();
+  const result = await CO.placeOrder();
+  if (!result.ok){
+    placing = false;
+    placeOrderBtn.classList.remove('loading'); placeOrderBtn.disabled = false;
+    showError(result.error);
+    return;
+  }
+  location.href = 'order-success.html?order=' + encodeURIComponent(result.order.id);
+});
+
+/* ---------- go ---------- */
+renderShipOptions();
+renderPayPreview1();
+renderPayOptions3();
+renderSummary();
+goStep(params.get('step') || 'information', { replace:true });
+
+// once the real shipping settings arrive (near-instant, but never
+// blocks first render), refresh anything showing a price/label from them
+CO.SHIPPING_METHODS_READY.then(()=>{ renderShipOptions(); renderSummary(); });
+</script>
+</body>
+</html>

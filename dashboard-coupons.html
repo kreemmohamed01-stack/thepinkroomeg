@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Coupons | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Coupons</h1><p>Promo codes customers can apply at checkout — validated for real, server-side.</p></div>
+          <button class="db-add" id="btnAddCoupon">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ADD COUPON
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr><th>CODE</th><th>DISCOUNT</th><th>MIN. ORDER</th><th>USAGE</th><th>EXPIRES</th><th>STATUS</th><th></th></tr>
+            </thead>
+            <tbody id="cpTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="cpEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <p>No coupons yet — add one to offer a real discount at checkout.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="db-overlay" id="cpOverlay"></div>
+  <aside class="db-drawer" id="cpDrawer">
+    <div class="db-drawer-head">
+      <h2 id="cpDrawerTitle">Coupon</h2>
+      <button class="db-drawer-close" id="cpDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="cpDrawerBody"></div>
+  </aside>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, escHtml, escAttr, toast, fmtDateShort } = DashUI;
+
+function discountLabel(c){
+  return c.type === 'percent' ? `${c.value}% off${c.maxDiscount != null ? ' (up to ' + money(c.maxDiscount) + ')' : ''}` : money(c.value) + ' off';
+}
+function statusOf(c){
+  if (!c.active) return { text: 'DISABLED', cls: 'cancelled' };
+  if (c.expiresAt && c.expiresAt < Date.now()) return { text: 'EXPIRED', cls: 'cancelled' };
+  if (c.usageLimit != null && c.usageCount >= c.usageLimit) return { text: 'USED UP', cls: 'cancelled' };
+  if (c.startsAt && c.startsAt > Date.now()) return { text: 'SCHEDULED', cls: 'pending' };
+  return { text: 'ACTIVE', cls: 'confirmed' };
+}
+
+function couponRow(c){
+  const st = statusOf(c);
+  return `<tr>
+    <td class="td-name"><b style="font-family:monospace;letter-spacing:1px">${escHtml(c.code)}</b>${c.label ? '<span>' + escHtml(c.label) + '</span>' : ''}</td>
+    <td>${discountLabel(c)}</td>
+    <td>${c.minOrderTotal != null ? money(c.minOrderTotal) : '<span class="no-price">&mdash;</span>'}</td>
+    <td>${c.usageCount}${c.usageLimit != null ? ' / ' + c.usageLimit : ''}</td>
+    <td>${c.expiresAt ? fmtDateShort(c.expiresAt) : '<span class="no-price">&mdash;</span>'}</td>
+    <td><span class="badge st-${st.cls}"><i></i>${st.text}</span></td>
+    <td class="td-actions">
+      <button class="btnEditCp" data-code="${escAttr(c.code)}" title="Edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+      <button class="btnDeleteCp danger" data-code="${escAttr(c.code)}" title="Delete"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </td>
+  </tr>`;
+}
+
+let COUPONS = [];
+
+async function load(){
+  const tbody = $('cpTableBody');
+  const empty = $('cpEmpty');
+  try {
+    const r = await fetch('/api/admin/coupons');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load coupons.');
+    COUPONS = d.coupons;
+    if (!COUPONS.length){ tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = COUPONS.map(couponRow).join('');
+  } catch(e){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    empty.querySelector('p').textContent = e.message;
+  }
+}
+$('btnAddCoupon').addEventListener('click', ()=> openDrawer(null));
+
+$('cpTableBody').addEventListener('click', async (e)=>{
+  const editBtn = e.target.closest('.btnEditCp');
+  const delBtn = e.target.closest('.btnDeleteCp');
+  if (editBtn){ openDrawer(COUPONS.find(c => c.code === editBtn.dataset.code)); return; }
+  if (delBtn){
+    if (!confirm(`Delete coupon "${delBtn.dataset.code}"? This can't be undone.`)) return;
+    try {
+      const r = await fetch('/api/admin/coupons?code=' + encodeURIComponent(delBtn.dataset.code), { method: 'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Coupon deleted.', 'ok');
+      load();
+    } catch(err){ toast(err.message, 'bad'); }
+  }
+});
+
+/* ---------- drawer ---------- */
+const overlay = $('cpOverlay'), drawer = $('cpDrawer');
+function closeDrawer(){ drawer.classList.remove('open'); overlay.classList.remove('open'); }
+overlay.addEventListener('click', closeDrawer);
+$('cpDrawerClose').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+function toDateInput(ts){
+  if (!ts) return '';
+  return new Date(ts).toISOString().slice(0, 10);
+}
+
+function openDrawer(c){
+  drawer.classList.add('open'); overlay.classList.add('open');
+  $('cpDrawerTitle').textContent = c ? 'Edit Coupon' : 'Add Coupon';
+  $('cpDrawerBody').innerHTML = `
+    <div class="db-field"><label>Code</label><input type="text" id="fCode" value="${escAttr(c ? c.code : '')}" placeholder="e.g. PINK10" style="text-transform:uppercase;font-family:monospace"></div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Type</label>
+        <select id="fType">
+          <option value="percent" ${!c || c.type === 'percent' ? 'selected' : ''}>Percent off</option>
+          <option value="fixed" ${c && c.type === 'fixed' ? 'selected' : ''}>Fixed amount off</option>
+        </select>
+      </div>
+      <div class="db-field"><label>Value</label><input type="number" id="fValue" value="${c ? c.value : ''}" min="0"></div>
+    </div>
+
+    <div class="db-field"><label>Customer-facing label (optional)</label><input type="text" id="fLabel" value="${escAttr(c && c.label || '')}" placeholder="e.g. 10% off your order"></div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Minimum order total (optional)</label><input type="number" id="fMinOrder" value="${c && c.minOrderTotal != null ? c.minOrderTotal : ''}" min="0"></div>
+      <div class="db-field"><label>Max discount cap, EGP (optional)</label><input type="number" id="fMaxDiscount" value="${c && c.maxDiscount != null ? c.maxDiscount : ''}" min="0"></div>
+    </div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Usage limit (optional)</label><input type="number" id="fUsageLimit" value="${c && c.usageLimit != null ? c.usageLimit : ''}" min="1"></div>
+      <div class="db-field"><label>Expires on (optional)</label><input type="date" id="fExpiresAt" value="${toDateInput(c && c.expiresAt)}"></div>
+    </div>
+
+    <label class="db-checkline"><input type="checkbox" id="fActive" ${!c || c.active ? 'checked' : ''}> Active (customers can use this code)</label>
+
+    ${c ? `<p style="font-size:11.5px;color:var(--ink-soft);margin:6px 0 0">Used ${c.usageCount} time${c.usageCount===1?'':'s'} so far.</p>` : ''}
+
+    <button class="db-save" id="cpSaveBtn">${c ? 'SAVE CHANGES' : 'CREATE COUPON'}</button>
+    <p class="db-save-msg" id="cpSaveMsg"></p>
+  `;
+  $('cpSaveBtn').addEventListener('click', ()=> saveCoupon(c ? c.code : null));
+}
+
+async function saveCoupon(originalCode){
+  const btn = $('cpSaveBtn');
+  const msg = $('cpSaveMsg');
+  btn.disabled = true;
+  msg.className = 'db-save-msg';
+
+  const payload = {
+    code: $('fCode').value.trim().toUpperCase(),
+    type: $('fType').value,
+    value: $('fValue').value === '' ? null : Number($('fValue').value),
+    label: $('fLabel').value.trim() || null,
+    minOrderTotal: $('fMinOrder').value === '' ? null : Number($('fMinOrder').value),
+    maxDiscount: $('fMaxDiscount').value === '' ? null : Number($('fMaxDiscount').value),
+    usageLimit: $('fUsageLimit').value === '' ? null : Number($('fUsageLimit').value),
+    expiresAt: $('fExpiresAt').value || null,
+    active: $('fActive').checked
+  };
+  if (originalCode) payload.originalCode = originalCode;
+
+  try {
+    const resp = await fetch('/api/admin/coupons', {
+      method: originalCode ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await resp.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved.'; msg.className = 'db-save-msg show ok';
+    toast(originalCode ? 'Coupon updated.' : 'Coupon created.', 'ok');
+    load();
+    setTimeout(closeDrawer, 700);
+  } catch(e){
+    msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

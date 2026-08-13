@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed | The Pink Room</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#f5f0e8; --cream-light:#f8f4ee; --beige:#e9dfd0; --beige-soft:#efe6d8;
+    --gold:#c9a97c; --ink:#1c1a17; --ink-soft:#3a362f; --line:#d8cdbb; --shine: rgba(201,169,124,.55);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  body{font-family:'Poppins',sans-serif;background:var(--cream-light);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  a{text-decoration:none;color:inherit;}
+  button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit;}
+  img{display:block;max-width:100%;}
+
+  /* ---------- TOPBAR ---------- */
+  .co-topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:22px 40px;background:var(--beige-soft);border-bottom:1px solid var(--line);}
+  .co-back{display:inline-flex;align-items:center;gap:9px;font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);flex:0 0 auto;min-width:150px;transition:color .3s ease, gap .3s ease;}
+  .co-back svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.6;}
+  .co-back:hover{color:var(--gold);gap:13px;}
+  .co-logo{position:relative;display:block;width:230px;overflow:hidden;flex:0 0 auto;}
+  .co-logo::after{content:'';position:absolute;top:0;left:-170%;width:60%;height:100%;background:linear-gradient(115deg,transparent 0%,transparent 32%,rgba(255,255,255,.45) 45%,rgba(255,241,214,.95) 50%,rgba(201,169,124,.8) 55%,transparent 68%,transparent 100%);transform:skewX(-20deg);mix-blend-mode:screen;pointer-events:none;animation:coLogoShine 3.4s ease-in-out infinite;}
+  @keyframes coLogoShine{0%{left:-170%;}55%{left:170%;}100%{left:170%;}}
+  .co-logo img{width:100%;height:auto;display:block;}
+  .co-secure{display:flex;align-items:center;gap:8px;font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);flex:0 0 auto;min-width:150px;justify-content:flex-end;}
+  .co-secure svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:1.6;}
+  @media (max-width:640px){.co-topbar{padding:16px 18px;} .co-back span,.co-secure span{display:none;} .co-logo{width:150px;}}
+
+  /* ---------- HERO ---------- */
+  .suc-hero{position:relative;overflow:hidden;text-align:center;padding:78px 24px 56px;background:linear-gradient(160deg, var(--ink) 0%, #2b2419 55%, var(--ink) 100%);}
+  .suc-glow{position:absolute;border-radius:50%;filter:blur(74px);pointer-events:none;animation:sucGlowPulse 7s ease-in-out infinite;}
+  .suc-glow-a{width:340px;height:340px;background:var(--gold);top:-130px;left:-80px;}
+  .suc-glow-b{width:280px;height:280px;background:var(--shine);bottom:-110px;right:-60px;animation-delay:2s;}
+  @keyframes sucGlowPulse{0%,100%{opacity:.3;transform:scale(1);}50%{opacity:.55;transform:scale(1.12);}}
+
+  .suc-check{
+    position:relative;z-index:2;width:78px;height:78px;margin:0 auto 26px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(circle, rgba(201,169,124,.22) 0%, transparent 70%);
+    animation:sucCheckPop .7s cubic-bezier(.34,1.56,.64,1) both;
+  }
+  .suc-check-ring{position:absolute;inset:0;border:1.5px solid var(--gold);border-radius:50%;opacity:.5;animation:sucRing 2.6s ease-out infinite;}
+  @keyframes sucRing{0%{transform:scale(.85);opacity:.7;}100%{transform:scale(1.5);opacity:0;}}
+  .suc-check svg{width:34px;height:34px;stroke:var(--gold);fill:none;stroke-width:2;}
+  .suc-check svg path{stroke-dasharray:40;stroke-dashoffset:40;animation:sucDraw .6s .5s ease forwards;}
+  @keyframes sucDraw{to{stroke-dashoffset:0;}}
+  @keyframes sucCheckPop{from{opacity:0;transform:scale(.6);}to{opacity:1;transform:scale(1);}}
+
+  .suc-eyebrow{position:relative;z-index:2;font-size:11px;letter-spacing:4px;font-weight:600;color:var(--gold);margin-bottom:14px;opacity:0;animation:sucIn .7s .2s ease forwards;}
+  .suc-title{position:relative;z-index:2;font-family:'Playfair Display',serif;font-weight:400;font-style:italic;font-size:46px;color:var(--cream-light);margin-bottom:16px;opacity:0;animation:sucIn .7s .32s ease forwards;}
+  .suc-sub{position:relative;z-index:2;font-size:14.5px;line-height:1.8;color:rgba(248,244,238,.72);max-width:460px;margin:0 auto;opacity:0;animation:sucIn .7s .44s ease forwards;}
+  @keyframes sucIn{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+
+  /* ---------- BODY ---------- */
+  .suc-wrap{max-width:900px;margin:-46px auto 0;padding:0 24px 90px;position:relative;z-index:3;}
+  .suc-card{background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 24px 60px rgba(20,17,12,.1);overflow:hidden;}
+  .suc-order-head{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:16px;padding:26px 30px;border-bottom:1px solid var(--line);background:var(--beige-soft);}
+  .suc-order-head p{font-size:10.5px;letter-spacing:1.8px;color:var(--ink-soft);margin-bottom:6px;}
+  .suc-order-head h2{font-family:'Playfair Display',serif;font-weight:400;font-size:22px;}
+  .suc-order-head .num{color:var(--gold);}
+  .suc-eta{text-align:right;}
+  .suc-eta b{display:block;font-size:13.5px;}
+  .suc-eta span{font-size:11.5px;color:var(--ink-soft);}
+
+  .suc-meta{display:grid;grid-template-columns:repeat(4,1fr);gap:0;border-bottom:1px solid var(--line);}
+  .suc-meta-item{padding:20px 24px;border-right:1px solid var(--line);}
+  .suc-meta-item:last-child{border-right:none;}
+  .suc-meta-item p{font-size:10px;letter-spacing:1.4px;color:var(--ink-soft);margin-bottom:6px;}
+  .suc-meta-item div{font-size:13px;line-height:1.6;}
+  .suc-status{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:600;letter-spacing:.6px;padding:4px 10px;border-radius:999px;background:rgba(201,169,124,.15);color:#8a6a3c;}
+  .suc-status i{width:6px;height:6px;border-radius:50%;background:#8a6a3c;}
+
+  .suc-items{padding:26px 30px;}
+  .suc-items-title{font-size:11px;letter-spacing:2px;font-weight:600;color:var(--ink-soft);margin-bottom:16px;}
+  .suc-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+  .suc-item:last-child{border-bottom:none;}
+  .suc-item-img{width:60px;height:60px;border-radius:3px;overflow:hidden;border:1px solid var(--line);flex-shrink:0;}
+  .suc-item-img img{width:100%;height:100%;object-fit:cover;}
+  .suc-item-info{flex:1;min-width:0;}
+  .suc-item-info b{display:block;font-size:13.5px;font-weight:500;}
+  .suc-item-info span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
+  .suc-item-price{font-size:13px;font-weight:600;white-space:nowrap;}
+
+  .suc-totals{padding:22px 30px;background:var(--beige-soft);border-top:1px solid var(--line);}
+  .suc-totals-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;color:var(--ink-soft);padding:5px 0;}
+  .suc-totals-row.discount span:last-child{color:#5a7a52;}
+  .suc-totals-row.grand{font-family:'Playfair Display',serif;font-size:19px;color:var(--ink);border-top:1px solid var(--line);margin-top:8px;padding-top:12px;}
+
+  .suc-actions{display:flex;flex-wrap:wrap;gap:12px;padding:26px 30px 30px;}
+  .suc-btn{
+    flex:1;min-width:180px;display:flex;align-items:center;justify-content:center;gap:9px;
+    padding:15px;font-size:11.5px;letter-spacing:1.6px;border-radius:2px;
+    transition:opacity .3s ease, transform .3s ease, background .3s ease, color .3s ease;
+  }
+  .suc-btn svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .suc-btn-primary{background:var(--ink);color:#fff;}
+  .suc-btn-primary:hover{opacity:.9;}
+  .suc-btn-outline{border:1px solid var(--ink);color:var(--ink);}
+  .suc-btn-outline:hover{background:var(--ink);color:#fff;}
+  .suc-btn-ghost{border:1px solid var(--line);color:var(--ink-soft);}
+  .suc-btn-ghost:hover{border-color:var(--gold);color:var(--gold);}
+  .suc-btn.loading{opacity:.7;pointer-events:none;}
+
+  .suc-toast{
+    position:fixed;left:50%;bottom:28px;transform:translateX(-50%) translateY(20px);
+    background:var(--ink);color:#fff;padding:13px 22px;border-radius:3px;font-size:12.5px;
+    opacity:0;pointer-events:none;transition:opacity .35s ease, transform .35s ease;z-index:50;
+    box-shadow:0 12px 30px rgba(0,0,0,.25);
+  }
+  .suc-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  .suc-empty{max-width:520px;margin:80px auto;text-align:center;padding:0 24px;}
+  .suc-empty h2{font-family:'Playfair Display',serif;font-weight:400;font-size:26px;margin-bottom:14px;}
+  .suc-empty p{color:var(--ink-soft);font-size:14px;margin-bottom:26px;}
+  .suc-empty a{display:inline-flex;padding:14px 26px;background:var(--ink);color:#fff;font-size:11.5px;letter-spacing:1.8px;border-radius:2px;}
+
+  @media (max-width:760px){
+    .suc-title{font-size:32px;}
+    .suc-meta{grid-template-columns:1fr 1fr;}
+    .suc-meta-item{border-right:none;border-bottom:1px solid var(--line);}
+    .suc-order-head{flex-direction:column;align-items:flex-start;}
+    .suc-eta{text-align:left;}
+    .suc-actions{flex-direction:column;}
+    .suc-btn{width:100%;}
+  }
+</style>
+</head>
+<body>
+
+  <header class="co-topbar">
+    <a class="co-back" href="index.html">
+      <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+      <span>BACK TO HOME</span>
+    </a>
+    <a class="co-logo" href="index.html" aria-label="The Pink Room"><img src="logo-beige.png" alt="The Pink Room"></a>
+    <div class="co-secure">
+      <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+      <span>SECURE CHECKOUT</span>
+    </div>
+  </header>
+
+  <section class="suc-hero">
+    <div class="suc-glow suc-glow-a"></div>
+    <div class="suc-glow suc-glow-b"></div>
+    <div class="suc-check"><div class="suc-check-ring"></div><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
+    <p class="suc-eyebrow">ORDER CONFIRMED</p>
+    <h1 class="suc-title">Thank You For Your Order</h1>
+    <p class="suc-sub">Your order has been successfully placed. Thank you for choosing The Pink Room.</p>
+  </section>
+
+  <div class="suc-wrap" id="sucWrap"></div>
+
+  <div class="suc-toast" id="sucToast"></div>
+
+<script src="analytics.js"></script>
+<script src="checkout.js"></script>
+<script>
+const CO = window.TPRCheckout;
+const $ = id => document.getElementById(id);
+const params = new URLSearchParams(location.search);
+const orderId = params.get('order');
+
+function toast(msg){
+  const el = $('sucToast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(()=> el.classList.remove('show'), 3200);
+}
+
+(async function render(){
+// this browser's own cache first (instant), then the server — so an email
+// receipt link opened on any device, or a different browser, still works
+const order = await CO.getOrderAnywhere(orderId);
+
+// quiet diagnostic only — never shown to the customer, just makes a
+// misconfigured Gmail/WhatsApp env var visible while testing in devtools
+if (order){
+  if (order._synced === false) console.warn('[order] never reached the server — only saved in this browser:', order._notify && order._notify.error);
+  const n = order._notify;
+  if (n && n.ok === false) console.warn('[order notify] request failed:', n.error);
+  if (n && n.shopEmail && n.shopEmail.ok === false) console.warn('[order notify] shop email failed:', n.shopEmail.error);
+  if (n && n.customerEmail && n.customerEmail.ok === false) console.warn('[order notify] customer email failed:', n.customerEmail.error);
+  if (n && n.whatsapp && n.whatsapp.ok === false) console.warn('[order notify] WhatsApp failed:', n.whatsapp.error);
+}
+
+if (!order){
+  document.title = 'Order Not Found | The Pink Room';
+  sucWrap.innerHTML = `<div class="suc-empty">
+    <h2>We couldn&rsquo;t find that order.</h2>
+    <p>It may have already been viewed, or the link has expired. Your bag is ready whenever you are.</p>
+    <a href="category.html?cat=all">EXPLORE THE COLLECTION</a>
+  </div>`;
+  document.querySelector('.suc-hero').style.display = 'none';
+} else {
+  const c = order.customer, a = order.shippingAddress, p = order.pricing;
+  const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'long', year:'numeric' });
+
+  document.querySelector('.suc-eyebrow').textContent = 'ORDER CONFIRMED';
+
+  sucWrap.innerHTML = `
+    <div class="suc-card">
+      <div class="suc-order-head">
+        <div>
+          <p>ORDER NUMBER</p>
+          <h2 class="num">#${order.id}</h2>
+        </div>
+        <div class="suc-eta">
+          <b>Estimated Delivery</b>
+          <span>${order.delivery.days} &middot; ${order.delivery.label}</span>
+        </div>
+      </div>
+
+      <div class="suc-meta">
+        <div class="suc-meta-item"><p>CUSTOMER</p><div>${c.name}<br>${c.phone}</div></div>
+        <div class="suc-meta-item"><p>DELIVERY ADDRESS</p><div>${[a.street,a.apt].filter(Boolean).join(', ')}<br>${[a.city,a.governorate].filter(Boolean).join(', ')}</div></div>
+        <div class="suc-meta-item"><p>PAYMENT METHOD</p><div>${order.paymentMethod.label}</div></div>
+        <div class="suc-meta-item"><p>PAYMENT STATUS</p><div><span class="suc-status"><i></i>${order.paymentStatus.toUpperCase()}</span><br><span style="font-size:11px;color:var(--ink-soft)">${orderDate}</span></div></div>
+      </div>
+
+      <div class="suc-items">
+        <p class="suc-items-title">ORDER ITEMS</p>
+        ${order.items.map(i => `
+          <div class="suc-item">
+            <div class="suc-item-img"><img src="${i.img}" alt="${i.name}"></div>
+            <div class="suc-item-info"><b>${i.name}</b><span>${i.variant || ''} &middot; Qty ${i.qty}</span></div>
+            <div class="suc-item-price">${CO.money(i.price * i.qty)}</div>
+          </div>`).join('')}
+      </div>
+
+      <div class="suc-totals">
+        <div class="suc-totals-row"><span>Subtotal</span><span>${CO.money(p.subtotal)}</span></div>
+        ${p.discount ? `<div class="suc-totals-row discount"><span>Discount</span><span>&minus;${CO.money(p.discount)}</span></div>` : ''}
+        <div class="suc-totals-row"><span>Shipping</span><span>${CO.money(p.shipping)}</span></div>
+        <div class="suc-totals-row grand"><span>Total</span><span>${CO.money(p.total)}</span></div>
+      </div>
+
+      <div class="suc-actions">
+        <button class="suc-btn suc-btn-ghost" id="btnTrack">
+          <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+          TRACK MY ORDER
+        </button>
+        <button class="suc-btn suc-btn-outline" id="btnDownload">
+          <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 21h14"/></svg>
+          DOWNLOAD RECEIPT
+        </button>
+        <a class="suc-btn suc-btn-primary" href="category.html?cat=all">
+          CONTINUE SHOPPING
+          <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+        </a>
+      </div>
+    </div>
+  `;
+
+  $('btnTrack').addEventListener('click', ()=>{
+    toast('Order tracking is coming soon — we’ll email you as your order moves.');
+  });
+  $('btnDownload').addEventListener('click', (e)=>{
+    e.currentTarget.classList.add('loading');
+    location.href = 'receipt.html?order=' + encodeURIComponent(order.id) + '&action=download';
+  });
+}
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Products | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Products</h1><p>Add, edit or remove anything in the catalogue.</p></div>
+        </div>
+
+        <div class="db-toolbar">
+          <div class="db-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="prodSearch" placeholder="Search by name, slug or SKU...">
+          </div>
+          <select class="db-filter" id="prodCategoryFilter">
+            <option value="">All categories</option>
+          </select>
+          <button class="db-add" id="btnAddProduct">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ADD PRODUCT
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>IMAGE</th><th>NAME</th><th>CATEGORY</th><th>PRICE</th><th>SALE PRICE</th><th>STOCK</th><th>AVAILABILITY</th><th></th>
+              </tr>
+            </thead>
+            <tbody id="prodTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="prodEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
+            <p>No products match this search.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="db-overlay" id="prodOverlay"></div>
+  <aside class="db-drawer" id="prodDrawer">
+    <div class="db-drawer-head">
+      <h2 id="prodDrawerTitle">Product</h2>
+      <button class="db-drawer-close" id="prodDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="prodDrawerBody"></div>
+  </aside>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, escHtml, escAttr, toast } = DashUI;
+
+// Categories/rooms are dashboard-editable now (Catalog Structure page) —
+// loaded fresh on every visit instead of hardcoded, so a category/room
+// added there shows up here immediately without a code change.
+let CATEGORY_OPTIONS = [];
+let ROOM_OPTIONS = [];
+let TOP_SELLER_IDS = [];
+
+async function loadCatalogStructure(){
+  try {
+    const r = await fetch('/api/admin/settings');
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load categories.');
+    const categories = d.settings.categories || {};
+    const rooms = d.settings.rooms || {};
+    CATEGORY_OPTIONS = Object.keys(categories).map(id => ({
+      value: id, label: categories[id].name,
+      subs: (categories[id].subcategories || []).map(s => ({ value: s.slug, label: s.name }))
+    }));
+    ROOM_OPTIONS = Object.keys(rooms).map(id => ({ value: id, label: rooms[id].name }));
+    TOP_SELLER_IDS = (d.settings.top_sellers || []).slice();
+
+    $('prodCategoryFilter').innerHTML = '<option value="">All categories</option>' +
+      CATEGORY_OPTIONS.map(c => `<option value="${c.value}">${escHtml(c.label)}</option>`).join('');
+  } catch(e){
+    toast(e.message, 'bad');
+  }
+}
+
+let prodSearchTimer = null;
+
+function productRow(p){
+  const img = (p.images && p.images[0]) || 'logo-beige.png';
+  return `<tr>
+    <td><div class="td-img"><img src="${escAttr(img)}" alt=""></div></td>
+    <td class="td-name">${escHtml(p.name)}<span>${escHtml(p.slug)}</span></td>
+    <td>${escHtml(p.categoryName)}${p.subcategoryName ? ' &mdash; ' + escHtml(p.subcategoryName) : ''}</td>
+    <td>${p.price != null ? money(p.price) : '<span class="no-price">&mdash;</span>'}</td>
+    <td>${p.salePrice != null ? money(p.salePrice) : '<span class="no-price">&mdash;</span>'}</td>
+    <td>${p.trackInventory ? `<span style="color:${p.stockQuantity <= 0 ? 'var(--err)' : (p.stockQuantity <= p.lowStockThreshold ? 'var(--warn)' : 'inherit')}">${p.stockQuantity}</span>` : '<span class="no-price">&mdash;</span>'}</td>
+    <td>${escHtml(p.availability || '')}</td>
+    <td class="td-actions">
+      <button class="btnEditProd" data-id="${escAttr(p.id)}" title="Edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+      <button class="btnDeleteProd danger" data-id="${escAttr(p.id)}" data-name="${escAttr(p.name)}" title="Delete"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </td>
+  </tr>`;
+}
+
+async function loadProducts(){
+  const params = new URLSearchParams({ q: $('prodSearch').value.trim(), category: $('prodCategoryFilter').value });
+  const tbody = $('prodTableBody');
+  const empty = $('prodEmpty');
+  try {
+    const r = await fetch('/api/admin/products?' + params.toString());
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load products.');
+    if (!d.products.length){
+      tbody.innerHTML = '';
+      empty.style.display = 'block';
+      empty.querySelector('p').textContent = 'No products match this search.';
+      return;
+    }
+    empty.style.display = 'none';
+    tbody.innerHTML = d.products.map(productRow).join('');
+  } catch(e){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    empty.querySelector('p').textContent = e.message;
+  }
+}
+$('prodSearch').addEventListener('input', ()=>{ clearTimeout(prodSearchTimer); prodSearchTimer = setTimeout(loadProducts, 350); });
+$('prodCategoryFilter').addEventListener('change', loadProducts);
+$('btnAddProduct').addEventListener('click', ()=> openProductDrawer(null));
+
+$('prodTableBody').addEventListener('click', async (e)=>{
+  const editBtn = e.target.closest('.btnEditProd');
+  const delBtn = e.target.closest('.btnDeleteProd');
+  if (editBtn){ openProductDrawer(editBtn.dataset.id); return; }
+  if (delBtn){
+    if (!confirm(`Delete "${delBtn.dataset.name}"? This can't be undone.`)) return;
+    try {
+      const r = await fetch('/api/admin/products?id=' + encodeURIComponent(delBtn.dataset.id), { method:'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Product deleted.', 'ok');
+      loadProducts();
+    } catch(err){ toast(err.message, 'bad'); }
+  }
+});
+
+/* ---------- product drawer ---------- */
+const prodOverlay = $('prodOverlay'), prodDrawer = $('prodDrawer');
+let drawerImages = [];
+
+function closeProductDrawer(){ prodDrawer.classList.remove('open'); prodOverlay.classList.remove('open'); }
+prodOverlay.addEventListener('click', closeProductDrawer);
+$('prodDrawerClose').addEventListener('click', closeProductDrawer);
+
+async function openProductDrawer(id){
+  prodDrawer.classList.add('open'); prodOverlay.classList.add('open');
+  drawerImages = [];
+
+  if (!id){
+    $('prodDrawerTitle').textContent = 'Add Product';
+    renderProductForm(null);
+    return;
+  }
+
+  $('prodDrawerTitle').textContent = 'Edit Product';
+  $('prodDrawerBody').innerHTML = '<p style="color:var(--ink-soft);font-size:13px">Loading…</p>';
+  try {
+    const r = await fetch('/api/admin/products?id=' + encodeURIComponent(id));
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load this product.');
+    drawerImages = (d.product.images || []).slice();
+    renderProductForm(d.product);
+  } catch(e){
+    $('prodDrawerBody').innerHTML = `<p style="color:var(--err);font-size:13px">${escHtml(e.message)}</p>`;
+  }
+}
+
+function populateSubcategories(categoryValue, selectedSub){
+  const cat = CATEGORY_OPTIONS.find(c => c.value === categoryValue) || CATEGORY_OPTIONS[0];
+  const sel = $('fSubcategory');
+  sel.innerHTML = '<option value="">&mdash;</option>' + cat.subs.map(s => `<option value="${s.value}" ${s.value === selectedSub ? 'selected' : ''}>${s.label}</option>`).join('');
+  sel.disabled = !cat.subs.length;
+}
+
+function renderProductForm(p){
+  const isEdit = !!p;
+  $('prodDrawerBody').innerHTML = `
+    <div class="db-field">
+      <label>Product Images</label>
+      <div class="db-images" id="imgList"></div>
+      <p class="db-img-hint">First image is the main photo shown on cards. Uploaded images are auto-resized.</p>
+      <p class="db-save-msg" id="imgUploadMsg"></p>
+      <input type="file" id="imgFileInput" accept="image/*" style="display:none">
+    </div>
+
+    <div class="db-field"><label>Name</label><input type="text" id="fName" value="${escAttr(p && p.name || '')}"></div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Category</label>
+        <select id="fCategory">${CATEGORY_OPTIONS.map(c => `<option value="${c.value}" ${p && p.category === c.value ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
+      </div>
+      <div class="db-field"><label>Subcategory</label><select id="fSubcategory"></select></div>
+    </div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Price (EGP)</label><input type="number" id="fPrice" value="${p && p.price != null ? p.price : ''}" min="0"></div>
+      <div class="db-field"><label>Sale Price (EGP, optional)</label><input type="number" id="fSalePrice" value="${p && p.salePrice != null ? p.salePrice : ''}" min="0"></div>
+    </div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Size Bucket</label>
+        <select id="fSize">
+          <option value="">&mdash;</option>
+          <option value="Small" ${p && p.size === 'Small' ? 'selected' : ''}>Small</option>
+          <option value="Medium" ${p && p.size === 'Medium' ? 'selected' : ''}>Medium</option>
+          <option value="Large" ${p && p.size === 'Large' ? 'selected' : ''}>Large</option>
+        </select>
+      </div>
+      <div class="db-field"><label>Availability</label>
+        <select id="fAvailability">
+          <option value="In Stock" ${!p || p.availability === 'In Stock' ? 'selected' : ''}>In Stock</option>
+          <option value="Out of Stock" ${p && p.availability === 'Out of Stock' ? 'selected' : ''}>Out of Stock</option>
+          <option value="Made to Order" ${p && p.availability === 'Made to Order' ? 'selected' : ''}>Made to Order</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="db-field"><label>Size Label &mdash; e.g. "100 cm W &times; 130 cm H"</label><input type="text" id="fSizeLabel" value="${escAttr(p && p.sizeLabel || '')}"></div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Material</label><input type="text" id="fMaterial" value="${escAttr(p && p.material || '')}"></div>
+      <div class="db-field"><label>Color</label><input type="text" id="fColor" value="${escAttr(p && p.color || '')}"></div>
+    </div>
+
+    <div class="db-field"><label>SKU (optional)</label><input type="text" id="fSku" value="${escAttr(p && p.sku || '')}"></div>
+
+    <label class="db-checkline"><input type="checkbox" id="fTrackInventory" ${p && p.trackInventory ? 'checked' : ''}> Track stock quantity for this product</label>
+    <div class="db-2col" id="fStockFields" style="${p && p.trackInventory ? '' : 'display:none'}">
+      <div class="db-field"><label>Stock Quantity</label><input type="number" id="fStockQuantity" value="${p && p.stockQuantity != null ? p.stockQuantity : 0}" min="0"></div>
+      <div class="db-field"><label>Low Stock Alert Threshold</label><input type="number" id="fLowStockThreshold" value="${p && p.lowStockThreshold != null ? p.lowStockThreshold : 5}" min="0"></div>
+    </div>
+
+    <div class="db-field"><label>Description</label><textarea id="fDescription">${escHtml(p && p.shortDescription || '')}</textarea></div>
+
+    <div class="db-field">
+      <label>Shop by Room &mdash; where this piece fits</label>
+      ${ROOM_OPTIONS.map(r => `<label class="db-checkline"><input type="checkbox" class="fRoom" value="${escAttr(r.value)}" ${p && Array.isArray(p.rooms) && p.rooms.includes(r.value) ? 'checked' : ''}> ${escHtml(r.label)}</label>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No rooms set up yet &mdash; add some from Catalog Structure.</p>'}
+    </div>
+
+    <label class="db-checkline"><input type="checkbox" id="fIsNew" ${p && p.isNew ? 'checked' : ''}> Mark as New Arrival</label>
+    <label class="db-checkline"><input type="checkbox" id="fTopSeller" ${p && TOP_SELLER_IDS.includes(p.id) ? 'checked' : ''}> Feature in homepage Top Sellers</label>
+
+    <button class="db-save" id="prodSaveBtn">${isEdit ? 'SAVE CHANGES' : 'CREATE PRODUCT'}</button>
+    <p class="db-save-msg" id="prodSaveMsg"></p>
+  `;
+
+  renderImageList();
+  populateSubcategories(p && p.category, p && p.subcategory);
+  $('fCategory').addEventListener('change', ()=> populateSubcategories($('fCategory').value, null));
+  $('fTrackInventory').addEventListener('change', (e)=> $('fStockFields').style.display = e.target.checked ? '' : 'none');
+
+  $('imgFileInput').addEventListener('change', async (e)=>{
+    const file = e.target.files[0];
+    e.target.value = '';
+    if (file) await addImageFile(file);
+  });
+
+  $('prodSaveBtn').addEventListener('click', ()=> saveProduct(isEdit ? p.id : null));
+}
+
+function renderImageList(){
+  const wrap = $('imgList');
+  wrap.innerHTML = drawerImages.map((url, i) => `
+    <div class="db-img-tile">
+      <img src="${escAttr(url)}">
+      ${i === 0 ? '<span class="db-img-tag">MAIN</span>' : ''}
+      <button class="db-img-remove" data-i="${i}" aria-label="Remove">&times;</button>
+    </div>`).join('') +
+    `<div class="db-img-add" id="imgAddTile"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD</div>`;
+
+  wrap.querySelectorAll('.db-img-remove').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      drawerImages.splice(Number(btn.dataset.i), 1);
+      renderImageList();
+    });
+  });
+  $('imgAddTile').addEventListener('click', ()=> $('imgFileInput').click());
+}
+
+/* Resizes to a max 1600px edge and re-encodes as JPEG before upload —
+   keeps every upload comfortably under Vercel's request body limit and
+   stops unoptimized phone photos from slowing the live site down. */
+function compressImage(file){
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error('Could not read the file.'));
+    reader.onload = () => {
+      const img = new Image();
+      img.onerror = () => reject(new Error('Could not read the image.'));
+      img.onload = () => {
+        const maxDim = 1600;
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          if (width > height) { height = Math.round(height * maxDim / width); width = maxDim; }
+          else { width = Math.round(width * maxDim / height); height = maxDim; }
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width; canvas.height = height;
+        canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+        resolve(canvas.toDataURL('image/jpeg', 0.85));
+      };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function addImageFile(file){
+  const tile = $('imgAddTile');
+  const msg = $('imgUploadMsg');
+  msg.className = 'db-save-msg';
+  tile.classList.add('uploading');
+  try {
+    const dataUrl = await compressImage(file);
+    const resp = await fetch('/api/admin/products?action=upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ filename: file.name, dataUrl })
+    });
+    const d = await resp.json();
+    if (!d.ok) throw new Error(d.error || 'Upload failed.');
+    drawerImages.push(d.url);
+    renderImageList();
+  } catch(e){
+    msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+  } finally {
+    if (document.body.contains(tile)) tile.classList.remove('uploading');
+  }
+}
+
+async function saveProduct(existingId){
+  const btn = $('prodSaveBtn');
+  const msg = $('prodSaveMsg');
+  btn.disabled = true;
+  msg.className = 'db-save-msg';
+
+  const category = $('fCategory').value;
+  const catMeta = CATEGORY_OPTIONS.find(c => c.value === category);
+  const subValue = $('fSubcategory').value || null;
+  const subMeta = subValue ? catMeta.subs.find(s => s.value === subValue) : null;
+
+  const payload = {
+    id: existingId || undefined,
+    name: $('fName').value.trim(),
+    category,
+    categoryName: catMeta.label,
+    subcategory: subValue,
+    subcategoryName: subMeta ? subMeta.label : null,
+    price: $('fPrice').value === '' ? null : Number($('fPrice').value),
+    salePrice: $('fSalePrice').value === '' ? null : Number($('fSalePrice').value),
+    images: drawerImages,
+    size: $('fSize').value || null,
+    sizeLabel: $('fSizeLabel').value.trim() || null,
+    material: $('fMaterial').value.trim() || null,
+    color: $('fColor').value.trim() || null,
+    availability: $('fAvailability').value,
+    sku: $('fSku').value.trim() || null,
+    isNew: $('fIsNew').checked,
+    rooms: Array.from(document.querySelectorAll('.fRoom:checked')).map(cb => cb.value),
+    trackInventory: $('fTrackInventory').checked,
+    stockQuantity: $('fStockQuantity').value === '' ? 0 : Number($('fStockQuantity').value),
+    lowStockThreshold: $('fLowStockThreshold').value === '' ? 5 : Number($('fLowStockThreshold').value),
+    shortDescription: $('fDescription').value.trim() || null
+  };
+  const wantsTopSeller = $('fTopSeller').checked;
+
+  try {
+    const resp = await fetch('/api/admin/products', {
+      method: existingId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await resp.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+
+    // Top Sellers is a separate list (settings key `top_sellers`), not a
+    // field on the product — sync it here so the checkbox actually does
+    // something. Only touches the setting if this checkbox changed.
+    const savedId = d.product.id;
+    const wasTopSeller = TOP_SELLER_IDS.includes(savedId);
+    if (wantsTopSeller !== wasTopSeller) {
+      const next = wantsTopSeller ? [...TOP_SELLER_IDS, savedId] : TOP_SELLER_IDS.filter(id => id !== savedId);
+      const setR = await fetch('/api/admin/settings', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'top_sellers', value: next })
+      });
+      const setD = await setR.json();
+      if (setD.ok) TOP_SELLER_IDS = next;
+    }
+
+    msg.textContent = 'Saved.'; msg.className = 'db-save-msg show ok';
+    toast(existingId ? 'Product updated.' : 'Product created.', 'ok');
+    loadProducts();
+    setTimeout(closeProductDrawer, 700);
+  } catch(e){
+    msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProductDrawer(); });
+
+/* ---------- go ---------- */
+DashUI.requireAuth(async ()=>{ await loadCatalogStructure(); loadProducts(); });
+</script>
+</body>
+</html>

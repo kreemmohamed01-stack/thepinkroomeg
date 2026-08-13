@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shipping | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .ship-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;margin-bottom:16px;position:relative;}
+  .ship-card .db-2col{margin-bottom:0;}
+  .ship-remove{position:absolute;top:16px;right:16px;background:none;border:none;color:var(--err);cursor:pointer;font-size:12px;letter-spacing:.5px;}
+  .ship-id-tag{font-family:monospace;font-size:11px;color:var(--ink-soft);letter-spacing:.5px;margin-bottom:14px;display:block;}
+  .ship-actions{display:flex;gap:12px;align-items:center;margin-top:6px;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap" style="max-width:760px">
+        <div class="db-page-head">
+          <div><h1>Shipping</h1><p>Methods, costs and delivery windows customers see at checkout — live, no code changes.</p></div>
+        </div>
+
+        <div id="shipList"></div>
+
+        <button class="db-add" id="btnAddMethod" style="margin-bottom:24px">
+          <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          ADD SHIPPING METHOD
+        </button>
+
+        <div class="ship-actions">
+          <button class="db-save" id="btnSaveShip" style="width:auto;padding:0 28px">SAVE CHANGES</button>
+          <p class="db-save-msg" id="shipMsg"></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { escAttr, toast } = DashUI;
+
+let methods = {};
+
+function methodCard(id, m){
+  return `<div class="ship-card" data-id="${escAttr(id)}">
+    <button class="ship-remove" data-remove="${escAttr(id)}">REMOVE</button>
+    <span class="ship-id-tag">id: ${escAttr(id)}</span>
+    <div class="db-field"><label>Label</label><input type="text" class="fLabel" value="${escAttr(m.label || '')}"></div>
+    <div class="db-field"><label>Delivery window text (shown to customer)</label><input type="text" class="fSub" value="${escAttr(m.sub || '')}" placeholder="e.g. 3 – 5 Business Days"></div>
+    <div class="db-2col">
+      <div class="db-field"><label>Price (EGP)</label><input type="number" class="fPrice" value="${m.price != null ? m.price : 0}" min="0"></div>
+      <div class="db-field"></div>
+    </div>
+    <div class="db-2col">
+      <div class="db-field"><label>Min business days</label><input type="number" class="fMinDays" value="${m.minDays != null ? m.minDays : 1}" min="0"></div>
+      <div class="db-field"><label>Max business days</label><input type="number" class="fMaxDays" value="${m.maxDays != null ? m.maxDays : 1}" min="0"></div>
+    </div>
+  </div>`;
+}
+
+function render(){
+  $('shipList').innerHTML = Object.keys(methods).map(id => methodCard(id, methods[id])).join('') ||
+    '<p style="font-size:12.5px;color:var(--ink-soft);margin-bottom:16px">No shipping methods yet — add one below.</p>';
+
+  $('shipList').querySelectorAll('.ship-remove').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      if (Object.keys(methods).length <= 1){ toast('Keep at least one shipping method.', 'bad'); return; }
+      delete methods[btn.dataset.remove];
+      render();
+    });
+  });
+}
+
+function collectFromDom(){
+  $('shipList').querySelectorAll('.ship-card').forEach(card=>{
+    const id = card.dataset.id;
+    methods[id] = {
+      id,
+      label: card.querySelector('.fLabel').value.trim() || id,
+      sub: card.querySelector('.fSub').value.trim(),
+      price: Math.max(0, Number(card.querySelector('.fPrice').value) || 0),
+      minDays: Math.max(0, Math.round(Number(card.querySelector('.fMinDays').value) || 0)),
+      maxDays: Math.max(0, Math.round(Number(card.querySelector('.fMaxDays').value) || 0))
+    };
+  });
+}
+
+$('btnAddMethod').addEventListener('click', ()=>{
+  const id = prompt('Short id for this method (letters/numbers, e.g. "overnight"):');
+  if (!id) return;
+  const clean = id.trim().toLowerCase().replace(/[^a-z0-9]+/g, '_');
+  if (!clean){ toast('Enter a valid id.', 'bad'); return; }
+  if (methods[clean]){ toast('That id already exists.', 'bad'); return; }
+  collectFromDom();
+  methods[clean] = { id: clean, label: 'New Method', sub: '', price: 0, minDays: 1, maxDays: 3 };
+  render();
+});
+
+$('btnSaveShip').addEventListener('click', async ()=>{
+  const btn = $('btnSaveShip');
+  const msg = $('shipMsg');
+  collectFromDom();
+  if (!Object.keys(methods).length){ toast('Add at least one shipping method first.', 'bad'); return; }
+
+  btn.disabled = true;
+  msg.className = 'db-save-msg';
+  try {
+    const r = await fetch('/api/admin/settings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'shipping_methods', value: methods })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved — live on the site now.'; msg.className = 'db-save-msg show ok';
+    toast('Shipping settings saved.', 'ok');
+  } catch(e){
+    msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+  } finally {
+    btn.disabled = false;
+  }
+});
+
+async function load(){
+  try {
+    const r = await fetch('/api/admin/settings?key=shipping_methods');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    if (r.status === 404){ methods = {}; render(); return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load shipping settings.');
+    methods = d.value || {};
+    render();
+  } catch(e){
+    $('shipList').innerHTML = `<p style="color:var(--err);font-size:13px">${e.message}</p>`;
+  }
+}
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

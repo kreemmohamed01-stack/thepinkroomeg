@@ -1,0 +1,30 @@
+{
+  "cleanUrls": true,
+  "trailingSlash": false,
+  "rewrites": [
+    { "source": "/paintings", "destination": "/category.html?cat=paintings" },
+    { "source": "/accessories", "destination": "/category.html?cat=accessories" },
+    { "source": "/lighting", "destination": "/category.html?cat=lighting" },
+    { "source": "/furniture", "destination": "/category.html?cat=furniture" },
+    { "source": "/wall-art", "destination": "/category.html?cat=wall-art" },
+    { "source": "/sale-offers", "destination": "/category.html?cat=sale-offers" },
+
+    { "source": "/wall-art/:slug", "destination": "/product.html?slug=:slug" },
+    { "source": "/paintings/:sub", "destination": "/category.html?cat=paintings&sub=:sub" },
+    { "source": "/accessories/:sub", "destination": "/category.html?cat=accessories&sub=:sub" },
+    { "source": "/lighting/:sub", "destination": "/category.html?cat=lighting&sub=:sub" },
+    { "source": "/furniture/:sub", "destination": "/category.html?cat=furniture&sub=:sub" },
+
+    { "source": "/products/:slug", "destination": "/product.html?slug=:slug" },
+    { "source": "/rooms/:room", "destination": "/category.html?room=:room" },
+
+    { "source": "/wishlist", "destination": "/wishlist.html" },
+    { "source": "/checkout", "destination": "/checkout.html?step=information" },
+    { "source": "/checkout/information", "destination": "/checkout.html?step=information" },
+    { "source": "/checkout/shipping", "destination": "/checkout.html?step=shipping" },
+    { "source": "/checkout/payment", "destination": "/checkout.html?step=payment" },
+    { "source": "/checkout/review", "destination": "/checkout.html?step=review" },
+    { "source": "/checkout/success", "destination": "/order-success.html" },
+    { "source": "/checkout/receipt", "destination": "/receipt.html" }
+  ]
+}

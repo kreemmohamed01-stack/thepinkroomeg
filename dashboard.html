@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Overview | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .ov-grid2{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;margin-bottom:24px;}
+  @media (max-width:1020px){ .ov-grid2{grid-template-columns:1fr;} }
+  .ov-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;}
+  .ov-card h3{font-family:'Playfair Display',serif;font-weight:400;font-size:16px;margin-bottom:2px;}
+  .ov-card .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:16px;}
+  .ov-order-row{
+    display:flex;align-items:center;justify-content:space-between;gap:10px;
+    padding:10px 0;border-bottom:1px solid var(--line);text-decoration:none;color:inherit;cursor:pointer;
+  }
+  .ov-order-row:last-child{border-bottom:none;}
+  .ov-order-row .l b{display:block;font-size:12.5px;color:var(--gold);}
+  .ov-order-row .l span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .ov-order-row .r{text-align:right;}
+  .ov-order-row .r b{display:block;font-size:12.5px;}
+  .ov-empty{font-size:12.5px;color:var(--ink-soft);padding:6px 0;}
+  .ov-seller-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
+  .ov-seller-row:last-child{border-bottom:none;}
+  .ov-seller-rank{
+    width:22px;height:22px;border-radius:50%;background:var(--beige-soft);color:var(--gold);
+    font-size:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  }
+  .ov-seller-row .n{flex:1;font-size:12.5px;}
+  .ov-seller-row .q{font-size:11px;color:var(--ink-soft);white-space:nowrap;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Overview</h1><p>Welcome back — here's what's happening at The Pink Room.</p></div>
+          <button class="db-refresh" id="ovRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div id="ovAlerts"></div>
+
+        <div class="db-quick">
+          <a href="dashboard-products.html"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Add Product</span></a>
+          <a href="dashboard-orders.html"><svg viewBox="0 0 24 24"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span>View Orders</span></a>
+          <a href="dashboard-customers.html"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg><span>View Customers</span></a>
+          <a href="dashboard-inventory.html"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg><span>Inventory</span></a>
+          <a href="dashboard-analytics.html"><svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg><span>View Analytics</span></a>
+        </div>
+
+        <div class="db-stats" id="ovStats"></div>
+
+        <div class="ov-grid2">
+          <div class="ov-card">
+            <h3>Recent Orders</h3>
+            <p class="sub">The last 6 orders placed</p>
+            <div id="ovRecentOrders"></div>
+          </div>
+          <div class="ov-card">
+            <h3>Recent Customers</h3>
+            <p class="sub">Most recently active</p>
+            <div id="ovRecentCustomers"></div>
+          </div>
+        </div>
+
+        <div class="ov-card">
+          <h3>Best-Selling Products</h3>
+          <p class="sub">By quantity sold, last 90 days</p>
+          <div id="ovBestSellers"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, fmtDate, fmtDateShort, escHtml } = DashUI;
+
+function statusBadge(status){ return `<span class="badge st-${status}"><i></i>${String(status||'').toUpperCase()}</span>`; }
+
+function pctChange(cur, prev){
+  if (!prev) return null;
+  return ((cur - prev) / prev) * 100;
+}
+
+async function load(){
+  const btn = $('ovRefresh');
+  btn.classList.add('spin');
+  try {
+    const r = await fetch('/api/admin/overview');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load overview.');
+
+    /* alerts */
+    const alerts = [];
+    if (d.orders.pending > 0){
+      alerts.push(`<div class="db-alert">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span><b>${d.orders.pending}</b> order${d.orders.pending===1?'':'s'} awaiting processing.</span>
+        <a href="dashboard-orders.html">View orders →</a>
+      </div>`);
+    }
+    if (d.orders.pendingPayments > 0){
+      alerts.push(`<div class="db-alert err">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span><b>${d.orders.pendingPayments}</b> order${d.orders.pendingPayments===1?'':'s'} with pending payment.</span>
+        <a href="dashboard-orders.html">View orders →</a>
+      </div>`);
+    }
+    if (d.products.outOfStock > 0){
+      alerts.push(`<div class="db-alert">
+        <svg viewBox="0 0 24 24"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        <span><b>${d.products.outOfStock}</b> product${d.products.outOfStock===1?'':'s'} marked Out of Stock.</span>
+        <a href="dashboard-inventory.html">View inventory →</a>
+      </div>`);
+    }
+    $('ovAlerts').innerHTML = alerts.join('');
+
+    /* stats */
+    const growth = pctChange(d.revenue.thisMonth, d.revenue.lastMonth);
+    const growthLabel = growth === null ? '' :
+      `<span class="db-stat-link" style="color:${growth >= 0 ? 'var(--ok)' : 'var(--err)'}">${growth >= 0 ? '▲' : '▼'} ${Math.abs(growth).toFixed(1)}% vs last month</span>`;
+
+    $('ovStats').innerHTML = `
+      <div class="db-stat gold"><p>REVENUE THIS MONTH</p><h3>${money(d.revenue.thisMonth)}</h3>${growthLabel}</div>
+      <div class="db-stat"><p>ORDERS THIS MONTH</p><h3>${d.orders.thisMonth}</h3><span class="db-stat-link">${d.orders.total} all-time</span></div>
+      <div class="db-stat"><p>CUSTOMERS</p><h3>${d.customers.total}</h3><span class="db-stat-link">+${d.customers.newThisMonth} this month</span></div>
+      <div class="db-stat"><p>PRODUCTS</p><h3>${d.products.total}</h3><span class="db-stat-link">${d.products.outOfStock} out of stock</span></div>
+      <div class="db-stat ${d.orders.pending ? 'warn' : ''}"><p>PENDING ORDERS</p><h3>${d.orders.pending}</h3></div>
+    `;
+
+    /* recent orders */
+    $('ovRecentOrders').innerHTML = d.recentOrders.length ? d.recentOrders.map(o => `
+      <a class="ov-order-row" href="dashboard-orders.html">
+        <div class="l"><b>#${escHtml(o.id)}</b><span>${escHtml(o.customerName || 'Guest')} &middot; ${fmtDate(o.createdAt)}</span></div>
+        <div class="r"><b>${money(o.total)}</b>${statusBadge(o.orderStatus)}</div>
+      </a>
+    `).join('') : '<p class="ov-empty">No orders yet.</p>';
+
+    /* recent customers */
+    $('ovRecentCustomers').innerHTML = d.recentCustomers.length ? d.recentCustomers.map(c => `
+      <a class="ov-order-row" href="dashboard-customers.html?email=${encodeURIComponent(c.email)}">
+        <div class="l"><b>${escHtml(c.name || 'Unnamed')}</b><span>${escHtml(c.email)}</span></div>
+        <div class="r"><b>${c.totalOrders} order${c.totalOrders===1?'':'s'}</b><span style="font-size:11px;color:var(--ink-soft)">${fmtDateShort(c.lastOrderAt)}</span></div>
+      </a>
+    `).join('') : '<p class="ov-empty">No customers yet.</p>';
+
+    /* best sellers */
+    $('ovBestSellers').innerHTML = d.bestSellers.length ? d.bestSellers.map((b, i) => `
+      <div class="ov-seller-row">
+        <div class="ov-seller-rank">${i+1}</div>
+        <div class="n">${escHtml(b.name || 'Unknown product')}</div>
+        <div class="q">${b.qty} sold &middot; ${money(b.revenue)}</div>
+      </div>
+    `).join('') : '<p class="ov-empty">No sales in the last 90 days.</p>';
+
+  } catch(e){
+    $('ovStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;
+  } finally {
+    btn.classList.remove('spin');
+  }
+}
+$('ovRefresh').addEventListener('click', load);
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>

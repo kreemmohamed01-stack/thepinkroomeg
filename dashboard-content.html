@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Content | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .ct-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:20px 22px;margin-bottom:20px;}
+  .ct-card h3{font-family:'Playfair Display',serif;font-weight:400;font-size:16px;margin-bottom:2px;}
+  .ct-card .sub{font-size:11.5px;color:var(--ink-soft);margin-bottom:16px;}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap" style="max-width:640px">
+        <div class="db-page-head">
+          <div><h1>Content</h1><p>Homepage text — edit without touching code. Product picks (Top Sellers) and browsing structure (categories/rooms) live under Catalog Structure.</p></div>
+        </div>
+
+        <div class="ct-card">
+          <h3>Homepage Hero</h3>
+          <p class="sub">The big title/subtitle over the video at the top of the homepage.</p>
+          <div class="db-field"><label>Title</label><input type="text" id="fTitle"></div>
+          <div class="db-field"><label>Subtitle</label><input type="text" id="fSub"></div>
+          <div class="db-2col">
+            <div class="db-field"><label>Button text</label><input type="text" id="fBtnText"></div>
+            <div class="db-field"><label>Button links to</label><input type="text" id="fBtnLink" placeholder="e.g. shop.html or category.html?cat=sale-offers"></div>
+          </div>
+        </div>
+
+        <div style="display:flex;align-items:center;gap:12px">
+          <button class="db-save" id="btnSave" style="width:auto;padding:0 28px">SAVE CHANGES</button>
+          <p class="db-save-msg" id="msg"></p>
+        </div>
+      </div>
+    </main>
+  </div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { toast } = DashUI;
+
+const DEFAULTS = {
+  heroTitle: 'The Art of Fine Living',
+  heroSubtitle: 'Curated Elegance For Every Home',
+  heroButtonText: 'SHOP NOW',
+  heroButtonLink: 'shop.html'
+};
+
+function fill(c){
+  $('fTitle').value = c.heroTitle || '';
+  $('fSub').value = c.heroSubtitle || '';
+  $('fBtnText').value = c.heroButtonText || '';
+  $('fBtnLink').value = c.heroButtonLink || '';
+}
+
+async function load(){
+  try {
+    const r = await fetch('/api/admin/settings?key=homepage_content');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    if (r.status === 404){ fill(DEFAULTS); return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load content.');
+    fill({ ...DEFAULTS, ...d.value });
+  } catch(e){ toast(e.message, 'bad'); fill(DEFAULTS); }
+}
+
+$('btnSave').addEventListener('click', async ()=>{
+  const btn = $('btnSave'), msg = $('msg');
+  const value = {
+    heroTitle: $('fTitle').value.trim() || DEFAULTS.heroTitle,
+    heroSubtitle: $('fSub').value.trim() || DEFAULTS.heroSubtitle,
+    heroButtonText: $('fBtnText').value.trim() || DEFAULTS.heroButtonText,
+    heroButtonLink: $('fBtnLink').value.trim() || DEFAULTS.heroButtonLink
+  };
+  btn.disabled = true; msg.className = 'db-save-msg';
+  try {
+    const r = await fetch('/api/admin/settings', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ key: 'homepage_content', value })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved — live on the homepage now.'; msg.className = 'db-save-msg show ok';
+    toast('Content saved.', 'ok');
+  } catch(e){ msg.textContent = e.message; msg.className = 'db-save-msg show bad'; }
+  finally { btn.disabled = false; }
+});
+
+/* ---------- go ---------- */
+DashUI.requireAuth(()=> load());
+</script>
+</body>
+</html>
