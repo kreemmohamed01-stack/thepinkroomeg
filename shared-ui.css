@@ -447,6 +447,13 @@
 html[dir="rtl"] body{
   font-family:'Cairo', 'Poppins', sans-serif;
 }
+/* Top navbar (incl. the logo) stays exactly as it is in English —
+   Flexbox's row-reversal in RTL would otherwise swap which side the
+   menu/search icons sit on and shift the logo, which isn't wanted:
+   the logo (and the bar around it) should never move when switching
+   language. Everything below the navbar (menu/cart/search drawers)
+   still mirrors normally. */
+html[dir="rtl"] .tpr-nav{direction:ltr;}
 html[dir="rtl"] .tpr-menu{
   left:auto;right:0;
   transform:translateX(100%);
