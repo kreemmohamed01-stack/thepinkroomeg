@@ -265,12 +265,32 @@ function renderProductForm(p){
 
     <button class="db-save" id="prodSaveBtn">${isEdit ? 'SAVE CHANGES' : 'CREATE PRODUCT'}</button>
     <p class="db-save-msg" id="prodSaveMsg"></p>
+    ${isEdit ? `<button class="db-save outline" id="prodDeleteBtn" style="margin-top:10px;border-color:var(--err);color:var(--err)">DELETE THIS PRODUCT</button>` : ''}
   `;
 
   renderImageList();
   populateSubcategories(p && p.category, p && p.subcategory);
   $('fCategory').addEventListener('change', ()=> populateSubcategories($('fCategory').value, null));
   $('fTrackInventory').addEventListener('change', (e)=> $('fStockFields').style.display = e.target.checked ? '' : 'none');
+
+  if (isEdit) {
+    $('prodDeleteBtn').addEventListener('click', async ()=>{
+      if (!confirm(`Delete "${p.name}"? This removes it from the site completely and can't be undone.`)) return;
+      const btn = $('prodDeleteBtn');
+      btn.disabled = true;
+      try {
+        const r = await fetch('/api/admin/products?id=' + encodeURIComponent(p.id), { method: 'DELETE' });
+        const d = await r.json();
+        if (!d.ok) throw new Error(d.error || 'Delete failed.');
+        toast('Product deleted.', 'ok');
+        closeProductDrawer();
+        loadProducts();
+      } catch(e){
+        toast(e.message, 'bad');
+        btn.disabled = false;
+      }
+    });
+  }
 
   $('imgFileInput').addEventListener('change', async (e)=>{
     const file = e.target.files[0];
