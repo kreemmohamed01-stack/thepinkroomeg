@@ -495,7 +495,10 @@ function updateSeoTags(p){
   const desc = (p.shortDescription || `Discover the ${p.name} at The Pink Room — curated home decor delivered across Egypt.`).slice(0, 300);
   const descEl = document.getElementById('seoDescription'); if (descEl) descEl.setAttribute('content', desc);
 
-  const url = 'https://thepinkroomeg.com/products/' + p.slug;
+  // /products/:slug exists as a prettier rewrite in vercel.json but is
+  // currently broken in production (404) — using the confirmed-working
+  // ?slug= form until that's fixed, so canonical never points at a 404.
+  const url = 'https://thepinkroomeg.com/product?slug=' + p.slug;
   const canonicalEl = document.getElementById('seoCanonical'); if (canonicalEl) canonicalEl.setAttribute('href', url);
 
   const img = (p.images && p.images[0]) ? new URL(p.images[0], location.href).href : 'https://thepinkroomeg.com/logo-footer-new.png';

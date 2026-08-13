@@ -85,17 +85,23 @@ async function sitemap(req, res) {
   res.setHeader('Content-Type', 'application/xml; charset=utf-8');
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
 
+  // NOTE: the site also has prettier /paintings, /products/:slug,
+  // /rooms/:room style rewrites defined in vercel.json, but those are
+  // currently broken in production (return 404 — a pre-existing routing
+  // issue, not something this sitemap should paper over). Using the
+  // ?query= URLs here instead since they're the ones confirmed to
+  // actually work (cleanUrls strips .html automatically) — a sitemap
+  // full of 404s would be actively harmful, not just cosmetically ugly.
   const staticUrls = [
     { loc: '/', priority: '1.0', changefreq: 'daily' },
-    { loc: '/paintings', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/accessories', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/lighting', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/furniture', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/wall-art', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/plants', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/sale-offers', priority: '0.8', changefreq: 'weekly' },
-    { loc: '/wishlist.html', priority: '0.3', changefreq: 'monthly' },
-    { loc: '/refund-return-policy.html', priority: '0.3', changefreq: 'monthly' }
+    { loc: '/category?cat=paintings', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=accessories', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=lighting', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=furniture', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=wall-art', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=plants', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=sale-offers', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/refund-return-policy', priority: '0.3', changefreq: 'monthly' }
   ];
 
   let productUrls = [];
@@ -103,9 +109,9 @@ async function sitemap(req, res) {
   try {
     if (sql) {
       const rows = await sql`SELECT slug, updated_at FROM products ORDER BY updated_at DESC`;
-      productUrls = rows.map(r => ({ loc: '/products/' + r.slug, priority: '0.7', changefreq: 'weekly', lastmod: new Date(r.updated_at).toISOString().slice(0, 10) }));
+      productUrls = rows.map(r => ({ loc: '/product?slug=' + r.slug, priority: '0.7', changefreq: 'weekly', lastmod: new Date(r.updated_at).toISOString().slice(0, 10) }));
       const rooms = await getSetting('rooms', null);
-      if (rooms) roomUrls = Object.keys(rooms).map(k => ({ loc: '/rooms/' + k, priority: '0.6', changefreq: 'weekly' }));
+      if (rooms) roomUrls = Object.keys(rooms).map(k => ({ loc: '/category?room=' + k, priority: '0.6', changefreq: 'weekly' }));
     }
   } catch (e) {
     console.error('[products] sitemap error:', e);
