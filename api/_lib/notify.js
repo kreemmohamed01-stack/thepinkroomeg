@@ -24,6 +24,7 @@
    ============================================================ */
 
 const nodemailer = require('nodemailer');
+const crypto = require('crypto');
 const { getSetting } = require('./settings');
 
 const money = (n) => 'EGP ' + Math.round(Number(n) || 0).toLocaleString('en-US');
@@ -258,4 +259,117 @@ async function notifyOrder(order) {
   };
 }
 
-module.exports = { notifyOrder };
+/* ============================================================
+   Newsletter — the homepage "Stay Inspired" form (api/products.js's
+   ?action=newsletter-subscribe) and the "notify subscribers" checkbox
+   on the product form (api/admin/products.js). Reuses the same Gmail
+   transporter/credentials as order emails — no separate setup needed.
+   ============================================================ */
+
+/* Every unsubscribe link is signed so nobody can unsubscribe someone
+   else's email by guessing it — HMAC over the email using the same
+   session secret already required for the dashboard, with a distinct
+   prefix so this token can never be replayed as a login session or
+   vice versa. */
+function unsubscribeToken(email) {
+  const secret = process.env.ADMIN_SESSION_SECRET || '';
+  return crypto.createHmac('sha256', 'newsletter-unsub:' + secret).update(email.toLowerCase()).digest('hex');
+}
+function verifyUnsubscribeToken(email, token) {
+  if (!email || !token) return false;
+  const expected = unsubscribeToken(email);
+  const a = Buffer.from(token), b = Buffer.from(expected);
+  return a.length === b.length && crypto.timingSafeEqual(a, b);
+}
+
+function getTransporter() {
+  const user = process.env.GMAIL_USER;
+  const pass = process.env.GMAIL_APP_PASSWORD;
+  if (!user || !pass) return null;
+  return { user, transporter: nodemailer.createTransport({ service: 'gmail', auth: { user, pass } }) };
+}
+
+function unsubscribeFooter(email, baseUrl) {
+  const token = unsubscribeToken(email);
+  const link = `${baseUrl}/api/products?action=newsletter-unsubscribe&email=${encodeURIComponent(email)}&token=${token}`;
+  return `<p style="font-size:11px;color:#9a9184;text-align:center;margin-top:24px">
+    You're receiving this because you subscribed at The Pink Room.
+    <a href="${link}" style="color:#9a9184">Unsubscribe</a>
+  </p>`;
+}
+
+async function sendNewsletterWelcome(email, baseUrl) {
+  const t = getTransporter();
+  if (!t) return { ok: false, error: 'GMAIL_USER / GMAIL_APP_PASSWORD not configured.' };
+  try {
+    await t.transporter.sendMail({
+      from: `"The Pink Room" <${t.user}>`,
+      to: email,
+      subject: "You're in — welcome to The Pink Room",
+      html: `<div style="font-family:Arial,Helvetica,sans-serif;background:${CREAM};padding:28px 16px">
+        <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e2d8c6;border-radius:6px;overflow:hidden">
+          <div style="background:${INK};padding:26px 24px;text-align:center">
+            <p style="margin:0;font-family:Georgia,serif;font-size:13px;letter-spacing:3px;color:${GOLD}">THE PINK ROOM</p>
+            <h1 style="margin:10px 0 0;color:#fff;font-size:20px;font-weight:400;font-style:italic">Welcome to The Room</h1>
+          </div>
+          <div style="padding:24px;text-align:center">
+            <p style="font-size:13px;color:#3a362f;line-height:1.8">You'll be the first to know about new arrivals, styling ideas and exclusive offers.</p>
+          </div>
+        </div>
+        ${unsubscribeFooter(email, baseUrl)}
+      </div>`
+    });
+    return { ok: true };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
+/* Sent to every active subscriber when the admin ticks "notify
+   subscribers" while saving a product. One send per recipient (not a
+   single email with everyone BCC'd — keeps each unsubscribe link
+   correctly scoped to that one address) — fine at small-list scale;
+   Gmail's own sending caps are the real ceiling if this list grows
+   large, at which point a dedicated bulk-email provider would be the
+   next step, not a code change here. */
+async function notifySubscribersNewProduct(product, emails, baseUrl) {
+  const t = getTransporter();
+  if (!t) return { ok: false, error: 'GMAIL_USER / GMAIL_APP_PASSWORD not configured.', sent: 0 };
+
+  const img = (product.images && product.images[0]) || '';
+  const priceHtml = product.salePrice != null
+    ? `${money(product.salePrice)} <span style="text-decoration:line-through;color:#9a9184">${money(product.price)}</span>`
+    : (product.price != null ? money(product.price) : '');
+  const productUrl = `${baseUrl}/product.html?slug=${encodeURIComponent(product.slug)}`;
+
+  let sent = 0, failed = 0;
+  await Promise.all(emails.map(email =>
+    t.transporter.sendMail({
+      from: `"The Pink Room" <${t.user}>`,
+      to: email,
+      subject: `New at The Pink Room: ${product.name}`,
+      html: `<div style="font-family:Arial,Helvetica,sans-serif;background:${CREAM};padding:28px 16px">
+        <div style="max-width:520px;margin:0 auto;background:#fff;border:1px solid #e2d8c6;border-radius:6px;overflow:hidden">
+          <div style="background:${INK};padding:20px 24px;text-align:center">
+            <p style="margin:0;font-family:Georgia,serif;font-size:12px;letter-spacing:3px;color:${GOLD}">THE PINK ROOM</p>
+          </div>
+          ${img ? `<img src="${img}" alt="${product.name}" style="width:100%;display:block">` : ''}
+          <div style="padding:22px 24px;text-align:center">
+            <h1 style="margin:0 0 8px;font-size:19px;font-weight:400;color:${INK}">${product.name}</h1>
+            <p style="font-size:15px;color:${INK};margin-bottom:18px">${priceHtml}</p>
+            <a href="${productUrl}" style="display:inline-block;background:${INK};color:#fff;padding:12px 28px;font-size:11px;letter-spacing:1.6px;text-decoration:none;border-radius:2px">SHOP NOW</a>
+          </div>
+        </div>
+        ${unsubscribeFooter(email, baseUrl)}
+      </div>`
+    }).then(() => { sent++; }).catch(() => { failed++; })
+  ));
+
+  return { ok: true, sent, failed };
+}
+
+module.exports = {
+  notifyOrder,
+  sendNewsletterWelcome, notifySubscribersNewProduct,
+  unsubscribeToken, verifyUnsubscribeToken
+};

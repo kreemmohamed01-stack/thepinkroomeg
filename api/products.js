@@ -6,14 +6,17 @@
    response matches how the site already worked, no pagination needed
    here yet.
 
-   GET  /api/products?action=site-structure       — categories/rooms/top-sellers/homepage content
-   GET  /api/products?action=reviews&productId=... — approved reviews + average for one product
-   POST /api/products?action=review                — submit a review (goes to 'pending', moderated in the dashboard)
+   GET  /api/products?action=site-structure          — categories/rooms/top-sellers/homepage content
+   GET  /api/products?action=reviews&productId=...    — approved reviews + average for one product
+   POST /api/products?action=review                   — submit a review (goes to 'pending', moderated in the dashboard)
+   POST /api/products?action=newsletter-subscribe      — "Stay Inspired" homepage form
+   GET  /api/products?action=newsletter-unsubscribe    — one-click unsubscribe link (from the email itself)
    All folded into this one public file rather than new ones — same
    public-catalog concern, keeps the serverless function count down. */
 const { sql } = require('./_lib/db');
 const { rowToProduct } = require('./_lib/products');
 const { getSetting } = require('./_lib/settings');
+const { sendNewsletterWelcome, verifyUnsubscribeToken } = require('./_lib/notify');
 
 async function siteStructure(req, res) {
   const empty = { categories: null, rooms: null, topSellers: null, homepageContent: null, storeSettings: null };
@@ -75,6 +78,54 @@ async function submitReview(req, res) {
   return res.status(200).json({ ok: true });
 }
 
+function isValidEmail(v) {
+  return typeof v === 'string' && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim());
+}
+function baseUrlOf(req) {
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return `${proto}://${req.headers.host}`;
+}
+
+async function newsletterSubscribe(req, res) {
+  if (!sql) return res.status(500).json({ ok: false, error: 'Database is not configured.' });
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const email = body && body.email ? String(body.email).trim().toLowerCase() : '';
+  if (!isValidEmail(email)) return res.status(400).json({ ok: false, error: 'Enter a valid email address.' });
+
+  await sql`
+    INSERT INTO newsletter_subscribers (email) VALUES (${email})
+    ON CONFLICT (email) DO UPDATE SET unsubscribed = false, unsubscribed_at = NULL
+  `;
+  // best-effort — a slow/failed welcome email should never fail the signup itself
+  sendNewsletterWelcome(email, baseUrlOf(req)).catch(() => {});
+  return res.status(200).json({ ok: true });
+}
+
+async function newsletterUnsubscribe(req, res) {
+  const email = req.query.email ? String(req.query.email).trim().toLowerCase() : '';
+  const token = req.query.token;
+  res.setHeader('Content-Type', 'text/html; charset=utf-8');
+
+  const page = (title, message) => res.status(200).send(`<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${title} | The Pink Room</title>
+    <style>body{font-family:Arial,Helvetica,sans-serif;background:#f8f4ee;display:flex;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:24px}
+    .box{max-width:420px;text-align:center;background:#fff;border:1px solid #e2d8c6;border-radius:6px;padding:36px 28px}
+    p{color:#3a362f;font-size:11px;letter-spacing:3px;margin:0 0 10px}
+    h1{font-family:Georgia,serif;font-weight:400;font-style:italic;font-size:20px;color:#1c1a17;margin:0 0 14px}
+    span{font-size:13px;color:#6b6459;line-height:1.7}
+    a{color:#c9a97c}</style></head>
+    <body><div class="box"><p>THE PINK ROOM</p><h1>${title}</h1><span>${message}</span></div></body></html>`);
+
+  if (!email || !isValidEmail(email) || !verifyUnsubscribeToken(email, token)) {
+    return page('Link not valid', 'This unsubscribe link is invalid or has expired.');
+  }
+  if (!sql) return page('Something went wrong', 'Please try again later.');
+
+  await sql`UPDATE newsletter_subscribers SET unsubscribed = true, unsubscribed_at = now() WHERE email = ${email}`;
+  return page("You're unsubscribed", `${email} won't receive any more emails from The Pink Room. <a href="/">Back to the site</a>`);
+}
+
 module.exports = async (req, res) => {
   const action = req.query.action;
 
@@ -91,6 +142,16 @@ module.exports = async (req, res) => {
     if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
     try { return await submitReview(req, res); }
     catch (e) { console.error('[products] review submit error:', e); return res.status(500).json({ ok: false, error: 'Could not submit review.' }); }
+  }
+  if (action === 'newsletter-subscribe') {
+    if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    try { return await newsletterSubscribe(req, res); }
+    catch (e) { console.error('[products] newsletter-subscribe error:', e); return res.status(500).json({ ok: false, error: 'Could not subscribe right now.' }); }
+  }
+  if (action === 'newsletter-unsubscribe') {
+    if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    try { return await newsletterUnsubscribe(req, res); }
+    catch (e) { console.error('[products] newsletter-unsubscribe error:', e); return res.status(500).json({ ok: false, error: 'Could not process that.' }); }
   }
 
   if (req.method !== 'GET') {

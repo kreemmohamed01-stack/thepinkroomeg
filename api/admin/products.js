@@ -16,6 +16,10 @@
    POST   /api/admin/products?action=review-moderate        — { id, status }
    DELETE /api/admin/products?action=review-delete&id=...   — delete a review
 
+   POST/PATCH above also accept a { notifySubscribers: true } field —
+   when set, every active "Stay Inspired" subscriber gets an email
+   about the product being saved. Never automatic, only on request.
+
    Upload, inventory and reviews used to be (or would have been)
    separate files — folded in here (all product-scoped) to stay under
    Vercel Hobby's serverless-function-per-deployment cap as more admin
@@ -26,6 +30,32 @@ const { put } = require('@vercel/blob');
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
 const { rowToProduct, validateProduct } = require('../_lib/products');
+const { notifySubscribersNewProduct } = require('../_lib/notify');
+
+function baseUrlOf(req) {
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return `${proto}://${req.headers.host}`;
+}
+
+/* Only fires when the admin explicitly ticks "notify subscribers" on
+   the product form — never automatically on every save, so routine
+   edits don't spam the list. Awaited before responding (same as order
+   notifications) so the caller's toast reflects what actually
+   happened, but never fails the save itself if sending has trouble. */
+async function maybeNotifySubscribers(req, product) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { body = {}; } }
+  if (!body || !body.notifySubscribers) return null;
+
+  try {
+    const subs = await sql`SELECT email FROM newsletter_subscribers WHERE unsubscribed = false`;
+    if (!subs.length) return { ok: true, sent: 0, failed: 0 };
+    return await notifySubscribersNewProduct(product, subs.map(s => s.email), baseUrlOf(req));
+  } catch (e) {
+    console.error('[admin/products] notifySubscribers error:', e);
+    return { ok: false, error: e.message };
+  }
+}
 
 async function uploadImage(req, res) {
   let body = req.body;
@@ -193,7 +223,9 @@ async function createProduct(req, res) {
   }
 
   const rows = await sql`SELECT * FROM products WHERE id = ${id}`;
-  return res.status(200).json({ ok: true, product: rowToProduct(rows[0]) });
+  const product = rowToProduct(rows[0]);
+  const notify = await maybeNotifySubscribers(req, product);
+  return res.status(200).json({ ok: true, product, notify });
 }
 
 async function updateProduct(req, res) {
@@ -233,7 +265,9 @@ async function updateProduct(req, res) {
 
   const rows = await sql`SELECT * FROM products WHERE id = ${id}`;
   if (!rows.length) return res.status(404).json({ ok: false, error: 'Product not found.' });
-  return res.status(200).json({ ok: true, product: rowToProduct(rows[0]) });
+  const product = rowToProduct(rows[0]);
+  const notify = await maybeNotifySubscribers(req, product);
+  return res.status(200).json({ ok: true, product, notify });
 }
 
 async function deleteProduct(req, res) {

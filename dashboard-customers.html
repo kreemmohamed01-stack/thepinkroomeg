@@ -10,6 +10,10 @@
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="dashboard-ui.css">
 <style>
+  .ov-card{background:#fff;border:1px solid var(--line);border-radius:5px;padding:16px 20px;}
+  .news-row{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .news-row:last-child{border-bottom:none;}
+  .news-row span:last-child{color:var(--ink-soft);}
   .cust-name-cell b{display:block;font-size:13px;}
   .cust-name-cell span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .cust-profile-head{display:flex;align-items:center;gap:14px;margin-bottom:22px;}
@@ -44,6 +48,17 @@
       <div class="db-wrap">
         <div class="db-page-head">
           <div><h1>Customers</h1><p>Every customer who has placed an order, built from real order history.</p></div>
+        </div>
+
+        <div class="ov-card" style="margin-bottom:20px">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
+            <div>
+              <h3 style="font-family:'Playfair Display',serif;font-weight:400;font-size:16px;margin-bottom:2px">Stay Inspired &mdash; Newsletter</h3>
+              <p style="font-size:11.5px;color:var(--ink-soft)"><span id="newsCount">&mdash;</span> subscribed from the homepage form. Announce a new product to all of them from its edit screen in Products.</p>
+            </div>
+            <button class="db-refresh" id="newsToggle" style="height:34px">VIEW LIST</button>
+          </div>
+          <div id="newsList" style="display:none;margin-top:14px;max-height:220px;overflow-y:auto"></div>
         </div>
 
         <div class="db-toolbar">
@@ -236,9 +251,33 @@ async function openCustomer(email){
 
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
 
+/* ---------- newsletter subscribers ---------- */
+let newsletterData = null;
+async function loadNewsletter(){
+  try {
+    const r = await fetch('/api/admin/customers?action=newsletter');
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error);
+    newsletterData = d;
+    $('newsCount').textContent = d.count;
+  } catch(e){ $('newsCount').textContent = '—'; }
+}
+$('newsToggle').addEventListener('click', ()=>{
+  const wrap = $('newsList');
+  const showing = wrap.style.display !== 'none';
+  if (showing){ wrap.style.display = 'none'; $('newsToggle').textContent = 'VIEW LIST'; return; }
+  wrap.style.display = 'block';
+  $('newsToggle').textContent = 'HIDE LIST';
+  if (!newsletterData) return;
+  wrap.innerHTML = newsletterData.subscribers.length
+    ? newsletterData.subscribers.map(s => `<div class="news-row"><span>${escHtml(s.email)}</span><span>${fmtDateShort(s.subscribedAt)}</span></div>`).join('')
+    : '<p style="font-size:12.5px;color:var(--ink-soft)">No subscribers yet.</p>';
+});
+
 /* ---------- go ---------- */
 DashUI.requireAuth(()=>{
   load();
+  loadNewsletter();
   const deepLinkEmail = new URLSearchParams(location.search).get('email');
   if (deepLinkEmail) openCustomer(deepLinkEmail);
 });

@@ -262,6 +262,7 @@ function renderProductForm(p){
 
     <label class="db-checkline"><input type="checkbox" id="fIsNew" ${p && p.isNew ? 'checked' : ''}> Mark as New Arrival</label>
     <label class="db-checkline"><input type="checkbox" id="fTopSeller" ${p && TOP_SELLER_IDS.includes(p.id) ? 'checked' : ''}> Feature in homepage Top Sellers</label>
+    <label class="db-checkline"><input type="checkbox" id="fNotifySubs"> Email &ldquo;Stay Inspired&rdquo; subscribers about this<span id="fNotifySubsCount" style="color:var(--ink-soft);font-weight:400"></span></label>
 
     <button class="db-save" id="prodSaveBtn">${isEdit ? 'SAVE CHANGES' : 'CREATE PRODUCT'}</button>
     <p class="db-save-msg" id="prodSaveMsg"></p>
@@ -272,6 +273,10 @@ function renderProductForm(p){
   populateSubcategories(p && p.category, p && p.subcategory);
   $('fCategory').addEventListener('change', ()=> populateSubcategories($('fCategory').value, null));
   $('fTrackInventory').addEventListener('change', (e)=> $('fStockFields').style.display = e.target.checked ? '' : 'none');
+
+  fetch('/api/admin/customers?action=newsletter').then(r=>r.json()).then(d=>{
+    if (d.ok) $('fNotifySubsCount').textContent = ` (${d.count} subscriber${d.count===1?'':'s'})`;
+  }).catch(()=>{});
 
   if (isEdit) {
     $('prodDeleteBtn').addEventListener('click', async ()=>{
@@ -404,7 +409,8 @@ async function saveProduct(existingId){
     trackInventory: $('fTrackInventory').checked,
     stockQuantity: $('fStockQuantity').value === '' ? 0 : Number($('fStockQuantity').value),
     lowStockThreshold: $('fLowStockThreshold').value === '' ? 5 : Number($('fLowStockThreshold').value),
-    shortDescription: $('fDescription').value.trim() || null
+    shortDescription: $('fDescription').value.trim() || null,
+    notifySubscribers: $('fNotifySubs').checked
   };
   const wantsTopSeller = $('fTopSeller').checked;
 
@@ -434,6 +440,10 @@ async function saveProduct(existingId){
 
     msg.textContent = 'Saved.'; msg.className = 'db-save-msg show ok';
     toast(existingId ? 'Product updated.' : 'Product created.', 'ok');
+    if (payload.notifySubscribers && d.notify) {
+      if (d.notify.ok) toast(`Emailed ${d.notify.sent} subscriber${d.notify.sent===1?'':'s'}${d.notify.failed ? `, ${d.notify.failed} failed` : ''}.`, d.notify.sent ? 'ok' : 'bad');
+      else toast('Could not email subscribers: ' + (d.notify.error || 'unknown error'), 'bad');
+    }
     loadProducts();
     setTimeout(closeProductDrawer, 700);
   } catch(e){

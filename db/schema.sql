@@ -234,3 +234,19 @@ CREATE TABLE IF NOT EXISTS reviews (
 );
 CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews (product_id);
 CREATE INDEX IF NOT EXISTS idx_reviews_status  ON reviews (status);
+
+
+-- ------------------------------------------------------------
+-- newsletter_subscribers — the homepage "Stay Inspired" form. Emailed
+-- when the admin adds a new product/offer and ticks "notify
+-- subscribers" (api/admin/products.js); every email includes an
+-- unsubscribe link (api/products.js?action=newsletter-unsubscribe).
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+  id                bigserial PRIMARY KEY,
+  email             text UNIQUE NOT NULL,
+  subscribed_at     timestamptz NOT NULL DEFAULT now(),
+  unsubscribed      boolean NOT NULL DEFAULT false,
+  unsubscribed_at   timestamptz
+);
+CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribed ON newsletter_subscribers (unsubscribed);

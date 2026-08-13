@@ -9,6 +9,8 @@
    GET /api/admin/customers                — paginated list + search
    GET /api/admin/customers?email=...       — one customer's profile +
                                                full order history
+   GET /api/admin/customers?action=newsletter — "Stay Inspired" subscriber
+                                               list + count
    ============================================================ */
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
@@ -120,6 +122,20 @@ async function getCustomer(req, res) {
   });
 }
 
+/* GET ?action=newsletter — "Stay Inspired" subscriber list, used by
+   the product form to show a live count before sending an announcement. */
+async function listNewsletter(req, res) {
+  const rows = await sql`
+    SELECT email, subscribed_at FROM newsletter_subscribers
+    WHERE unsubscribed = false ORDER BY subscribed_at DESC
+  `;
+  return res.status(200).json({
+    ok: true,
+    count: rows.length,
+    subscribers: rows.map(r => ({ email: r.email, subscribedAt: new Date(r.subscribed_at).getTime() }))
+  });
+}
+
 module.exports = async (req, res) => {
   const session = requireAuth(req, res);
   if (!session) return;
@@ -130,6 +146,7 @@ module.exports = async (req, res) => {
       res.setHeader('Allow', 'GET');
       return res.status(405).json({ ok: false, error: 'Method not allowed.' });
     }
+    if (req.query.action === 'newsletter') return await listNewsletter(req, res);
     return req.query.email ? await getCustomer(req, res) : await listCustomers(req, res);
   } catch (e) {
     console.error('[admin/customers] error:', e);

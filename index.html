@@ -2487,13 +2487,14 @@
       <div class="journal-newsletter">
         <p class="journal-eyebrow">STAY INSPIRED</p>
         <p class="journal-news-sub">New arrivals, styling ideas &amp; exclusive offers.</p>
-        <form class="journal-form" onsubmit="return false;">
+        <form class="journal-form" id="newsletterForm">
           <div class="journal-input-wrap">
             <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
-            <input type="email" placeholder="Enter your email" required>
+            <input type="email" id="newsletterEmail" placeholder="Enter your email" required>
           </div>
-          <button type="submit" class="journal-join-btn"><span>JOIN THE ROOM</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
+          <button type="submit" class="journal-join-btn" id="newsletterBtn"><span>JOIN THE ROOM</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></button>
         </form>
+        <p id="newsletterMsg" style="font-size:11.5px;margin-top:10px;min-height:1em"></p>
       </div>
     </div>
   </section>
@@ -2784,6 +2785,36 @@
       const target = roomCards.find(c => c.dataset.i === s.dataset.i);
       if (target) target.scrollIntoView({ behavior:'smooth', inline:'center', block:'nearest' });
     });
+  });
+
+  // ---- "Stay Inspired" newsletter form ----
+  const newsletterForm = document.getElementById('newsletterForm');
+  newsletterForm.addEventListener('submit', async (e)=>{
+    e.preventDefault();
+    const emailEl = document.getElementById('newsletterEmail');
+    const btn = document.getElementById('newsletterBtn');
+    const msg = document.getElementById('newsletterMsg');
+    const email = emailEl.value.trim();
+
+    btn.disabled = true;
+    msg.textContent = '';
+    try {
+      const r = await fetch('/api/products?action=newsletter-subscribe', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email })
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || "Couldn't subscribe right now.");
+      msg.style.color = '#8ba888';
+      msg.textContent = "You're in — welcome to The Room.";
+      emailEl.value = '';
+    } catch(err){
+      msg.style.color = '#d98a7e';
+      msg.textContent = err.message;
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   // ---- Journal: tap-to-preview on touch devices (mirrors :hover zoom/glow) ----
