@@ -3,7 +3,18 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Product | The Pink Room</title>
+<title id="seoTitle">Product | The Pink Room</title>
+<meta id="seoDescription" name="description" content="Discover curated home decor at The Pink Room.">
+<link rel="canonical" href="https://thepinkroomeg.com/product.html" id="seoCanonical">
+
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
+<meta property="og:type" content="product">
+<meta property="og:site_name" content="The Pink Room">
+<meta name="twitter:card" content="summary_large_image">
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
@@ -476,7 +487,56 @@ function highlightsFor(p){
   return out;
 }
 
+function updateSeoTags(p){
+  const title = p.name + ' | The Pink Room';
+  document.title = title;
+  const titleEl = document.getElementById('seoTitle'); if (titleEl) titleEl.textContent = title;
+
+  const desc = (p.shortDescription || `Discover the ${p.name} at The Pink Room — curated home decor delivered across Egypt.`).slice(0, 300);
+  const descEl = document.getElementById('seoDescription'); if (descEl) descEl.setAttribute('content', desc);
+
+  const url = 'https://thepinkroomeg.com/products/' + p.slug;
+  const canonicalEl = document.getElementById('seoCanonical'); if (canonicalEl) canonicalEl.setAttribute('href', url);
+
+  const img = (p.images && p.images[0]) ? new URL(p.images[0], location.href).href : 'https://thepinkroomeg.com/logo-footer-new.png';
+  const setMeta = (attr, val, content) => {
+    let el = document.querySelector(`meta[${attr}="${val}"]`);
+    if (!el){ el = document.createElement('meta'); el.setAttribute(attr, val); document.head.appendChild(el); }
+    el.setAttribute('content', content);
+  };
+  setMeta('property', 'og:title', title);
+  setMeta('property', 'og:description', desc);
+  setMeta('property', 'og:image', img);
+  setMeta('property', 'og:url', url);
+  setMeta('name', 'twitter:title', title);
+  setMeta('name', 'twitter:description', desc);
+  setMeta('name', 'twitter:image', img);
+
+  const price = p.salePrice != null ? p.salePrice : p.price;
+  const ld = {
+    '@context': 'https://schema.org',
+    '@type': 'Product',
+    name: p.name,
+    image: (p.images || []).map(i => new URL(i, location.href).href),
+    description: desc,
+    sku: p.sku || p.id,
+    brand: { '@type': 'Brand', name: 'The Pink Room' },
+    offers: {
+      '@type': 'Offer',
+      url,
+      priceCurrency: 'EGP',
+      price: price != null ? price : undefined,
+      availability: p.availability === 'Out of Stock' ? 'https://schema.org/OutOfStock' : 'https://schema.org/InStock'
+    }
+  };
+  const ldScript = document.createElement('script');
+  ldScript.type = 'application/ld+json';
+  ldScript.textContent = JSON.stringify(ld);
+  document.head.appendChild(ldScript);
+}
+
 function buildPage(p){
+  updateSeoTags(p);
   document.title = p.name + ' | The Pink Room';
   // p.size is just the internal filter bucket (Small/Medium/Large) — only
   // p.sizeLabel is real client-supplied copy, so only that renders here.

@@ -1,0 +1,13 @@
+User-agent: *
+Allow: /
+Disallow: /dashboard*
+Disallow: /api/admin/
+Disallow: /api/
+
+# Checkout/order-success/receipt/wishlist are reachable (not blocked
+# here) but carry their own <meta name="robots" content="noindex">,
+# which is the more correct way to keep private/personalized pages out
+# of the index without hiding them from crawlers entirely (a robots.txt
+# block would prevent Google from ever seeing that noindex tag).
+
+Sitemap: https://thepinkroomeg.com/sitemap.xml

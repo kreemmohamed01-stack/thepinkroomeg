@@ -7,6 +7,7 @@
     { "source": "/lighting", "destination": "/category.html?cat=lighting" },
     { "source": "/furniture", "destination": "/category.html?cat=furniture" },
     { "source": "/wall-art", "destination": "/category.html?cat=wall-art" },
+    { "source": "/plants", "destination": "/category.html?cat=plants" },
     { "source": "/sale-offers", "destination": "/category.html?cat=sale-offers" },
 
     { "source": "/wall-art/:slug", "destination": "/product.html?slug=:slug" },
@@ -25,6 +26,8 @@
     { "source": "/checkout/payment", "destination": "/checkout.html?step=payment" },
     { "source": "/checkout/review", "destination": "/checkout.html?step=review" },
     { "source": "/checkout/success", "destination": "/order-success.html" },
-    { "source": "/checkout/receipt", "destination": "/receipt.html" }
+    { "source": "/checkout/receipt", "destination": "/receipt.html" },
+
+    { "source": "/sitemap.xml", "destination": "/api/products?action=sitemap" }
   ]
 }

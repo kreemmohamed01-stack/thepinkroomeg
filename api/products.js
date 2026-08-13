@@ -11,12 +11,15 @@
    POST /api/products?action=review                   — submit a review (goes to 'pending', moderated in the dashboard)
    POST /api/products?action=newsletter-subscribe      — "Stay Inspired" homepage form
    GET  /api/products?action=newsletter-unsubscribe    — one-click unsubscribe link (from the email itself)
+   GET  /api/products?action=sitemap                   — XML sitemap (rewritten to /sitemap.xml, see vercel.json)
    All folded into this one public file rather than new ones — same
    public-catalog concern, keeps the serverless function count down. */
 const { sql } = require('./_lib/db');
 const { rowToProduct } = require('./_lib/products');
 const { getSetting } = require('./_lib/settings');
 const { sendNewsletterWelcome, verifyUnsubscribeToken } = require('./_lib/notify');
+
+const SITE_URL = 'https://thepinkroomeg.com';
 
 async function siteStructure(req, res) {
   const empty = { categories: null, rooms: null, topSellers: null, homepageContent: null, storeSettings: null };
@@ -76,6 +79,49 @@ async function submitReview(req, res) {
     VALUES (${productId}, ${String(name).trim().slice(0,100)}, ${email ? String(email).trim().slice(0,200) : null}, ${r}, ${title ? String(title).trim().slice(0,150) : null}, ${String(text).trim()}, 'pending')
   `;
   return res.status(200).json({ ok: true });
+}
+
+async function sitemap(req, res) {
+  res.setHeader('Content-Type', 'application/xml; charset=utf-8');
+  res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate=86400');
+
+  const staticUrls = [
+    { loc: '/', priority: '1.0', changefreq: 'daily' },
+    { loc: '/paintings', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/accessories', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/lighting', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/furniture', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/wall-art', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/plants', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/sale-offers', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/wishlist.html', priority: '0.3', changefreq: 'monthly' },
+    { loc: '/refund-return-policy.html', priority: '0.3', changefreq: 'monthly' }
+  ];
+
+  let productUrls = [];
+  let roomUrls = [];
+  try {
+    if (sql) {
+      const rows = await sql`SELECT slug, updated_at FROM products ORDER BY updated_at DESC`;
+      productUrls = rows.map(r => ({ loc: '/products/' + r.slug, priority: '0.7', changefreq: 'weekly', lastmod: new Date(r.updated_at).toISOString().slice(0, 10) }));
+      const rooms = await getSetting('rooms', null);
+      if (rooms) roomUrls = Object.keys(rooms).map(k => ({ loc: '/rooms/' + k, priority: '0.6', changefreq: 'weekly' }));
+    }
+  } catch (e) {
+    console.error('[products] sitemap error:', e);
+  }
+
+  const all = [...staticUrls, ...roomUrls, ...productUrls];
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+${all.map(u => `  <url>
+    <loc>${SITE_URL}${u.loc}</loc>
+${u.lastmod ? `    <lastmod>${u.lastmod}</lastmod>\n` : ''}    <changefreq>${u.changefreq}</changefreq>
+    <priority>${u.priority}</priority>
+  </url>`).join('\n')}
+</urlset>`;
+
+  return res.status(200).send(xml);
 }
 
 function isValidEmail(v) {
@@ -152,6 +198,11 @@ module.exports = async (req, res) => {
     if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
     try { return await newsletterUnsubscribe(req, res); }
     catch (e) { console.error('[products] newsletter-unsubscribe error:', e); return res.status(500).json({ ok: false, error: 'Could not process that.' }); }
+  }
+  if (action === 'sitemap') {
+    if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    try { return await sitemap(req, res); }
+    catch (e) { console.error('[products] sitemap error:', e); return res.status(500).send('Could not generate sitemap.'); }
   }
 
   if (req.method !== 'GET') {
