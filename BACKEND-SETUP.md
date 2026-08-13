@@ -110,18 +110,28 @@ Already configured. Reference if the API key ever needs regenerating
 
 ## Deploying changes
 
-This project isn't connected to git — deploys are manual:
-```
-npx vercel --prod
-```
-Run from the project folder. This account has several **other**
-`thepinkroom*` projects from earlier deploy attempts (`thepinkroom`,
-`thepinkroom-1/2/3`, `thepinkroom888`, `thepinkroom1234`) — none of those
-are the live site and none have the database connected. The live one is
-**`thepinkroom-4`** (aliased at `thepinkroom-4.vercel.app`); the local
-`.vercel/project.json` is linked to it, so plain `vercel --prod` from
-this folder always targets the right one. Worth cleaning up the unused
-ones eventually so they don't cause the same mix-up again.
+**Connected to GitHub now** — `thepinkroom-4` is linked to
+`github.com/kreemmohamed01-stack/thepinkroomeg` (`main` branch). A push
+to `main` triggers an automatic production deploy — `npx vercel --prod`
+manual deploys still work too (same project, either path is fine), but
+git push is the normal way to ship changes going forward.
+
+This account has several **other** `thepinkroom*` projects from earlier
+deploy attempts (`thepinkroom`, `thepinkroom-1/2/3`, `thepinkroom888`,
+`thepinkroom1234`) — none of those are the live site, none have the
+database connected, and none are linked to the GitHub repo. The live
+one is **`thepinkroom-4`** (aliased at `thepinkroom-4.vercel.app`); the
+local `.vercel/project.json` is linked to it. Worth cleaning up the
+unused ones eventually so they don't cause the same mix-up again.
+
+**Security note**: the repo was briefly created with `.env.local`
+(real Neon database credentials + Blob token) committed via a manual
+GitHub web upload, before the git connection here. That history was
+force-pushed over with a clean commit that never contained it — the
+repo (private) now only has the one clean commit. `.gitignore` already
+excludes `.env*`, so this shouldn't recur via `git push` from this
+folder; it can only happen again via another manual upload that
+includes it.
 
 ---
 
