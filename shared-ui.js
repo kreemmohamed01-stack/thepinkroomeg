@@ -1,90 +1,11 @@
 /* ============================================================
-   THE PINK ROOM — i18n (English / Arabic)
-   Phase 1: the shared chrome only (navbar, menu drawer, cart drawer,
-   search drawer, bottom tabbar) — the parts built by this same file,
-   so switching language reaches every page instantly since this file
-   is loaded everywhere. Page-specific content (product names/
-   descriptions, page body copy) is still English-only; a deliberate,
-   scoped first step, not the whole site yet.
-
-   Choice is stored in localStorage (tpr_lang), same pattern as cart/
-   wishlist. Switching language reloads the page — the simplest way to
-   guarantee every already-rendered string (chrome + anything else that
-   reads TPR_I18N.t() in the future) re-renders correctly, with no
-   partial-update bugs from patching dozens of independent DOM nodes.
-   Nothing else about the site changes when this runs.
-   ============================================================ */
-(function(){
-  const LANG_KEY = 'tpr_lang';
-
-  const DICT = {
-    en: {
-      shopAll: 'SHOP ALL', paintings: 'PAINTINGS', lighting: 'LIGHTING', furniture: 'FURNITURE',
-      home: 'Home', accessories: 'Accessories', wallArt: 'Wall Art', plants: 'Plants', sale: 'Sale', contact: 'Contact',
-      shopByRoom: 'SHOP BY ROOM', currency: 'CURRENCY', language: 'LANGUAGE',
-      yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECKOUT',
-      taxNote: 'Taxes and shipping calculated at checkout.',
-      policyPrefix: 'By completing your purchase, you agree to our', policyAnd: 'and',
-      termsConditions: 'Terms & Conditions', refundPolicy: 'Refund & Return Policy',
-      continueShopping: 'CONTINUE SHOPPING', bagEmptySub: 'Your bag is waiting for something beautiful.',
-      exploreProducts: 'EXPLORE PRODUCTS',
-      search: 'SEARCH', findSomethingBeautiful: 'Find something beautiful.', searchPlaceholder: 'What are you looking for?',
-      popularSearches: 'POPULAR SEARCHES', pillVases: 'Vases', pillLighting: 'Lighting', pillTables: 'Tables',
-      pillCandles: 'Candles', pillMarble: 'Marble', pillSale: 'Sale', exploreTheEdit: 'EXPLORE THE EDIT',
-      results: 'RESULTS', viewAllResults: 'VIEW ALL RESULTS', nothingFound: 'NOTHING FOUND',
-      nothingFoundSub: "We couldn't find what you're looking for.",
-      trySearching: 'Try searching for vases, lighting, tables or paintings.', exploreAllProducts: 'EXPLORE ALL PRODUCTS',
-      tabHome: 'HOME', tabShop: 'SHOP', tabSearch: 'SEARCH', tabWishlist: 'WISHLIST', tabCart: 'CART'
-    },
-    ar: {
-      shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
-      home: 'الرئيسية', accessories: 'إكسسوارات', wallArt: 'لوحات حائط', plants: 'نباتات', sale: 'تخفيضات', contact: 'تواصل معنا',
-      shopByRoom: 'تسوقي حسب الغرفة', currency: 'العملة', language: 'اللغة',
-      yourBag: 'حقيبتك', shoppingBag: 'حقيبة التسوق', subtotal: 'الإجمالي الفرعي', checkout: 'إتمام الشراء',
-      taxNote: 'الضرائب والشحن يتم حسابهم عند إتمام الشراء.',
-      policyPrefix: 'بإتمامك الشراء، فإنك توافقين على', policyAnd: 'و',
-      termsConditions: 'الشروط والأحكام', refundPolicy: 'سياسة الاسترجاع والاستبدال',
-      continueShopping: 'أكملي التسوق', bagEmptySub: 'حقيبتك في انتظار شيء جميل.',
-      exploreProducts: 'اكتشفي المنتجات',
-      search: 'بحث', findSomethingBeautiful: 'ابحثي عن شيء جميل.', searchPlaceholder: 'بتدوري على إيه؟',
-      popularSearches: 'الأكثر بحثاً', pillVases: 'مزهريات', pillLighting: 'إضاءة', pillTables: 'طاولات',
-      pillCandles: 'شموع', pillMarble: 'رخام', pillSale: 'تخفيضات', exploreTheEdit: 'مختارات مميزة',
-      results: 'النتائج', viewAllResults: 'عرض كل النتائج', nothingFound: 'لا توجد نتائج',
-      nothingFoundSub: 'لم نتمكن من إيجاد ما تبحثين عنه.',
-      trySearching: 'جربي البحث عن مزهريات، إضاءة، طاولات أو لوحات.', exploreAllProducts: 'اكتشفي كل المنتجات',
-      tabHome: 'الرئيسية', tabShop: 'تسوقي', tabSearch: 'بحث', tabWishlist: 'المفضلة', tabCart: 'الحقيبة'
-    }
-  };
-
-  function getLang(){
-    try { return localStorage.getItem(LANG_KEY) === 'ar' ? 'ar' : 'en'; } catch(e){ return 'en'; }
-  }
-  function t(key){
-    const lang = getLang();
-    return (DICT[lang] && DICT[lang][key]) || DICT.en[key] || key;
-  }
-  function applyDocumentDirection(){
-    const lang = getLang();
-    document.documentElement.lang = lang;
-    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
-  }
-  function setLang(lang){
-    try { localStorage.setItem(LANG_KEY, lang === 'ar' ? 'ar' : 'en'); } catch(e){}
-    location.reload();
-  }
-
-  applyDocumentDirection(); // as early as possible — before this file builds any chrome markup below
-
-  window.TPR_I18N = { t, getLang, setLang };
-})();
-
-/* ============================================================
    THE PINK ROOM — shared chrome controller
    Injects the navbar, menu drawer, cart drawer, search drawer and
    bottom tabbar into any page that includes it, so every page
    behaves identically. Cart lives in localStorage and is shared
    across the whole site.
-   Requires: catalog.js, shared-ui.css
+   Requires: i18n.js (window.TPR_I18N — must be loaded first),
+   catalog.js, shared-ui.css
    ============================================================ */
 (function(){
   const { t } = window.TPR_I18N;

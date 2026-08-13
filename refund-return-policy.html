@@ -3,11 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="i18n.js"></script>
 <title>Refund &amp; Return Policy | The Pink Room</title>
 <meta name="description" content="The Pink Room Refund &amp; Return Policy — returns, exchanges, refunds and eligibility.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&family=Cairo:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
   :root{
     --cream:#f5f0e8;
@@ -253,6 +254,12 @@
     .policy-contact p{font-size:17px;}
     .policy-btn{width:100%;justify-content:center;}
   }
+
+  /* ---------- RTL (Arabic) ---------- */
+  html[dir="rtl"] body{font-family:'Cairo', 'Poppins', sans-serif;}
+  html[dir="rtl"] .policy-list li{padding-left:0;padding-right:24px;}
+  html[dir="rtl"] .policy-list li::before{left:auto;right:0;}
+  html[dir="rtl"] .policy-back svg{transform:scaleX(-1);}
 </style>
 </head>
 <body>
@@ -260,7 +267,7 @@
   <header class="policy-topbar">
     <button class="policy-back" onclick="history.length>1?history.back():location.href='index.html'">
       <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      <span>BACK</span>
+      <span data-i18n="policyBack">BACK</span>
     </button>
     <a class="policy-logo" href="index.html" aria-label="The Pink Room">
       <img src="logo-beige.png" alt="The Pink Room">
@@ -269,37 +276,37 @@
   </header>
 
   <section class="policy-hero">
-    <p class="policy-eyebrow">CUSTOMER CARE</p>
-    <h1>Refund &amp; Return Policy</h1>
+    <p class="policy-eyebrow" data-i18n="policyCustomerCare">CUSTOMER CARE</p>
+    <h1 data-i18n="policyPageTitle">Refund &amp; Return Policy</h1>
     <div class="policy-hero-rule"></div>
   </section>
 
   <main class="policy-wrap">
-    <p class="policy-intro">At The Pink Room, we are committed to ensure your optimum satisfaction with every purchase. If for any reason you are not fully satisfied, you may request a return within 14 days of receiving your order based on the below.</p>
+    <p class="policy-intro" data-i18n="policyIntro">At The Pink Room, we are committed to ensure your optimum satisfaction with every purchase. If for any reason you are not fully satisfied, you may request a return within 14 days of receiving your order based on the below.</p>
 
     <section class="policy-section">
-      <h2>Returns</h2>
-      <p>To be eligible for a return, the following conditions must be met:</p>
-      <ul class="policy-list">
+      <h2 data-i18n="policyReturnsHeading">Returns</h2>
+      <p data-i18n="policyReturnsIntro">To be eligible for a return, the following conditions must be met:</p>
+      <ul class="policy-list" data-i18n-list="policyReturnsList">
         <li>The item must be in the same condition as received</li>
         <li>The item must be unused and undamaged</li>
         <li>The item must be returned in its original packaging</li>
         <li>A receipt or proof of purchase is required</li>
       </ul>
-      <p>Please contact The Pink Room team <a href="mailto:thepinkroomeg@gmail.com">thepinkroomeg@gmail.com</a> prior to returning any item. Once your return request has been approved, you will receive detailed instructions on how to send back your order.</p>
-      <div class="policy-note">Returns sent without prior authorization will not be accepted.</div>
+      <p id="policyReturnsContact"><span data-i18n="policyReturnsContactPrefix">Please contact The Pink Room team</span> <a href="mailto:thepinkroomeg@gmail.com">thepinkroomeg@gmail.com</a> <span data-i18n="policyReturnsContactSuffix">prior to returning any item. Once your return request has been approved, you will receive detailed instructions on how to send back your order.</span></p>
+      <div class="policy-note" data-i18n="policyReturnsNote">Returns sent without prior authorization will not be accepted.</div>
     </section>
 
     <section class="policy-section">
-      <h2>Damaged, Defective, or Incorrect Items</h2>
-      <p>We kindly ask that you inspect your order upon receipt.</p>
-      <p>If the item arrives damaged, defective, or incorrect, please contact us immediately and include clear photos of the product and the packaging. This will allow us to assess the issue and provide an appropriate resolution as quickly as possible.</p>
+      <h2 data-i18n="policyDamagedHeading">Damaged, Defective, or Incorrect Items</h2>
+      <p data-i18n="policyDamagedP1">We kindly ask that you inspect your order upon receipt.</p>
+      <p data-i18n="policyDamagedP2">If the item arrives damaged, defective, or incorrect, please contact us immediately and include clear photos of the product and the packaging. This will allow us to assess the issue and provide an appropriate resolution as quickly as possible.</p>
     </section>
 
     <section class="policy-section">
-      <h2>Non-Returnable Items</h2>
-      <p>We will not be able to accept returns for the following items:</p>
-      <ul class="policy-list">
+      <h2 data-i18n="policyNonReturnableHeading">Non-Returnable Items</h2>
+      <p data-i18n="policyNonReturnableIntro">We will not be able to accept returns for the following items:</p>
+      <ul class="policy-list" data-i18n-list="policyNonReturnableList">
         <li>Custom-made or specially ordered products</li>
         <li>Personalized items</li>
         <li>Plants or other perishable goods</li>
@@ -308,46 +315,59 @@
         <li>Sale or clearance items</li>
         <li>Gift cards</li>
       </ul>
-      <p>If you are unsure whether your item is eligible for return, please contact us before initiating a return.</p>
+      <p data-i18n="policyNonReturnableFooter">If you are unsure whether your item is eligible for return, please contact us before initiating a return.</p>
     </section>
 
     <section class="policy-section">
-      <h2>Exchanges</h2>
-      <p>If you wish to exchange an item, please contact us ASAP.</p>
-      <p>The original item must meet our return eligibility criteria. Once the return has been approved.</p>
+      <h2 data-i18n="policyExchangesHeading">Exchanges</h2>
+      <p data-i18n="policyExchangesP1">If you wish to exchange an item, please contact us ASAP.</p>
+      <p data-i18n="policyExchangesP2">The original item must meet our return eligibility criteria. Once the return has been approved.</p>
     </section>
 
     <section class="policy-section">
-      <h2>Refunds</h2>
-      <p>Once your returned item has been received and inspected, we will notify you of the approval status of your refund.</p>
-      <p>If approved, the refund will be issued to your original payment method, where applicable ASAP.</p>
-      <p>Please note that processing times may vary depending on your bank, card issuer, or payment provider.</p>
+      <h2 data-i18n="policyRefundsHeading">Refunds</h2>
+      <p data-i18n="policyRefundsP1">Once your returned item has been received and inspected, we will notify you of the approval status of your refund.</p>
+      <p data-i18n="policyRefundsP2">If approved, the refund will be issued to your original payment method, where applicable ASAP.</p>
+      <p data-i18n="policyRefundsP3">Please note that processing times may vary depending on your bank, card issuer, or payment provider.</p>
     </section>
 
     <section class="policy-section">
-      <h2>Important Information</h2>
-      <p>Shipping and delivery fees are non-refundable as it&rsquo;s a third party service.</p>
-      <p>For any questions regarding returns, exchanges, or refunds, please contact The Pink Room team.</p>
+      <h2 data-i18n="policyImportantHeading">Important Information</h2>
+      <p data-i18n="policyImportantP1">Shipping and delivery fees are non-refundable as it&rsquo;s a third party service.</p>
+      <p data-i18n="policyImportantP2">For any questions regarding returns, exchanges, or refunds, please contact The Pink Room team.</p>
     </section>
 
     <div class="policy-contact">
-      <p>Still have a question about your order?</p>
+      <p data-i18n="policyStillQuestion">Still have a question about your order?</p>
       <div class="policy-contact-actions">
         <a class="policy-btn filled" href="https://wa.me/201207803666" target="_blank" rel="noopener">
           <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Zm0 22.9h-.004a10.4 10.4 0 0 1-5.3-1.45l-.38-.22-4.12 1.33 1.35-4.02-.25-.41a10.35 10.35 0 0 1-1.6-5.53c0-5.75 4.68-10.42 10.44-10.42 2.79 0 5.4 1.09 7.37 3.06a10.34 10.34 0 0 1 3.05 7.36c0 5.75-4.68 10.3-10.53 10.3Zm5.72-7.72c-.31-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.72.16-.21.31-.83 1.03-1.02 1.25-.19.21-.38.24-.7.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.19.21-.31.31-.52.1-.21.05-.4-.03-.55-.08-.16-.72-1.75-.99-2.39-.26-.63-.53-.54-.72-.55-.19-.01-.4-.01-.61-.01-.21 0-.55.08-.84.4-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.22 3.42 5.39 4.79.75.32 1.34.52 1.8.66.76.24 1.44.21 1.99.13.61-.09 1.87-.76 2.13-1.5.26-.73.26-1.36.18-1.5-.08-.13-.28-.21-.6-.36Z"/></svg>
-          CHAT ON WHATSAPP
+          <span data-i18n="policyChatWhatsapp">CHAT ON WHATSAPP</span>
         </a>
         <a class="policy-btn" href="mailto:thepinkroomeg@gmail.com">
           <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
-          EMAIL US
+          <span data-i18n="policyEmailUs">EMAIL US</span>
         </a>
       </div>
     </div>
   </main>
 
   <footer class="policy-footer">
-    &copy; 2024 The Pink Room. All rights reserved. &nbsp;&middot;&nbsp; <a href="index.html">Back to shop</a>
+    &copy; 2024 The Pink Room. <span data-i18n="policyAllRightsReserved">All rights reserved.</span> &nbsp;&middot;&nbsp; <a href="index.html" data-i18n="policyBackToShop">Back to shop</a>
   </footer>
 
+<script>
+  (function(){
+    if (!window.TPR_I18N) return;
+    var t = window.TPR_I18N.t;
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-list]').forEach(function(el){
+      var items = t(el.getAttribute('data-i18n-list'));
+      if (Array.isArray(items)) el.innerHTML = items.map(function(s){ return '<li>' + s + '</li>'; }).join('');
+    });
+  })();
+</script>
 </body>
 </html>
