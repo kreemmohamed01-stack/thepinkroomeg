@@ -581,6 +581,69 @@ to genuinely page-copy content.
 
 ---
 
+## Newsletter ("Stay Inspired")
+
+The homepage's email signup form was pure UI mockup before
+(`onsubmit="return false;"`, never sent anywhere). Now it actually
+captures emails, and the admin can announce a new product to everyone
+subscribed with one checkbox.
+
+- **Schema**: `newsletter_subscribers` (`email` unique, `subscribed_at`,
+  `unsubscribed` boolean + `unsubscribed_at`). Re-subscribing an email
+  that previously unsubscribed just flips the flag back — no duplicate
+  rows.
+- **API**: folded into existing files, no new ones.
+  - Public, `api/products.js`: `POST ?action=newsletter-subscribe`
+    (validates the email, upserts, fires a welcome email — best-effort,
+    a slow/failed welcome email never fails the signup itself). `GET
+    ?action=newsletter-unsubscribe&email=&token=` — the link every
+    email ends with; returns a small branded HTML confirmation page
+    (not JSON — it's meant to be clicked from an email client), and
+    only unsubscribes if the token matches.
+  - Admin: `GET /api/admin/customers?action=newsletter` (subscriber
+    count + list, shown on the Customers page). The actual "send an
+    announcement" trigger lives on `api/admin/products.js`'s existing
+    create/update — pass `{ notifySubscribers: true }` and every active
+    subscriber gets emailed about that product.
+- **Security**: unsubscribe links are signed (`HMAC-SHA256` over the
+  email, keyed with `ADMIN_SESSION_SECRET` under a distinct prefix so
+  the token can never be confused with a login session) — nobody can
+  unsubscribe someone else's address by guessing it. Verified correct
+  via an isolated unit test (matching secret → valid, wrong token/wrong
+  email → rejected) — the *live* link couldn't be end-to-end clicked
+  during this build (no real inbox to check, and Vercel intentionally
+  masks `ADMIN_SESSION_SECRET` when pulled locally via `vercel env
+  pull`, which is correct behavior on their part, not a bug here) — the
+  underlying crypto is proven correct, only "does the exact email
+  arrive and the link work" is unverified. Worth a real click-through
+  test with a real inbox once convenient.
+- **Dashboard**: a "Stay Inspired" summary card at the top of
+  `dashboard-customers.html` (count + expandable list). The product
+  Add/Edit drawer (`dashboard-products.html`) has an "Email 'Stay
+  Inspired' subscribers about this" checkbox showing the live
+  subscriber count, ticked only when the admin wants that specific
+  save to trigger an announcement — never automatic, so routine edits
+  don't spam the list.
+- **Reuses the existing Gmail/nodemailer setup** — same `GMAIL_USER`/
+  `GMAIL_APP_PASSWORD` as order emails, no new credentials needed.
+- **Sending model**: one email per subscriber (not one email BCC'd to
+  everyone) so each person's unsubscribe link is correctly scoped to
+  just their address. Fine at the list sizes a store like this has
+  early on; Gmail's own daily sending cap (~500 for a personal
+  account) is the real ceiling if the list grows large — a dedicated
+  bulk-email provider would be the next step at that point, not a code
+  change here.
+- **Instagram auto-post notifications — not built**: the client asked
+  about emailing subscribers whenever a new Instagram post goes up,
+  not just new products. That needs a Meta/Instagram Business API
+  connection (OAuth app, access token, either polling or a webhook
+  subscription) — the same category of setup the client already found
+  too frustrating for WhatsApp Business earlier in this project.
+  Deliberately not started without confirming the client wants to go
+  through that again; flagged to them directly instead of guessed at.
+
+---
+
 ## Reviews
 
 Customer product reviews — new end-to-end (schema, public submit/read,
