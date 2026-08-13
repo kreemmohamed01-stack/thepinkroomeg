@@ -1,4 +1,84 @@
 /* ============================================================
+   THE PINK ROOM — i18n (English / Arabic)
+   Phase 1: the shared chrome only (navbar, menu drawer, cart drawer,
+   search drawer, bottom tabbar) — the parts built by this same file,
+   so switching language reaches every page instantly since this file
+   is loaded everywhere. Page-specific content (product names/
+   descriptions, page body copy) is still English-only; a deliberate,
+   scoped first step, not the whole site yet.
+
+   Choice is stored in localStorage (tpr_lang), same pattern as cart/
+   wishlist. Switching language reloads the page — the simplest way to
+   guarantee every already-rendered string (chrome + anything else that
+   reads TPR_I18N.t() in the future) re-renders correctly, with no
+   partial-update bugs from patching dozens of independent DOM nodes.
+   Nothing else about the site changes when this runs.
+   ============================================================ */
+(function(){
+  const LANG_KEY = 'tpr_lang';
+
+  const DICT = {
+    en: {
+      shopAll: 'SHOP ALL', paintings: 'PAINTINGS', lighting: 'LIGHTING', furniture: 'FURNITURE',
+      home: 'Home', accessories: 'Accessories', wallArt: 'Wall Art', plants: 'Plants', sale: 'Sale', contact: 'Contact',
+      shopByRoom: 'SHOP BY ROOM', currency: 'CURRENCY', language: 'LANGUAGE',
+      yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECKOUT',
+      taxNote: 'Taxes and shipping calculated at checkout.',
+      policyPrefix: 'By completing your purchase, you agree to our', policyAnd: 'and',
+      termsConditions: 'Terms & Conditions', refundPolicy: 'Refund & Return Policy',
+      continueShopping: 'CONTINUE SHOPPING', bagEmptySub: 'Your bag is waiting for something beautiful.',
+      exploreProducts: 'EXPLORE PRODUCTS',
+      search: 'SEARCH', findSomethingBeautiful: 'Find something beautiful.', searchPlaceholder: 'What are you looking for?',
+      popularSearches: 'POPULAR SEARCHES', pillVases: 'Vases', pillLighting: 'Lighting', pillTables: 'Tables',
+      pillCandles: 'Candles', pillMarble: 'Marble', pillSale: 'Sale', exploreTheEdit: 'EXPLORE THE EDIT',
+      results: 'RESULTS', viewAllResults: 'VIEW ALL RESULTS', nothingFound: 'NOTHING FOUND',
+      nothingFoundSub: "We couldn't find what you're looking for.",
+      trySearching: 'Try searching for vases, lighting, tables or paintings.', exploreAllProducts: 'EXPLORE ALL PRODUCTS',
+      tabHome: 'HOME', tabShop: 'SHOP', tabSearch: 'SEARCH', tabWishlist: 'WISHLIST', tabCart: 'CART'
+    },
+    ar: {
+      shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
+      home: 'الرئيسية', accessories: 'إكسسوارات', wallArt: 'لوحات حائط', plants: 'نباتات', sale: 'تخفيضات', contact: 'تواصل معنا',
+      shopByRoom: 'تسوقي حسب الغرفة', currency: 'العملة', language: 'اللغة',
+      yourBag: 'حقيبتك', shoppingBag: 'حقيبة التسوق', subtotal: 'الإجمالي الفرعي', checkout: 'إتمام الشراء',
+      taxNote: 'الضرائب والشحن يتم حسابهم عند إتمام الشراء.',
+      policyPrefix: 'بإتمامك الشراء، فإنك توافقين على', policyAnd: 'و',
+      termsConditions: 'الشروط والأحكام', refundPolicy: 'سياسة الاسترجاع والاستبدال',
+      continueShopping: 'أكملي التسوق', bagEmptySub: 'حقيبتك في انتظار شيء جميل.',
+      exploreProducts: 'اكتشفي المنتجات',
+      search: 'بحث', findSomethingBeautiful: 'ابحثي عن شيء جميل.', searchPlaceholder: 'بتدوري على إيه؟',
+      popularSearches: 'الأكثر بحثاً', pillVases: 'مزهريات', pillLighting: 'إضاءة', pillTables: 'طاولات',
+      pillCandles: 'شموع', pillMarble: 'رخام', pillSale: 'تخفيضات', exploreTheEdit: 'مختارات مميزة',
+      results: 'النتائج', viewAllResults: 'عرض كل النتائج', nothingFound: 'لا توجد نتائج',
+      nothingFoundSub: 'لم نتمكن من إيجاد ما تبحثين عنه.',
+      trySearching: 'جربي البحث عن مزهريات، إضاءة، طاولات أو لوحات.', exploreAllProducts: 'اكتشفي كل المنتجات',
+      tabHome: 'الرئيسية', tabShop: 'تسوقي', tabSearch: 'بحث', tabWishlist: 'المفضلة', tabCart: 'الحقيبة'
+    }
+  };
+
+  function getLang(){
+    try { return localStorage.getItem(LANG_KEY) === 'ar' ? 'ar' : 'en'; } catch(e){ return 'en'; }
+  }
+  function t(key){
+    const lang = getLang();
+    return (DICT[lang] && DICT[lang][key]) || DICT.en[key] || key;
+  }
+  function applyDocumentDirection(){
+    const lang = getLang();
+    document.documentElement.lang = lang;
+    document.documentElement.dir = lang === 'ar' ? 'rtl' : 'ltr';
+  }
+  function setLang(lang){
+    try { localStorage.setItem(LANG_KEY, lang === 'ar' ? 'ar' : 'en'); } catch(e){}
+    location.reload();
+  }
+
+  applyDocumentDirection(); // as early as possible — before this file builds any chrome markup below
+
+  window.TPR_I18N = { t, getLang, setLang };
+})();
+
+/* ============================================================
    THE PINK ROOM — shared chrome controller
    Injects the navbar, menu drawer, cart drawer, search drawer and
    bottom tabbar into any page that includes it, so every page
@@ -7,6 +87,7 @@
    Requires: catalog.js, shared-ui.css
    ============================================================ */
 (function(){
+  const { t } = window.TPR_I18N;
 
   const WA = 'https://wa.me/201207803666';
   const IG = 'https://www.instagram.com/thepinkroom_eg?igsh=dnZrbW9xazV2dGp5';
@@ -61,10 +142,10 @@
       <div class="tpr-side">
         <button class="tpr-icon" id="tprMenuBtn" aria-label="Menu">${ICONS.menu}</button>
         <nav class="tpr-desknav">
-          <a href="category.html?cat=all">SHOP ALL</a>
-          <a href="category.html?cat=paintings">PAINTINGS</a>
-          <a href="category.html?cat=lighting">LIGHTING</a>
-          <a href="category.html?cat=furniture">FURNITURE</a>
+          <a href="category.html?cat=all">${t('shopAll')}</a>
+          <a href="category.html?cat=paintings">${t('paintings')}</a>
+          <a href="category.html?cat=lighting">${t('lighting')}</a>
+          <a href="category.html?cat=furniture">${t('furniture')}</a>
         </nav>
       </div>
       <a class="tpr-logo" href="index.html" aria-label="The Pink Room">${LOGO_MARK}</a>
@@ -82,11 +163,11 @@
 
     const tabbar = drawersOnly ? '' : `
     <nav class="tpr-tabbar">
-      <a href="index.html">${ICONS.home}HOME</a>
-      <a href="category.html?cat=all" id="tprTabShop">${ICONS.grid}SHOP</a>
-      <button id="tprTabSearch">${ICONS.search}SEARCH</button>
-      <a href="wishlist.html">${ICONS.heart}WISHLIST<span class="tpr-tab-badge" id="tprWishBadgeTab">0</span></a>
-      <button id="tprTabCart">${ICONS.bag}CART<span class="tpr-tab-badge" id="tprCartBadgeTab">0</span></button>
+      <a href="index.html">${ICONS.home}${t('tabHome')}</a>
+      <a href="category.html?cat=all" id="tprTabShop">${ICONS.grid}${t('tabShop')}</a>
+      <button id="tprTabSearch">${ICONS.search}${t('tabSearch')}</button>
+      <a href="wishlist.html">${ICONS.heart}${t('tabWishlist')}<span class="tpr-tab-badge" id="tprWishBadgeTab">0</span></a>
+      <button id="tprTabCart">${ICONS.bag}${t('tabCart')}<span class="tpr-tab-badge" id="tprCartBadgeTab">0</span></button>
     </nav>`;
 
     return `
@@ -98,23 +179,23 @@
         <button class="tpr-close" id="tprMenuClose" aria-label="Close">&times;</button>
       </div>
       <nav class="tpr-menu-nav">
-        <a href="index.html">Home</a>
-        <a href="category.html?cat=all">Shop All</a>
-        <a href="category.html?cat=paintings">Paintings</a>
-        <a href="category.html?cat=accessories">Accessories</a>
-        <a href="category.html?cat=lighting">Lighting</a>
-        <a href="category.html?cat=furniture">Furniture</a>
-        <a href="category.html?cat=wall-art">Wall Art</a>
-        <a href="category.html?cat=plants">Plants</a>
-        <a href="category.html?cat=sale-offers">Sale</a>
-        <a href="${WA}" target="_blank" rel="noopener" id="tprMenuContact">Contact</a>
+        <a href="index.html">${t('home')}</a>
+        <a href="category.html?cat=all">${t('shopAll')}</a>
+        <a href="category.html?cat=paintings">${t('paintings')}</a>
+        <a href="category.html?cat=accessories">${t('accessories')}</a>
+        <a href="category.html?cat=lighting">${t('lighting')}</a>
+        <a href="category.html?cat=furniture">${t('furniture')}</a>
+        <a href="category.html?cat=wall-art">${t('wallArt')}</a>
+        <a href="category.html?cat=plants">${t('plants')}</a>
+        <a href="category.html?cat=sale-offers">${t('sale')}</a>
+        <a href="${WA}" target="_blank" rel="noopener" id="tprMenuContact">${t('contact')}</a>
       </nav>
-      <p class="tpr-menu-label">SHOP BY ROOM</p>
+      <p class="tpr-menu-label">${t('shopByRoom')}</p>
       <div class="tpr-menu-rooms">${roomLinks}</div>
 
       <div class="tpr-prefs">
         <div class="tpr-pref">
-          <span>CURRENCY</span>
+          <span>${t('currency')}</span>
           <div class="tpr-dd" id="tprCurrencyDd">
             <span id="tprCurrencyLabel">EGP</span>
             <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
@@ -126,13 +207,13 @@
           </div>
         </div>
         <div class="tpr-pref">
-          <span>LANGUAGE</span>
+          <span>${t('language')}</span>
           <div class="tpr-dd" id="tprLangDd">
-            <span id="tprLangLabel">EN</span>
+            <span id="tprLangLabel">${window.TPR_I18N.getLang() === 'ar' ? 'AR' : 'EN'}</span>
             <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
             <ul class="tpr-dd-menu">
-              <li class="selected" data-val="EN">English</li>
-              <li data-val="AR">العربية</li>
+              <li class="${window.TPR_I18N.getLang() === 'en' ? 'selected' : ''}" data-val="EN">English</li>
+              <li class="${window.TPR_I18N.getLang() === 'ar' ? 'selected' : ''}" data-val="AR">العربية</li>
             </ul>
           </div>
         </div>
@@ -148,8 +229,8 @@
     <aside class="tpr-drawer" id="tprCart" aria-label="Shopping bag">
       <div class="tpr-drawer-head">
         <div>
-          <p class="tpr-eyebrow">YOUR BAG</p>
-          <h2 class="tpr-drawer-title">Shopping Bag <span class="count" id="tprCartCount">(0)</span></h2>
+          <p class="tpr-eyebrow">${t('yourBag')}</p>
+          <h2 class="tpr-drawer-title">${t('shoppingBag')} <span class="count" id="tprCartCount">(0)</span></h2>
         </div>
         <button class="tpr-close-light" id="tprCartClose" aria-label="Close">&times;</button>
       </div>
@@ -157,57 +238,57 @@
       <div class="tpr-cart-items" id="tprCartItems"></div>
       <div class="tpr-empty" id="tprCartEmpty">
         ${ICONS.bag}
-        <p class="tpr-empty-title">YOUR BAG</p>
-        <p class="tpr-empty-sub">Your bag is waiting for something beautiful.</p>
-        <a href="category.html?cat=all" class="tpr-btn">EXPLORE PRODUCTS ${ICONS.arrow}</a>
+        <p class="tpr-empty-title">${t('yourBag')}</p>
+        <p class="tpr-empty-sub">${t('bagEmptySub')}</p>
+        <a href="category.html?cat=all" class="tpr-btn">${t('exploreProducts')} ${ICONS.arrow}</a>
       </div>
       <div class="tpr-summary" id="tprCartSummary">
         <div class="tpr-rule"></div>
-        <div class="tpr-subtotal"><span>Subtotal</span><span id="tprSubtotal">EGP 0.00</span></div>
-        <button class="tpr-checkout" id="tprCheckout"><span>CHECKOUT</span> ${ICONS.arrow}</button>
-        <p class="tpr-tax">Taxes and shipping calculated at checkout.</p>
-        <p class="tpr-policy">By completing your purchase, you agree to our <a href="#">Terms &amp; Conditions</a> and <a href="refund-return-policy.html">Refund &amp; Return Policy</a>.</p>
-        <a href="category.html?cat=all" class="tpr-continue">CONTINUE SHOPPING ${ICONS.arrow}</a>
+        <div class="tpr-subtotal"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
+        <button class="tpr-checkout" id="tprCheckout"><span>${t('checkout')}</span> ${ICONS.arrow}</button>
+        <p class="tpr-tax">${t('taxNote')}</p>
+        <p class="tpr-policy">${t('policyPrefix')} <a href="#">${t('termsConditions')}</a> ${t('policyAnd')} <a href="refund-return-policy.html">${t('refundPolicy')}</a>.</p>
+        <a href="category.html?cat=all" class="tpr-continue">${t('continueShopping')} ${ICONS.arrow}</a>
       </div>
     </aside>
 
     <aside class="tpr-drawer" id="tprSearch" aria-label="Search">
       <div class="tpr-drawer-head">
         <div>
-          <p class="tpr-eyebrow">SEARCH</p>
-          <h2 class="tpr-drawer-title" style="font-style:italic">Find something beautiful.</h2>
+          <p class="tpr-eyebrow">${t('search')}</p>
+          <h2 class="tpr-drawer-title" style="font-style:italic">${t('findSomethingBeautiful')}</h2>
         </div>
         <button class="tpr-close-light" id="tprSearchClose" aria-label="Close">&times;</button>
       </div>
       <div class="tpr-search-input">
         ${ICONS.search}
-        <input type="text" id="tprSearchInput" placeholder="What are you looking for?" autocomplete="off">
+        <input type="text" id="tprSearchInput" placeholder="${t('searchPlaceholder')}" autocomplete="off">
         <button class="tpr-search-clear" id="tprSearchClear" aria-label="Clear">&times;</button>
       </div>
       <div class="tpr-search-body">
         <div id="tprSearchDefault">
-          <p class="tpr-section-label">POPULAR SEARCHES</p>
+          <p class="tpr-section-label">${t('popularSearches')}</p>
           <div class="tpr-pills">
-            <a href="#" data-term="Vase">Vases</a>
-            <a href="#" data-term="Lamp">Lighting</a>
-            <a href="#" data-term="Table">Tables</a>
-            <a href="#" data-term="Candle">Candles</a>
-            <a href="#" data-term="Marble">Marble</a>
-            <a href="#" data-term="Sale">Sale</a>
+            <a href="#" data-term="Vase">${t('pillVases')}</a>
+            <a href="#" data-term="Lamp">${t('pillLighting')}</a>
+            <a href="#" data-term="Table">${t('pillTables')}</a>
+            <a href="#" data-term="Candle">${t('pillCandles')}</a>
+            <a href="#" data-term="Marble">${t('pillMarble')}</a>
+            <a href="#" data-term="Sale">${t('pillSale')}</a>
           </div>
-          <p class="tpr-section-label">EXPLORE THE EDIT</p>
+          <p class="tpr-section-label">${t('exploreTheEdit')}</p>
           <div class="tpr-edit-grid" id="tprEditGrid"></div>
         </div>
         <div id="tprSearchResults" class="tpr-hidden">
-          <p class="tpr-section-label" id="tprResultsLabel">RESULTS</p>
+          <p class="tpr-section-label" id="tprResultsLabel">${t('results')}</p>
           <div id="tprResultsList"></div>
-          <a href="category.html?cat=all" class="tpr-viewall" id="tprViewAll">VIEW ALL RESULTS ${ICONS.arrow}</a>
+          <a href="category.html?cat=all" class="tpr-viewall" id="tprViewAll">${t('viewAllResults')} ${ICONS.arrow}</a>
         </div>
         <div id="tprSearchEmpty" class="tpr-empty" style="padding-top:40px">
-          <p class="tpr-empty-title">NOTHING FOUND</p>
-          <p class="tpr-empty-sub">We couldn&rsquo;t find what you&rsquo;re looking for.</p>
-          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:24px">Try searching for vases, lighting, tables or paintings.</p>
-          <a href="category.html?cat=all" class="tpr-btn">EXPLORE ALL PRODUCTS ${ICONS.arrow}</a>
+          <p class="tpr-empty-title">${t('nothingFound')}</p>
+          <p class="tpr-empty-sub">${t('nothingFoundSub')}</p>
+          <p style="font-size:13px;color:var(--ink-soft);margin-bottom:24px">${t('trySearching')}</p>
+          <a href="category.html?cat=all" class="tpr-btn">${t('exploreAllProducts')} ${ICONS.arrow}</a>
         </div>
       </div>
     </aside>
@@ -258,7 +339,7 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeAll(); });
 
   /* ---------- currency / language ---------- */
-  function setupDropdown(ddId, labelId){
+  function setupDropdown(ddId, labelId, onSelect){
     const dd = $(ddId); if (!dd) return;
     const label = $(labelId);
     dd.addEventListener('click', e => {
@@ -273,11 +354,18 @@
         li.classList.add('selected');
         label.textContent = li.dataset.val;
         dd.classList.remove('open');
+        if (onSelect) onSelect(li.dataset.val);
       });
     });
   }
   setupDropdown('tprCurrencyDd', 'tprCurrencyLabel');
-  setupDropdown('tprLangDd', 'tprLangLabel');
+  // language actually switches the site (reloads with the new language
+  // applied) — everything else here is cosmetic-only (currency has no
+  // real effect yet), this one really does something on selection
+  setupDropdown('tprLangDd', 'tprLangLabel', (val) => {
+    const wanted = val === 'AR' ? 'ar' : 'en';
+    if (wanted !== window.TPR_I18N.getLang()) window.TPR_I18N.setLang(wanted);
+  });
   document.addEventListener('click', ()=> {
     document.querySelectorAll('.tpr-dd.open').forEach(o => o.classList.remove('open'));
   });

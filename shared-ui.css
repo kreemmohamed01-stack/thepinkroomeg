@@ -1,3 +1,5 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+
 /* ============================================================
    THE PINK ROOM — shared chrome
    Navbar, menu drawer, cart drawer, search drawer, bottom tabbar.
@@ -429,3 +431,35 @@
   .tpr-tabbar{display:flex;}
   body.tpr-has-tabbar{padding-bottom:66px;}
 }
+
+/* ============================================================
+   RTL (Arabic) — Phase 1: the shared chrome this file builds
+   (navbar, menu drawer, cart/search drawers, tabbar). Activated by
+   <html dir="rtl">, set by shared-ui.js's TPR_I18N based on the
+   stored language choice. Most of the flex-based layout above
+   mirrors on its own once `dir` flips (Flexbox's `row` axis follows
+   the document's writing direction); everything below is the small
+   set of hardcoded left/right values that don't mirror automatically
+   and would otherwise look wrong (menu sliding from the wrong edge,
+   a dropdown anchored off-screen, etc).
+   ============================================================ */
+html[dir="rtl"] body{
+  font-family:'Cairo', 'Poppins', sans-serif;
+}
+html[dir="rtl"] .tpr-menu{
+  left:auto;right:0;
+  transform:translateX(100%);
+  box-shadow:-24px 0 60px rgba(0,0,0,.4);
+}
+html[dir="rtl"] .tpr-menu.open{transform:translateX(0);}
+html[dir="rtl"] .tpr-menu-nav a{transform:translateX(18px);}
+html[dir="rtl"] .tpr-menu.open .tpr-menu-nav a{transform:translateX(0);}
+html[dir="rtl"] .tpr-menu-nav a:hover{padding-left:0;padding-right:8px;}
+html[dir="rtl"] .tpr-drawer{
+  right:auto;left:0;
+  transform:translateX(-100%);
+  box-shadow:24px 0 60px rgba(20,17,12,.18);
+}
+html[dir="rtl"] .tpr-drawer.open{transform:translateX(0);}
+html[dir="rtl"] .tpr-dd-menu{left:auto;right:0;}
+html[dir="rtl"] .tpr-dd-menu li{text-align:right;}
