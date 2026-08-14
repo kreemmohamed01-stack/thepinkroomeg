@@ -309,14 +309,20 @@
     }
   }
 
-  /* Local-first order lookup, falling back to the server for any order
-     this browser doesn't have cached (a different device, or an email
-     receipt link) — the one function order-success.html / receipt.html
-     should call instead of getOrder() directly. */
+  /* Server-first order lookup (so a dashboard status change — shipped,
+     delivered, payment update — actually shows up when the customer
+     reopens their receipt), falling back to this browser's local cache
+     only if the server can't be reached (offline, or a brand-new order
+     the API hasn't caught up on yet) — the one function
+     order-success.html / receipt.html should call instead of
+     getOrder() directly. */
   async function getOrderAnywhere(id){
-    const local = id ? getOrder(id) : getLatestOrder();
-    if (local) return local;
-    return id ? fetchOrder(id) : null;
+    if (id) {
+      const remote = await fetchOrder(id);
+      if (remote) return remote;
+      return getOrder(id);
+    }
+    return getLatestOrder();
   }
 
   window.TPRCheckout = {

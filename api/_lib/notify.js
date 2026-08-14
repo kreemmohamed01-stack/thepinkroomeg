@@ -125,7 +125,7 @@ function shopEmailHtml(order) {
   </div>`;
 }
 
-function customerEmailHtml(order, tpl) {
+function customerEmailHtml(order, tpl, storeSettings) {
   const c = order.customer, a = order.shippingAddress;
   return `<div style="font-family:Arial,Helvetica,sans-serif;background:${CREAM};padding:28px 16px">
     <div style="max-width:600px;margin:0 auto;background:#fff;border:1px solid #e2d8c6;border-radius:6px;overflow:hidden">
@@ -150,7 +150,7 @@ function customerEmailHtml(order, tpl) {
         <table style="width:100%;border-collapse:collapse;margin-bottom:20px">${pricingRowsHtml(order.pricing, order.promo)}</table>
         <p style="font-size:12px;color:#6b6459;line-height:1.8;margin-bottom:4px"><b style="color:${INK}">Delivery address:</b><br>${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}, ${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, Egypt</p>
         <p style="font-size:12px;color:#6b6459;line-height:1.8;margin-bottom:20px"><b style="color:${INK}">Payment method:</b> ${escapeHtml(order.paymentMethod.label)}</p>
-        <p style="font-size:12.5px;color:#6b6459;line-height:1.8;text-align:center;border-top:1px solid #e2d8c6;padding-top:16px">${fillTemplate(escapeHtml(tpl.customerEmailFooter), { shopWhatsapp: `<a href="https://wa.me/201207803666" style="color:${GOLD}">+20 120 780 3666</a>` })}</p>
+        <p style="font-size:12.5px;color:#6b6459;line-height:1.8;text-align:center;border-top:1px solid #e2d8c6;padding-top:16px">${fillTemplate(escapeHtml(tpl.customerEmailFooter), { shopWhatsapp: `<a href="https://wa.me/${String((storeSettings && storeSettings.whatsapp) || '+201207803666').replace(/[^0-9]/g, '')}" style="color:${GOLD}">${escapeHtml((storeSettings && storeSettings.whatsapp) || '+20 120 780 3666')}</a>` })}</p>
       </div>
     </div>
   </div>`;
@@ -180,7 +180,7 @@ function whatsappText(order, tpl) {
   return filled.replace(/\n{3,}/g, '\n\n').trim();
 }
 
-async function sendEmails(order, tpl) {
+async function sendEmails(order, tpl, storeSettings) {
   const user = process.env.GMAIL_USER;
   const pass = process.env.GMAIL_APP_PASSWORD;
   if (!user || !pass) throw new Error('GMAIL_USER / GMAIL_APP_PASSWORD not configured.');
@@ -206,7 +206,7 @@ async function sendEmails(order, tpl) {
       from: `"The Pink Room" <${user}>`,
       to: order.customer.email,
       subject: fillTemplate(tpl.customerEmailSubject, vars),
-      html: customerEmailHtml(order, tpl)
+      html: customerEmailHtml(order, tpl, storeSettings)
     }).then(() => ({ ok: true })).catch(e => ({ ok: false, error: e.message }));
   } else {
     results.customerEmail = { ok: false, error: 'No customer email provided.' };
@@ -246,9 +246,12 @@ async function notifyOrder(order) {
   // fall straight back to the exact defaults if settings can't be read
   const tpl = await getSetting('notification_templates', DEFAULT_TEMPLATES).catch(() => DEFAULT_TEMPLATES);
   const merged = { ...DEFAULT_TEMPLATES, ...tpl }; // fills in any field an older/partial saved template is missing
+  // same Store Settings (Dashboard) WhatsApp number the storefront shows —
+  // so the customer email's "chat with us" link matches the real number
+  const storeSettings = await getSetting('store_settings', { whatsapp: '+201207803666' }).catch(() => ({ whatsapp: '+201207803666' }));
 
   const [emailResult, whatsappResult] = await Promise.allSettled([
-    sendEmails(order, merged),
+    sendEmails(order, merged, storeSettings),
     sendWhatsapp(order, merged)
   ]);
 

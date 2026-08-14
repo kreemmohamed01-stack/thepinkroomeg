@@ -183,6 +183,40 @@ const SITE_STRUCTURE_READY = fetch('/api/products?action=site-structure')
     return true;
   });
 
+/* Patches any footer/contact links a page happens to have, from the real
+   Store Settings (dashboard-editable) once they arrive. index.html has
+   always done this patch itself inline; every other page's footer was a
+   plain static copy that never picked up a changed WhatsApp number/email/
+   Instagram/Maps link — this makes it automatic for any page that reuses
+   the same element ids, index.html included (redundant there, harmless).
+   Every lookup is a no-op if the page doesn't have that element. */
+SITE_STRUCTURE_READY.then(()=>{
+  const s = STORE_SETTINGS;
+  if (!s) return;
+  const $ = id => document.getElementById(id);
+  const waHref = s.whatsapp ? 'https://wa.me/' + String(s.whatsapp).replace(/[^0-9]/g, '') : null;
+
+  ['footWA', 'footWAContact', 'floatWA', 'pdpWhatsApp'].forEach(id => {
+    const el = $(id);
+    if (el && waHref) el.href = waHref;
+  });
+  const waLabelEl = $('footWAContactLabel');
+  if (waLabelEl && s.whatsapp) waLabelEl.textContent = s.whatsapp;
+
+  const igEl = $('footIG');
+  if (igEl && s.instagramUrl) igEl.href = s.instagramUrl;
+
+  ['footMap', 'footMapContact'].forEach(id => {
+    const el = $(id);
+    if (el && s.mapsUrl) el.href = s.mapsUrl;
+  });
+
+  const emailEl = $('footEmailContact');
+  if (emailEl && s.contactEmail) emailEl.href = 'mailto:' + s.contactEmail;
+  const emailLabelEl = $('footEmailLabel');
+  if (emailLabelEl && s.contactEmail) emailLabelEl.textContent = s.contactEmail;
+});
+
 /* Filter vocabularies — the client's requested facets. Any colour or
    material that isn't listed here still shows up in the filters
    automatically (see optionsFor() in category.html); this list only

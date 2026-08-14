@@ -470,6 +470,8 @@ PRODUCTS_READY.then(()=>{
       });
     }
     buildPage(product);
+    // #pdpWhatsApp is re-patched from the real Store Settings by the
+    // shared handler in catalog.js once SITE_STRUCTURE_READY resolves
   }
 });
 
@@ -637,7 +639,7 @@ function buildPage(p){
           <span class="svc-txt"><b>Estimated Delivery</b><span>3 - 5 business days</span></span>
           <svg class="svc-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
-        <a class="svc-row" href="https://wa.me/201207803666" target="_blank" rel="noopener">
+        <a class="svc-row" id="pdpWhatsApp" href="https://wa.me/${String(STORE_SETTINGS.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener">
           ${ICON.help}
           <span class="svc-txt"><b>Need Help?</b><span>Contact us anytime</span></span>
           <svg class="svc-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
