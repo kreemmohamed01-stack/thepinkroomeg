@@ -80,6 +80,31 @@
           </div>
         </div>
 
+        <div class="an-grid2">
+          <div class="list-card">
+            <h3>Visitors by Device</h3>
+            <p class="sub">Detected from the browser's own request, selected range</p>
+            <div class="top-list" id="listDevices"></div>
+          </div>
+          <div class="list-card">
+            <h3>Visitors by Country</h3>
+            <p class="sub">From network location, selected range</p>
+            <div class="top-list" id="listCountries"></div>
+          </div>
+        </div>
+
+        <div class="list-card" style="margin-bottom:24px">
+          <h3>Recent Visitors</h3>
+          <p class="sub">Most recent 25 real visits — bots/crawlers are already filtered out, this is who's actually browsing, and from where</p>
+          <div class="db-table-wrap">
+            <table>
+              <thead><tr><th>WHEN</th><th>DEVICE</th><th>BROWSER</th><th>LOCATION</th><th>PAGE</th></tr></thead>
+              <tbody id="recentVisitorsBody"></tbody>
+            </table>
+          </div>
+          <p class="top-empty" id="recentVisitorsEmpty" style="display:none">No visits in this range yet.</p>
+        </div>
+
         <div class="an-grid3">
           <div class="list-card">
             <h3>Most Viewed Products</h3>
@@ -104,7 +129,9 @@
 <script src="dashboard-ui.js"></script>
 <script>
 const $ = id => document.getElementById(id);
-const { money, escHtml } = DashUI;
+const { money, escHtml, fmtDate } = DashUI;
+
+const DEVICE_LABEL = { mobile: 'Mobile', tablet: 'Tablet', desktop: 'Desktop', unknown: 'Unknown' };
 
 const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
@@ -238,6 +265,20 @@ async function loadRangeAnalytics(){
       ...d.paymentStatusBreakdown.map(r => statusRow(r.status, r.count, paymentTotal, r.status))
     ];
     $('statusBreakdown').innerHTML = rows.length ? rows.join('') : '<p class="top-empty">No orders in this range.</p>';
+
+    renderTopList('listDevices', d.deviceBreakdown.map(r => ({ name: DEVICE_LABEL[r.device] || r.device, count: r.count })), { emptyText: 'No visits in this range yet.' });
+    renderTopList('listCountries', d.countryBreakdown.map(r => ({ name: r.country, count: r.count })), { emptyText: 'No visits in this range yet.' });
+
+    const rv = d.recentVisitors || [];
+    $('recentVisitorsEmpty').style.display = rv.length ? 'none' : 'block';
+    $('recentVisitorsBody').innerHTML = rv.map(v => `
+      <tr>
+        <td>${fmtDate(v.at)}</td>
+        <td>${escHtml(DEVICE_LABEL[v.device] || v.device)}</td>
+        <td>${escHtml(v.browser)}</td>
+        <td>${escHtml(v.city ? (v.city + ', ' + v.country) : v.country)}</td>
+        <td style="color:var(--ink-soft);font-size:11.5px">${escHtml(v.path || '')}</td>
+      </tr>`).join('');
   } catch(e){
     $('rangeStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;
   }

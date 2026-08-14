@@ -137,13 +137,22 @@ CREATE TABLE IF NOT EXISTS analytics_events (
   product_name   text,
   category       text,
   category_name  text,
-  created_at     timestamptz NOT NULL DEFAULT now()
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  device_type    text,            -- mobile | tablet | desktop — parsed server-side from the request's own User-Agent header
+  browser        text,
+  country        text,            -- from Vercel's edge geo headers, not client-reported
+  city           text
 );
 CREATE INDEX IF NOT EXISTS idx_analytics_created_at ON analytics_events (created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_analytics_session    ON analytics_events (session_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_type       ON analytics_events (type);
 CREATE INDEX IF NOT EXISTS idx_analytics_product    ON analytics_events (product_id);
 CREATE INDEX IF NOT EXISTS idx_analytics_category   ON analytics_events (category);
+-- older databases created before these columns existed
+ALTER TABLE analytics_events ADD COLUMN IF NOT EXISTS device_type text;
+ALTER TABLE analytics_events ADD COLUMN IF NOT EXISTS browser     text;
+ALTER TABLE analytics_events ADD COLUMN IF NOT EXISTS country     text;
+ALTER TABLE analytics_events ADD COLUMN IF NOT EXISTS city        text;
 
 -- ------------------------------------------------------------
 -- active_sessions — upserted by every pageview/heartbeat (~every 25s
@@ -156,9 +165,13 @@ CREATE INDEX IF NOT EXISTS idx_analytics_category   ON analytics_events (categor
 CREATE TABLE IF NOT EXISTS active_sessions (
   session_id  text PRIMARY KEY,
   last_seen   timestamptz NOT NULL DEFAULT now(),
-  path        text
+  path        text,
+  device_type text,
+  country     text
 );
 CREATE INDEX IF NOT EXISTS idx_active_sessions_last_seen ON active_sessions (last_seen DESC);
+ALTER TABLE active_sessions ADD COLUMN IF NOT EXISTS device_type text;
+ALTER TABLE active_sessions ADD COLUMN IF NOT EXISTS country     text;
 
 
 -- ------------------------------------------------------------

@@ -47,7 +47,8 @@ async function rangeAnalytics(req, res) {
   const { start, end } = range;
 
   const [
-    orderStats, visitorCount, customerSplit, bestSellers, worstSellers, orderStatusRows, paymentStatusRows
+    orderStats, visitorCount, customerSplit, bestSellers, worstSellers, orderStatusRows, paymentStatusRows,
+    deviceRows, countryRows, recentVisitorRows
   ] = await Promise.all([
     sql`
       SELECT count(*)::int AS orders, COALESCE(sum((pricing->>'total')::numeric), 0)::float AS revenue
@@ -99,6 +100,29 @@ async function rangeAnalytics(req, res) {
       SELECT payment_status, count(*)::int AS n FROM orders
       WHERE created_at >= ${start} AND created_at < ${end}
       GROUP BY payment_status
+    `,
+    sql`
+      SELECT COALESCE(device_type, 'unknown') AS device_type, count(DISTINCT session_id)::int AS n
+      FROM analytics_events
+      WHERE type = 'pageview' AND created_at >= ${start} AND created_at < ${end}
+      GROUP BY device_type ORDER BY n DESC
+    `,
+    sql`
+      SELECT COALESCE(country, 'Unknown') AS country, count(DISTINCT session_id)::int AS n
+      FROM analytics_events
+      WHERE type = 'pageview' AND created_at >= ${start} AND created_at < ${end}
+      GROUP BY country ORDER BY n DESC LIMIT 12
+    `,
+    sql`
+      SELECT session_id, device_type, browser, country, city, path, created_at
+      FROM (
+        SELECT DISTINCT ON (session_id) session_id, device_type, browser, country, city, path, created_at
+        FROM analytics_events
+        WHERE type = 'pageview' AND created_at >= ${start} AND created_at < ${end}
+        ORDER BY session_id, created_at DESC
+      ) latest
+      ORDER BY created_at DESC
+      LIMIT 25
     `
   ]);
 
@@ -122,7 +146,16 @@ async function rangeAnalytics(req, res) {
     bestSellers: bestSellers.map(r => ({ productId: r.product_id, name: r.name, qty: r.qty, revenue: r.revenue })),
     worstSellers: worstSellers.map(r => ({ productId: r.product_id, name: r.name, qty: r.qty })),
     orderStatusBreakdown: orderStatusRows.map(r => ({ status: r.order_status, count: r.n })),
-    paymentStatusBreakdown: paymentStatusRows.map(r => ({ status: r.payment_status, count: r.n }))
+    paymentStatusBreakdown: paymentStatusRows.map(r => ({ status: r.payment_status, count: r.n })),
+    deviceBreakdown: deviceRows.map(r => ({ device: r.device_type, count: r.n })),
+    countryBreakdown: countryRows.map(r => ({ country: r.country, count: r.n })),
+    // real, individual visits (not aggregated) — device/browser/country
+    // come from the request itself, not anything the visitor claimed,
+    // so this is the honest way to sanity-check the traffic is real
+    recentVisitors: recentVisitorRows.map(r => ({
+      sessionId: r.session_id, device: r.device_type || 'unknown', browser: r.browser || 'Unknown',
+      country: r.country || 'Unknown', city: r.city || null, path: r.path, at: new Date(r.created_at).getTime()
+    }))
   });
 }
 

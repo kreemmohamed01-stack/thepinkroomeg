@@ -4,6 +4,7 @@
    active-visitor count). Heartbeats update last_seen but are not
    stored as events — see db/schema.sql for why. */
 const { sql } = require('./_lib/db');
+const { describeVisitor } = require('./_lib/visitor');
 
 const VALID_TYPES = ['pageview', 'product_view', 'category_view', 'add_to_cart', 'heartbeat'];
 const clip = (s, n) => (s == null ? null : String(s).slice(0, n));
@@ -21,17 +22,22 @@ module.exports = async (req, res) => {
 
   if (!sessionId || !VALID_TYPES.includes(type)) return res.status(200).json({ ok: true }); // malformed beacon — ignore, don't error the page
 
+  // server-decided, not client-reported — a scraper can lie about
+  // sessionId/type but not about the request it's actually making
+  const visitor = describeVisitor(req);
+  if (visitor.bot) return res.status(200).json({ ok: true }); // known crawler/script — don't count it at all
+
   try {
     await sql`
-      INSERT INTO active_sessions (session_id, last_seen, path)
-      VALUES (${clip(sessionId, 100)}, now(), ${clip(path, 300)})
-      ON CONFLICT (session_id) DO UPDATE SET last_seen = now(), path = ${clip(path, 300)}
+      INSERT INTO active_sessions (session_id, last_seen, path, device_type, country)
+      VALUES (${clip(sessionId, 100)}, now(), ${clip(path, 300)}, ${visitor.deviceType}, ${visitor.country})
+      ON CONFLICT (session_id) DO UPDATE SET last_seen = now(), path = ${clip(path, 300)}, device_type = ${visitor.deviceType}, country = ${visitor.country}
     `;
 
     if (type !== 'heartbeat') {
       await sql`
-        INSERT INTO analytics_events (session_id, type, path, product_id, product_name, category, category_name)
-        VALUES (${clip(sessionId, 100)}, ${type}, ${clip(path, 300)}, ${clip(productId, 100)}, ${clip(productName, 200)}, ${clip(category, 100)}, ${clip(categoryName, 100)})
+        INSERT INTO analytics_events (session_id, type, path, product_id, product_name, category, category_name, device_type, browser, country, city)
+        VALUES (${clip(sessionId, 100)}, ${type}, ${clip(path, 300)}, ${clip(productId, 100)}, ${clip(productName, 200)}, ${clip(category, 100)}, ${clip(categoryName, 100)}, ${visitor.deviceType}, ${visitor.browser}, ${visitor.country}, ${visitor.city})
       `;
     }
 
