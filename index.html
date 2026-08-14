@@ -218,21 +218,34 @@
     animation: logoGlow 4.5s ease-in-out infinite;
   }
   .logo-wrap img{width:100%;height:auto;display:block;}
+  /* shine lives only on the letterforms themselves: the moving gradient is
+     masked to the logo artwork's own alpha, so it never paints a visible
+     box over the transparent gaps/background around the letters */
   .logo-wrap::after{
     content:'';
     position:absolute;
-    top:0;left:-170%;
-    width:60%;height:100%;
-    background:linear-gradient(115deg,
-      transparent 0%, transparent 32%,
-      rgba(255,255,255,.55) 45%,
+    inset:0;
+    background:linear-gradient(100deg,
+      transparent 0%, transparent 38%,
+      rgba(255,255,255,.95) 47%,
       rgba(255,241,214,1) 50%,
-      rgba(201,169,124,.85) 55%,
-      transparent 68%, transparent 100%);
-    transform:skewX(-20deg);
-    mix-blend-mode:screen;
+      rgba(201,169,124,.95) 53%,
+      transparent 62%, transparent 100%);
+    background-size:300% 100%;
+    background-position:-100% 0;
+    -webkit-mask-image:url('logo-beige.png');
+    -webkit-mask-size:100% 100%;
+    -webkit-mask-repeat:no-repeat;
+    mask-image:url('logo-beige.png');
+    mask-size:100% 100%;
+    mask-repeat:no-repeat;
     pointer-events:none;
-    animation: logoShineSweep 3.2s ease-in-out infinite;
+    animation: logoLetterShine 3.2s ease-in-out infinite;
+  }
+  @keyframes logoLetterShine{
+    0%{background-position:-100% 0;}
+    55%{background-position:200% 0;}
+    100%{background-position:200% 0;}
   }
   @keyframes logoShineSweep{
     0%{left:-170%;}
