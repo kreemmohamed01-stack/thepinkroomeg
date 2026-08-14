@@ -210,55 +210,29 @@
   .hamburger-btn span{display:none;}
   .topbar-mobile .logo-wrap{
     position:relative;
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:5px;
-    flex:0 0 auto;
-  }
-  .logo-main{
-    display:flex;
-    align-items:center;
-    font-family:'Playfair Display', serif;
-    font-weight:500;
-    font-size:18px;
-    letter-spacing:2px;
-    line-height:1;
-    white-space:nowrap;
-  }
-  .logo-main .sp{width:.42em;}
-  .logo-main span{
-    color:#e0b877;
-    animation: letterGlow 2.6s ease-in-out infinite;
-    animation-delay:calc(var(--i) * .13s);
-  }
-  @keyframes letterGlow{
-    0%,72%,100%{
-      color:#d9ae6b;
-      text-shadow:0 2px 6px rgba(0,0,0,.55);
-    }
-    18%{
-      color:#fff3d8;
-      text-shadow:0 2px 6px rgba(0,0,0,.55), 0 0 14px rgba(240,205,150,.95), 0 0 26px rgba(201,169,124,.7);
-    }
-  }
-  .logo-tagline{
-    display:flex;
-    align-items:center;
-    gap:10px;
-    white-space:nowrap;
-  }
-  .logo-rule{
     display:block;
-    width:32px;height:1px;
-    background:rgba(217,174,107,.75);
+    flex:0 0 auto;
+    width:200px;
+    max-width:54vw;
+    overflow:hidden;
+    animation: logoGlow 4.5s ease-in-out infinite;
   }
-  .logo-tagline span{
-    font-family:'Poppins', sans-serif;
-    font-size:7px;
-    font-weight:400;
-    letter-spacing:2.4px;
-    color:#d9ae6b;
+  .logo-wrap img{width:100%;height:auto;display:block;}
+  .logo-wrap::after{
+    content:'';
+    position:absolute;
+    top:0;left:-170%;
+    width:60%;height:100%;
+    background:linear-gradient(115deg,
+      transparent 0%, transparent 32%,
+      rgba(255,255,255,.55) 45%,
+      rgba(255,241,214,1) 50%,
+      rgba(201,169,124,.85) 55%,
+      transparent 68%, transparent 100%);
+    transform:skewX(-20deg);
+    mix-blend-mode:screen;
+    pointer-events:none;
+    animation: logoShineSweep 3.2s ease-in-out infinite;
   }
   @keyframes logoShineSweep{
     0%{left:-170%;}
@@ -284,9 +258,7 @@
     }
     .topbar-mobile .side{gap:20px;}
     .topbar-mobile svg{width:18px;height:18px;}
-    .logo-main{font-size:33px;letter-spacing:5.5px;}
-    .logo-rule{width:64px;}
-    .logo-tagline span{font-size:10px;letter-spacing:4px;}
+    .logo-wrap{width:300px;max-width:26vw;}
     .hamburger-btn span{display:inline;}
   }
 
@@ -2023,9 +1995,7 @@
 
   @media (min-width:600px) and (max-width:960px){
     .topbar-mobile{padding:76px 26px 12px;}
-    .logo-main{font-size:48px;letter-spacing:8.5px;}
-    .logo-rule{width:94px;}
-    .logo-tagline span{font-size:14px;letter-spacing:5.5px;}
+    .logo-wrap{width:330px;max-width:56vw;}
     .topbar-mobile svg{width:22px;height:22px;}
     .topbar-mobile .side{gap:16px;}
   }
@@ -2250,13 +2220,7 @@
       </button>
     </div>
     <a class="logo-wrap" href="index.html" aria-label="The Pink Room">
-      <div class="logo-main">
-        <span style="--i:0">T</span><span style="--i:1">H</span><span style="--i:2">E</span><span class="sp"></span><span style="--i:3">P</span><span style="--i:4">I</span><span style="--i:5">N</span><span style="--i:6">K</span><span class="sp"></span><span style="--i:7">R</span><span style="--i:8">O</span><span style="--i:9">O</span><span style="--i:10">M</span>
-      </div>
-      <div class="logo-tagline">
-        <i class="logo-rule"></i>
-        <span>HOME ACCESSORIES</span>
-      </div>
+      <img src="logo-beige.png" alt="The Pink Room">
     </a>
     <div class="side">
       <button class="mobile-icon" id="searchTrigger" aria-label="Open search">
