@@ -510,3 +510,67 @@
   renderCart();
   renderWishBadge();
 })();
+
+/* ============================================================
+   THE PINK ROOM — scroll reveal
+   Sections/cards fade + rise into place as they're scrolled into
+   view, instead of everything being visible on load. Entirely
+   additive — doesn't touch any existing render function on any page;
+   it just watches the DOM (MutationObserver) for elements matching
+   known content-block selectors, tags them for the CSS transition in
+   shared-ui.css, and reveals each with IntersectionObserver (fires
+   once, then stops watching that element — no per-scroll work, so
+   this stays cheap no matter how much the visitor scrolls).
+   Skipped entirely if the visitor has "reduce motion" turned on.
+   ============================================================ */
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  if (!('IntersectionObserver' in window) || !('MutationObserver' in window)) return;
+
+  const SELECTOR = [
+    // homepage
+    '.cats-eyebrow', '.cats-title', '.cats-divider', '.cats-sub', '.cat-card',
+    '.eyebrow-badge', '.ts-title', '.ts-desc', '.ts-card',
+    '.trust-item',
+    '.rooms-glass-card', '.room-card',
+    '.journal-eyebrow', '.journal-title', '.journal-sub', '.journal-insta', '.journal-video-wrap', '.journal-newsletter',
+    // category.html / wishlist.html product grids
+    '.product-card',
+    // product.html
+    '.gallery', '.pdp-info', '.rel-card', '.rev-item', '.rev-form',
+    // wishlist.html
+    '.wish-body-head'
+  ].join(', ');
+
+  const staggerCount = new WeakMap(); // parent element -> how many children already given a stagger delay
+
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('tpr-revealed');
+      io.unobserve(entry.target);
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+  function wire(el){
+    if (el.classList.contains('tpr-reveal')) return; // already wired
+    el.classList.add('tpr-reveal');
+    const parent = el.parentElement;
+    const i = staggerCount.get(parent) || 0;
+    staggerCount.set(parent, i + 1);
+    el.style.transitionDelay = Math.min(i * 70, 420) + 'ms';
+    io.observe(el);
+  }
+
+  function scan(node){
+    if (!node || node.nodeType !== 1) return;
+    if (node.matches && node.matches(SELECTOR)) wire(node);
+    if (node.querySelectorAll) node.querySelectorAll(SELECTOR).forEach(wire);
+  }
+
+  scan(document.body);
+
+  new MutationObserver((mutations) => {
+    mutations.forEach(m => m.addedNodes.forEach(scan));
+  }).observe(document.body, { childList: true, subtree: true });
+})();
