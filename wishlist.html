@@ -167,6 +167,7 @@
     color:#fff;background:var(--ink);
   }
   .card-tag.sale{background:#8a6a3c;}
+  .card-tag.soldout{background:#6b6b6b;}
   .card-wish{
     position:absolute;top:10px;right:10px;z-index:2;
     width:32px;height:32px;border-radius:50%;
@@ -188,6 +189,7 @@
   .product-card:hover .card-add{opacity:1;transform:translateY(0);}
   .card-add:hover{background:var(--gold);color:var(--ink);}
   .card-add.added{background:var(--gold);color:var(--ink);}
+  .card-add.is-oos{opacity:1;background:rgba(107,107,107,.88);cursor:not-allowed;}
   @media (hover:none){
     .card-add{opacity:1;transform:none;position:static;margin-top:10px;left:auto;right:auto;bottom:auto;}
     .card-media{overflow:visible;}
@@ -472,11 +474,16 @@ function wishedProducts(){
 }
 
 function cardMarkup(p, i){
+  const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
   const pct = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
-  const tag = p.salePrice ? `<span class="card-tag sale">SALE</span>` : (p.isNew ? `<span class="card-tag">NEW</span>` : '');
+  const tag = oos ? `<span class="card-tag soldout">SOLD OUT</span>`
+            : p.salePrice ? `<span class="card-tag sale">SALE</span>` : (p.isNew ? `<span class="card-tag">NEW</span>` : '');
   const price = p.salePrice
     ? `${money(p.salePrice)} <span class="was">${money(p.price)}</span> <span class="pct">-${pct}%</span>`
     : (p.price != null ? money(p.price) : `<span class="tbc">EGP &mdash;</span>`);
+  const addBtn = oos
+    ? `<button class="card-add is-oos" disabled>SOLD OUT</button>`
+    : `<button class="card-add" data-add="${p.id}">ADD TO BAG</button>`;
   return `<a class="product-card" href="product.html?slug=${p.slug}" style="animation-delay:${i*0.05}s">
     <div class="card-media">
       ${tag}
@@ -484,7 +491,7 @@ function cardMarkup(p, i){
         <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       </button>
       <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
-      <button class="card-add" data-add="${p.id}">ADD TO BAG</button>
+      ${addBtn}
     </div>
     <h3 class="card-name">${p.name}</h3>
     <p class="card-cat">${p.subcategoryName || p.categoryName}</p>

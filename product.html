@@ -155,6 +155,9 @@
     padding:4px 9px;border-radius:2px;
   }
   .pdp-tax{font-size:12.5px;color:var(--ink-soft);margin-bottom:24px;}
+  .pdp-stock{font-size:12px;font-weight:600;letter-spacing:.4px;margin:-16px 0 24px;}
+  .pdp-stock.oos{color:#b13b3b;}
+  .pdp-stock.low{color:#a97a2e;}
   .pdp-rule{height:1px;background:var(--line);margin:24px 0;}
   .pdp-desc{font-size:14.5px;line-height:1.95;color:var(--ink-soft);}
 
@@ -210,6 +213,8 @@
   .btn-bag:hover{transform:translateY(-2px);box-shadow:0 12px 28px rgba(20,17,12,.28);}
   .btn-bag:hover::before{left:120%;}
   .btn-bag.added{background:var(--gold);color:var(--ink);}
+  .btn-bag:disabled{background:#8a8a8a;cursor:not-allowed;}
+  .btn-bag:disabled:hover{transform:none;box-shadow:none;}
 
   .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
   .btn-ghost{
@@ -553,6 +558,9 @@ function buildPage(p){
   const hl = highlightsFor(p);
   const related = PRODUCTS.filter(x => x.category === p.category && x.slug !== p.slug).slice(0, 3);
 
+  const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
+  const lowStock = !oos && p.trackInventory && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 5);
+
   root.innerHTML = `
   <nav class="pdp-crumb">
     <a href="index.html">Home</a>${ICON.chev}
@@ -591,6 +599,7 @@ function buildPage(p){
       <h1 class="pdp-name">${p.name}</h1>
       <div class="pdp-price">${priceMarkup(p)}</div>
       <p class="pdp-tax">Tax included.</p>
+      ${oos ? `<p class="pdp-stock oos">Sold Out</p>` : (lowStock ? `<p class="pdp-stock low">Only ${p.stockQuantity} left in stock</p>` : '')}
       <div class="pdp-rule"></div>
 
       <p class="pdp-desc">${p.shortDescription || ''}</p>
@@ -606,16 +615,16 @@ function buildPage(p){
         <div class="pdp-size-box">${sizeText}</div>
       </div>` : ''}
 
-      <div class="pdp-field">
+      ${oos ? '' : `<div class="pdp-field">
         <span class="pdp-label">QUANTITY</span>
         <div class="qty-row">
           <button id="qtyMinus" aria-label="Decrease">&minus;</button>
           <span class="val" id="qtyVal">1</span>
           <button id="qtyPlus" aria-label="Increase">+</button>
         </div>
-      </div>
+      </div>`}
 
-      <button class="btn-bag" id="btnBag"><span>ADD TO BAG</span></button>
+      <button class="btn-bag" id="btnBag" ${oos ? 'disabled' : ''}><span>${oos ? 'SOLD OUT' : 'ADD TO BAG'}</span></button>
 
       <div class="btn-row">
         <button class="btn-ghost ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" id="btnWish" data-id="${p.id}">${ICON.heart} ADD TO WISHLIST</button>
@@ -859,11 +868,15 @@ function wireActions(p){
   const val = document.getElementById('qtyVal');
   const bump = ()=>{ val.classList.add('bump'); setTimeout(()=> val.classList.remove('bump'), 300); };
 
-  document.getElementById('qtyPlus').addEventListener('click', ()=>{ qty++; val.textContent = qty; bump(); });
-  document.getElementById('qtyMinus').addEventListener('click', ()=>{ qty = Math.max(1, qty-1); val.textContent = qty; bump(); });
+  // quantity controls aren't rendered at all for a sold-out product
+  const qtyPlusEl = document.getElementById('qtyPlus');
+  const qtyMinusEl = document.getElementById('qtyMinus');
+  if (qtyPlusEl) qtyPlusEl.addEventListener('click', ()=>{ qty++; val.textContent = qty; bump(); });
+  if (qtyMinusEl) qtyMinusEl.addEventListener('click', ()=>{ qty = Math.max(1, qty-1); val.textContent = qty; bump(); });
 
   const bag = document.getElementById('btnBag');
   bag.addEventListener('click', ()=>{
+    if (bag.disabled) return;
     if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p);
     bag.classList.add('added');
     bag.querySelector('span').textContent = 'ADDED TO BAG';

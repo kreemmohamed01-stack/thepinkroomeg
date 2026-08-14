@@ -34,6 +34,16 @@
 
   const LOGO_MARK = `<img src="logo-beige.png" alt="The Pink Room">`;
 
+  /* a product is sold out either because the admin flagged it manually,
+     or because its tracked stock quantity has hit zero — "Made to Order"
+     is intentionally NOT sold out, it's just custom-made */
+  function isOutOfStock(p){
+    if (!p) return false;
+    if (p.availability === 'Out of Stock') return true;
+    if (p.trackInventory && Number(p.stockQuantity) <= 0) return true;
+    return false;
+  }
+
   /* ---------- cart storage (shared across pages) ---------- */
   function loadCart(){
     try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; }
@@ -373,7 +383,12 @@
 
   /* public API so pages can add to bag / manage the wishlist */
   window.TPR = {
+    isOutOfStock,
     addToCart(product){
+      // safety net — the UI should already stop a sold-out item from
+      // reaching this point (button disabled/hidden), this just makes
+      // sure nothing can add one to the bag even if it somehow does
+      if (isOutOfStock(product)) return;
       const existing = cart.find(i => String(i.id) === String(product.id));
       if (existing) existing.qty++;
       else cart.push({
