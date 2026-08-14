@@ -370,7 +370,7 @@
 
   /* ---------- SHOP BY CATEGORY ---------- */
   .cats{
-    background-color:var(--cream-light);
+    background-color:#f8ecde;
     background-image:url('background sec 2/sec 2 lab background .jpeg');
     background-size:cover;
     background-position:center;
@@ -380,6 +380,12 @@
   }
   @media (max-width:599px){
     .cats{background-image:url('background sec 2/sec 2 mopil background.jpeg');}
+  }
+  /* laptop: the section is closer to square than the artwork's own 4:3
+     shape, so "cover" was cropping the leaf/arch off both edges — show
+     the full image instead, letterboxed in a matching cream tone */
+  @media (min-width:961px){
+    .cats{background-size:contain;}
   }
   .cats-eyebrow{
     font-size:11.5px;letter-spacing:4px;font-weight:600;
@@ -997,6 +1003,12 @@
     cursor:pointer;
     box-shadow:0 24px 54px rgba(20,17,12,.18);
     transition:transform .55s cubic-bezier(.34,1.56,.64,1), box-shadow .55s ease;
+  }
+  /* laptop: the fixed height was shorter than the video's real 16:9 shape,
+     cropping the top and bottom — match the box to the video instead so
+     the whole clip shows, nothing added behind it */
+  @media (min-width:961px){
+    .journal-video-wrap{height:auto;aspect-ratio:16/9;}
   }
   .journal-video-wrap:hover{
     transform:scale(1.015);
