@@ -27,7 +27,7 @@
   const DICT = {
     en: {
       shopAll: 'SHOP ALL', paintings: 'PAINTINGS', lighting: 'LIGHTING', furniture: 'FURNITURE',
-      home: 'Home', accessories: 'Accessories', wallArt: 'Wall Art', plants: 'Plants', sale: 'Sale', contact: 'Contact',
+      home: 'Home', accessories: 'Accessories', wallArt: 'WallArt', plants: 'Artificial Plants', sale: 'Sale', contact: 'Contact',
       shopByRoom: 'SHOP BY ROOM', currency: 'CURRENCY', language: 'LANGUAGE',
       yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECKOUT',
       taxNote: 'Taxes and shipping calculated at checkout.',

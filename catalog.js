@@ -56,7 +56,7 @@ const CATEGORIES = {
     ]
   },
   'wall-art': {
-    name: 'Wall Art',
+    name: 'WallArt',
     description: 'Considered wall pieces that give a room its focal point, selected for texture, tone and composition.',
     hero: 'categ photos/wall art-upscaled-2x.png',
     subcategories: []
@@ -71,7 +71,7 @@ const CATEGORIES = {
     ]
   },
   'plants': {
-    name: 'Plants',
+    name: 'Artificial Plants',
     description: 'Living greenery and botanical pieces, chosen to bring life and texture into every room.',
     hero: 'categ photos/plants-upscaled-2x.png',
     subcategories: []
