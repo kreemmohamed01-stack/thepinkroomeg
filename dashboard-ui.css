@@ -213,7 +213,10 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 .db-img-tile{
   position:relative;width:76px;height:76px;border-radius:4px;overflow:hidden;
   border:1px solid var(--line);background:var(--beige-soft);flex-shrink:0;
+  cursor:pointer;transition:border-color .2s ease;
 }
+.db-img-tile:not(.is-main):hover{border-color:var(--gold);}
+.db-img-tile.is-main{border:2px solid var(--gold);cursor:default;}
 .db-img-tile img{width:100%;height:100%;object-fit:cover;display:block;}
 .db-img-tile .db-img-tag{
   position:absolute;bottom:0;left:0;right:0;background:rgba(28,26,23,.75);color:#fff;

@@ -204,9 +204,9 @@ function renderProductForm(p){
     <div class="db-field">
       <label>Product Images</label>
       <div class="db-images" id="imgList"></div>
-      <p class="db-img-hint">First image is the main photo shown on cards. Uploaded images are auto-resized.</p>
+      <p class="db-img-hint">Select as many photos as you want at once. Click any photo to make it the main one shown on cards — images are auto-resized.</p>
       <p class="db-save-msg" id="imgUploadMsg"></p>
-      <input type="file" id="imgFileInput" accept="image/*" style="display:none">
+      <input type="file" id="imgFileInput" accept="image/*" multiple style="display:none">
     </div>
 
     <div class="db-field"><label>Name</label><input type="text" id="fName" value="${escAttr(p && p.name || '')}"></div>
@@ -301,9 +301,11 @@ function renderProductForm(p){
   }
 
   $('imgFileInput').addEventListener('change', async (e)=>{
-    const file = e.target.files[0];
+    const files = Array.from(e.target.files || []);
     e.target.value = '';
-    if (file) await addImageFile(file);
+    // one at a time — keeps the "uploading..." state on the ADD tile
+    // accurate and each photo's own error (if any) reported separately
+    for (const file of files) await addImageFile(file);
   });
 
   $('prodSaveBtn').addEventListener('click', ()=> saveProduct(isEdit ? p.id : null));
@@ -312,7 +314,7 @@ function renderProductForm(p){
 function renderImageList(){
   const wrap = $('imgList');
   wrap.innerHTML = drawerImages.map((url, i) => `
-    <div class="db-img-tile">
+    <div class="db-img-tile ${i === 0 ? 'is-main' : ''}" data-i="${i}" title="${i === 0 ? 'Main photo' : 'Click to make this the main photo'}">
       <img src="${escAttr(url)}">
       ${i === 0 ? '<span class="db-img-tag">MAIN</span>' : ''}
       <button class="db-img-remove" data-i="${i}" aria-label="Remove">&times;</button>
@@ -323,6 +325,16 @@ function renderImageList(){
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
       drawerImages.splice(Number(btn.dataset.i), 1);
+      renderImageList();
+    });
+  });
+  // click anywhere else on a tile — pin that photo as image #1 (MAIN)
+  wrap.querySelectorAll('.db-img-tile').forEach(tile=>{
+    tile.addEventListener('click', ()=>{
+      const i = Number(tile.dataset.i);
+      if (i === 0) return;
+      const [picked] = drawerImages.splice(i, 1);
+      drawerImages.unshift(picked);
       renderImageList();
     });
   });
