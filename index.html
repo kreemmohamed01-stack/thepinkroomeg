@@ -209,43 +209,13 @@
   }
   .hamburger-btn span{display:none;}
   .topbar-mobile .logo-wrap{
-    position:relative;
     display:block;
     flex:0 0 auto;
-    width:260px;
-    max-width:58vw;
-    overflow:hidden;
-    animation: logoGlow 4.5s ease-in-out infinite;
+    width:300px;
+    max-width:60vw;
+    transform:translateY(10px);
   }
   .logo-wrap img{width:100%;height:auto;display:block;}
-  /* shine lives only on the letterforms themselves: the moving gradient is
-     masked to the logo artwork's own alpha, so it never paints a visible
-     box over the transparent gaps/background around the letters */
-  .logo-wrap::after{
-    content:'';
-    position:absolute;
-    inset:0;
-    background:linear-gradient(100deg,
-      transparent 0%, transparent 38%,
-      rgba(255,255,255,.95) 47%,
-      rgba(255,241,214,1) 50%,
-      rgba(201,169,124,.95) 53%,
-      transparent 62%, transparent 100%);
-    background-size:300% 100%;
-    background-position:-100% 0;
-    -webkit-mask-image:url('logo-beige.png');
-    -webkit-mask-size:100% 100%;
-    -webkit-mask-repeat:no-repeat;
-    mask-image:url('logo-beige.png');
-    mask-size:100% 100%;
-    mask-repeat:no-repeat;
-    pointer-events:none;
-    animation: logoLetterShine 6s ease-in-out infinite;
-  }
-  @keyframes logoLetterShine{
-    0%{background-position:-100% 0;}
-    100%{background-position:200% 0;}
-  }
   @keyframes logoShineSweep{
     0%{left:-170%;}
     55%{left:170%;}
@@ -270,7 +240,7 @@
     }
     .topbar-mobile .side{gap:20px;}
     .topbar-mobile svg{width:18px;height:18px;}
-    .logo-wrap{width:380px;max-width:30vw;}
+    .logo-wrap{width:420px;max-width:32vw;}
     .hamburger-btn span{display:inline;}
   }
 
@@ -1235,6 +1205,13 @@
     box-shadow:0 0 16px var(--shine);
   }
   .footer-social:hover svg{stroke:var(--gold);}
+  /* the real WhatsApp brand green, same as the floating button — placed
+     after .footer-social:hover so it wins the cascade on this icon;
+     its own artwork is a filled glyph, not an outline, so it needs its
+     own fill (the shared .footer-social rule strokes instead) */
+  .footer-whatsapp-badge{background:#25D366;border-color:#25D366;}
+  .footer-whatsapp-badge svg{fill:#fff;stroke:none;}
+  .footer-whatsapp-badge:hover{background:#20BD5A;border-color:#20BD5A;box-shadow:0 0 16px rgba(37,211,102,.5);}
   .footer-contact-item{
     display:flex;align-items:flex-start;gap:10px;
     margin-bottom:16px;
@@ -1316,28 +1293,30 @@
   .footer-legal a:hover{color:var(--gold);}
   .footer-legal span{opacity:.4;}
 
-  /* ---------- FLOATING WHATSAPP BUTTON ---------- */
+  /* ---------- FLOATING WHATSAPP BUTTON — the real WhatsApp brand
+     green, not the site's own palette, so it reads instantly as "this
+     opens WhatsApp" ---------- */
   .whatsapp-float{
     position:fixed;
     right:20px;bottom:22px;
     z-index:60;
-    width:46px;height:46px;
+    width:64px;height:64px;
     border-radius:50%;
     display:flex;align-items:center;justify-content:center;
-    background:var(--ink);
+    background:#25D366;
     box-shadow:0 8px 20px rgba(20,17,12,.28);
     animation: floaty 3.6s ease-in-out infinite;
     transition:transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease, background .35s ease;
   }
-  .whatsapp-float svg{width:22px;height:22px;color:#fff;transition:color .3s ease;}
+  .whatsapp-float svg{width:30px;height:30px;color:#fff;transition:color .3s ease;}
   .whatsapp-float:hover{
     transform:scale(1.12) translateY(-3px);
-    background:var(--gold);
-    box-shadow:0 10px 26px var(--shine);
+    background:#20BD5A;
+    box-shadow:0 10px 26px rgba(37,211,102,.5);
   }
   @media (max-width:960px){
-    .whatsapp-float{width:42px;height:42px;right:16px;bottom:18px;}
-    .whatsapp-float svg{width:20px;height:20px;}
+    .whatsapp-float{width:56px;height:56px;right:16px;bottom:18px;}
+    .whatsapp-float svg{width:26px;height:26px;}
   }
 
   /* ---------- MOBILE DRAWER ---------- */
@@ -2026,7 +2005,7 @@
 
   @media (min-width:600px) and (max-width:960px){
     .topbar-mobile{padding:76px 26px 12px;}
-    .logo-wrap{width:400px;max-width:60vw;}
+    .logo-wrap{width:430px;max-width:64vw;}
     .topbar-mobile svg{width:22px;height:22px;}
     .topbar-mobile .side{gap:16px;}
   }
