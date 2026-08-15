@@ -95,10 +95,10 @@
 
         <div class="list-card" style="margin-bottom:24px">
           <h3>Recent Visitors</h3>
-          <p class="sub">Most recent 25 real visits — bots/crawlers are already filtered out, this is who's actually browsing, and from where</p>
+          <p class="sub">Most recent 25 visits — known crawlers/scripts are already blocked before they're even recorded. "Possible bot" below is a heuristic (hit only the homepage once, nothing else) for the ones that slip through disguised as a real browser — not a certainty, just a flag worth a second look.</p>
           <div class="db-table-wrap">
             <table>
-              <thead><tr><th>WHEN</th><th>DEVICE</th><th>BROWSER</th><th>LOCATION</th><th>PAGE</th></tr></thead>
+              <thead><tr><th>WHEN</th><th>DEVICE</th><th>BROWSER</th><th>LOCATION</th><th>PAGE</th><th>NOTE</th></tr></thead>
               <tbody id="recentVisitorsBody"></tbody>
             </table>
           </div>
@@ -272,12 +272,13 @@ async function loadRangeAnalytics(){
     const rv = d.recentVisitors || [];
     $('recentVisitorsEmpty').style.display = rv.length ? 'none' : 'block';
     $('recentVisitorsBody').innerHTML = rv.map(v => `
-      <tr>
+      <tr${v.likelyBot ? ' style="background:rgba(200,60,60,.05)"' : ''}>
         <td>${fmtDate(v.at)}</td>
         <td>${escHtml(DEVICE_LABEL[v.device] || v.device)}</td>
         <td>${escHtml(v.browser)}</td>
         <td>${escHtml(v.city ? (v.city + ', ' + v.country) : v.country)}</td>
         <td style="color:var(--ink-soft);font-size:11.5px">${escHtml(v.path || '')}</td>
+        <td>${v.likelyBot ? '<span class="badge st-cancelled"><i></i>POSSIBLE BOT</span>' : ''}</td>
       </tr>`).join('');
   } catch(e){
     $('rangeStats').innerHTML = `<p style="color:var(--err);font-size:13px;grid-column:1/-1">${escHtml(e.message)}</p>`;

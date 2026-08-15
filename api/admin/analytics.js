@@ -114,14 +114,25 @@ async function rangeAnalytics(req, res) {
       GROUP BY country ORDER BY n DESC LIMIT 12
     `,
     sql`
-      SELECT session_id, device_type, browser, country, city, path, created_at
+      SELECT latest.session_id, latest.device_type, latest.browser, latest.country, latest.city, latest.path, latest.created_at,
+             -- heuristic, not a certainty: a session that hit the site exactly
+             -- once and never went past the homepage (no product/category view,
+             -- no add-to-cart, no second pageview) is the classic signature of
+             -- an automated scan/monitor rather than a real visitor browsing
+             (hits.n = 1 AND (latest.path = '/' OR latest.path IS NULL)) AS likely_bot
       FROM (
         SELECT DISTINCT ON (session_id) session_id, device_type, browser, country, city, path, created_at
         FROM analytics_events
         WHERE type = 'pageview' AND created_at >= ${start} AND created_at < ${end}
         ORDER BY session_id, created_at DESC
       ) latest
-      ORDER BY created_at DESC
+      JOIN (
+        SELECT session_id, count(*)::int AS n
+        FROM analytics_events
+        WHERE created_at >= ${start} AND created_at < ${end}
+        GROUP BY session_id
+      ) hits USING (session_id)
+      ORDER BY latest.created_at DESC
       LIMIT 25
     `
   ]);
@@ -154,7 +165,8 @@ async function rangeAnalytics(req, res) {
     // so this is the honest way to sanity-check the traffic is real
     recentVisitors: recentVisitorRows.map(r => ({
       sessionId: r.session_id, device: r.device_type || 'unknown', browser: r.browser || 'Unknown',
-      country: r.country || 'Unknown', city: r.city || null, path: r.path, at: new Date(r.created_at).getTime()
+      country: r.country || 'Unknown', city: r.city || null, path: r.path, at: new Date(r.created_at).getTime(),
+      likelyBot: !!r.likely_bot
     }))
   });
 }
