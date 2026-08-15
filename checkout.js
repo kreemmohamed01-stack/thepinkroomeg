@@ -66,11 +66,6 @@
          through a PCI-compliant gateway and only store the returned token. */
       async process(){ return { status:'pending', note:'Card payments require a connected payment gateway. Your order has been recorded and will be confirmed once payment is captured.' }; }
     },
-    paypal: {
-      id:'paypal', label:'PayPal', enabled:true,
-      description:'Pay securely with your PayPal account.',
-      async process(){ return { status:'pending', note:'PayPal checkout requires a connected merchant account.' }; }
-    },
     bank_transfer: {
       id:'bank_transfer', label:'Bank Transfer', enabled:true,
       description:'Transfer directly from your bank account.',
