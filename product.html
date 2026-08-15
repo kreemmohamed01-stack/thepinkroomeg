@@ -177,6 +177,22 @@
     padding:15px 18px;
     font-size:14px;color:var(--ink);
   }
+  /* paintings are made to order — this offers a custom size instead of
+     only the size shown, straight to WhatsApp so pricing/specifics can
+     be worked out directly rather than guessed at in the cart */
+  .pdp-customize{
+    display:flex;align-items:center;gap:12px;
+    margin-bottom:22px;
+    padding:14px 16px;
+    border:1px solid rgba(201,169,124,.4);
+    background:rgba(201,169,124,.08);
+    border-radius:3px;
+    transition:border-color .3s ease, background .3s ease;
+  }
+  .pdp-customize:hover{border-color:var(--gold);background:rgba(201,169,124,.14);}
+  .pdp-customize svg{width:22px;height:22px;stroke:var(--gold);fill:none;stroke-width:1.4;flex-shrink:0;}
+  .pdp-customize span{font-size:13px;color:var(--ink-soft);line-height:1.5;}
+  .pdp-customize span b{color:var(--ink);font-weight:600;}
   .qty-row{display:flex;align-items:center;border:1px solid var(--line);border-radius:2px;width:fit-content;}
   .qty-row button{
     width:44px;height:46px;
@@ -441,7 +457,8 @@ const ICON = {
   help:  '<svg viewBox="0 0 24 24"><path d="M4 13v-1a8 8 0 0 1 16 0v1"/><rect x="2" y="13" width="5" height="7" rx="2"/><rect x="17" y="13" width="5" height="7" rx="2"/><path d="M20 20a4 4 0 0 1-4 4h-2"/></svg>',
   zoom:  '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
   leaf:  '<svg viewBox="0 0 24 24"><path d="M4 20c0-8 6-14 16-15 0 10-6 15-13 15Z"/><line x1="4" y1="20" x2="12" y2="12"/></svg>',
-  bulb:  '<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8.9.9 1.5l.1.6h5l.1-.6c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z"/></svg>'
+  bulb:  '<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8.9.9 1.5l.1.6h5l.1-.6c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z"/></svg>',
+  ruler: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="1.5"/><line x1="6" y1="7" x2="6" y2="11"/><line x1="10" y1="7" x2="10" y2="11"/><line x1="14" y1="7" x2="14" y2="11"/><line x1="18" y1="7" x2="18" y2="11"/></svg>'
 };
 
 const money = n => 'EGP ' + Number(n).toLocaleString('en-US');
@@ -471,7 +488,19 @@ PRODUCTS_READY.then(()=>{
     }
     buildPage(product);
     // #pdpWhatsApp is re-patched from the real Store Settings by the
-    // shared handler in catalog.js once SITE_STRUCTURE_READY resolves
+    // shared handler in catalog.js once SITE_STRUCTURE_READY resolves.
+    // #pdpCustomizeWA carries a product-specific ?text= message the
+    // shared handler doesn't know about, so it's patched here instead,
+    // preserving everything after the phone number.
+    if (typeof SITE_STRUCTURE_READY !== 'undefined') {
+      SITE_STRUCTURE_READY.then(()=>{
+        const el = document.getElementById('pdpCustomizeWA');
+        if (el && STORE_SETTINGS.whatsapp) {
+          const num = String(STORE_SETTINGS.whatsapp).replace(/[^0-9]/g, '');
+          el.href = el.href.replace(/wa\.me\/\d*/, 'wa.me/' + num);
+        }
+      });
+    }
   }
 });
 
@@ -563,6 +592,11 @@ function buildPage(p){
   const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
   const lowStock = !oos && p.trackInventory && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 5);
 
+  // paintings are made to order — offer a custom size straight to
+  // WhatsApp instead of only the size shown on the listing
+  const customizeMsg = encodeURIComponent(`Hi! I'd like to ask about a custom size for "${p.name}".`);
+  const customizeWaNum = String(STORE_SETTINGS.whatsapp || '').replace(/[^0-9]/g, '');
+
   root.innerHTML = `
   <nav class="pdp-crumb">
     <a href="index.html">Home</a>${ICON.chev}
@@ -616,6 +650,11 @@ function buildPage(p){
         <span class="pdp-label">SIZE</span>
         <div class="pdp-size-box">${sizeText}</div>
       </div>` : ''}
+
+      ${p.category === 'paintings' ? `<a class="pdp-customize" id="pdpCustomizeWA" href="https://wa.me/${customizeWaNum}?text=${customizeMsg}" target="_blank" rel="noopener">
+        ${ICON.ruler}
+        <span>Need a different size? Every piece is hand-painted to order — <b>Customize This Piece</b> and we'll work out the size with you.</span>
+      </a>` : ''}
 
       ${oos ? '' : `<div class="pdp-field">
         <span class="pdp-label">QUANTITY</span>
