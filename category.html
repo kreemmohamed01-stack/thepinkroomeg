@@ -764,7 +764,7 @@ document.getElementById('catHeroImg').style.backgroundImage = `url('${category.h
 })();
 
 /* ---------- subcategory nav ---------- */
-(function renderSubnav(){
+function renderSubnav(){
   const wrap = document.getElementById('subnavWrap');
   const nav  = document.getElementById('subnav');
   if (!category.subcategories.length){ wrap.style.display = 'none'; return; }
@@ -774,7 +774,23 @@ document.getElementById('catHeroImg').style.backgroundImage = `url('${category.h
       : `<a href="category.html?cat=${catSlug}&sub=${s.slug}" class="${s.slug === subSlug ? 'active' : ''}">${s.name}</a>`
   ).join('');
   if (isRoom) document.querySelector('.cat-eyebrow').textContent = 'SHOP BY ROOM';
-})();
+}
+renderSubnav();
+
+/* ALL_CATEGORY/ROOM_CATEGORY build their tab list from CATEGORIES the
+   instant this script runs — before the dashboard's real category
+   order (fetched async) has arrived, so the tabs above render with
+   catalog.js's hardcoded default order for a moment. Rebuild them and
+   redraw once the real order is in, same "mutate in place, re-render"
+   pattern used for the rest of the page. */
+if ((isAll || isRoom) && typeof SITE_STRUCTURE_READY !== 'undefined') {
+  SITE_STRUCTURE_READY.then(()=>{
+    const fresh = Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => ({ slug:k, name:CATEGORIES[k].name, isCategory:true }));
+    ALL_CATEGORY.subcategories = fresh;
+    if (ROOM_CATEGORY) ROOM_CATEGORY.subcategories = fresh.slice();
+    renderSubnav();
+  });
+}
 
 /* ---------- scope ---------- */
 const searchQuery = (params.get('q') || '').trim().toLowerCase();
