@@ -84,11 +84,10 @@
   .gal-swipe{display:none;}
   .gal-stage img{
     width:100%;height:100%;
-    object-fit:cover;
+    object-fit:contain;
     transition:opacity .4s ease, transform 1.1s cubic-bezier(.16,1,.3,1);
   }
-  /* the dimensions plate must never be cropped */
-  .gal-stage img.contain{object-fit:contain;background:#fff;}
+  .gal-stage img.contain{background:#fff;}
   .gal-stage.zoomed img{transform:scale(1.7);cursor:zoom-out;}
   .gal-zoom{
     position:absolute;top:14px;right:14px;z-index:3;
@@ -122,8 +121,7 @@
     background:#fff;
     transition:border-color .3s ease, transform .3s ease;
   }
-  .gal-thumb img{width:100%;height:100%;object-fit:cover;}
-  .gal-thumb.contain img{object-fit:contain;}
+  .gal-thumb img{width:100%;height:100%;object-fit:contain;}
   .gal-thumb.active{border-color:var(--gold);box-shadow:0 0 0 1px var(--gold);}
   .gal-thumb:hover{transform:translateY(-2px);}
   .gal-counter{display:none;}
@@ -316,7 +314,7 @@
     border:1px solid var(--line);border-radius:3px;background:#fff;
     margin-bottom:13px;
   }
-  .rel-media img{width:100%;height:100%;object-fit:cover;transition:transform 1s cubic-bezier(.16,1,.3,1);}
+  .rel-media img{width:100%;height:100%;object-fit:contain;transition:transform 1s cubic-bezier(.16,1,.3,1);}
   .rel-card:hover .rel-media img{transform:scale(1.06);}
   .rel-wish{
     position:absolute;top:10px;right:10px;z-index:2;
@@ -404,8 +402,8 @@
       flex:0 0 100%;scroll-snap-align:center;
       aspect-ratio:1/1;background:var(--beige-soft);
     }
-    .gal-swipe img{width:100%;height:100%;object-fit:cover;}
-    .gal-swipe img.contain{object-fit:contain;background:#fff;}
+    .gal-swipe img{width:100%;height:100%;object-fit:contain;}
+    .gal-swipe img.contain{background:#fff;}
     .gal-thumbs{margin-top:12px;justify-content:center;}
     .gal-thumb{width:74px;height:74px;}
     .gal-counter{
