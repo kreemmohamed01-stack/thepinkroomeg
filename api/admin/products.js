@@ -184,10 +184,16 @@ async function listProducts(req, res) {
   const category = String(req.query.category || '').trim();
   const like = '%' + search + '%';
 
+  // the category filter matches a product's primary category OR any of
+  // the extra categories it's also listed under (extra.extraCategories),
+  // so filtering by e.g. Accessories finds the Sale piece placed there
+  const extraMatch = JSON.stringify([{ category }]);
+
   const rows = await sql`
     SELECT * FROM products
     WHERE (${search} = '' OR name ILIKE ${like} OR slug ILIKE ${like} OR sku ILIKE ${like})
-      AND (${category} = '' OR category = ${category})
+      AND (${category} = '' OR category = ${category}
+           OR extra->'extraCategories' @> ${extraMatch}::jsonb)
     ORDER BY category ASC, sort_order ASC, created_at DESC
   `;
   return res.status(200).json({ ok: true, products: rows.map(rowToProduct) });

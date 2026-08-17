@@ -837,15 +837,18 @@ function scopedProducts(){
   if (isRoom)              list = PRODUCTS.filter(p => p.rooms && p.rooms.includes(roomSlug));
   else if (isAll)          list = PRODUCTS;
   else if (category.virtual === 'sale') list = PRODUCTS.filter(p => p.salePrice);
-  else                     list = PRODUCTS.filter(p => p.category === catSlug && (!subSlug || p.subcategory === subSlug));
+  // productInCategory() counts a product's primary category AND any extra
+  // categories it was placed in from the dashboard (catalog.js)
+  else                     list = PRODUCTS.filter(p => productInCategory(p, catSlug, subSlug));
 
   if (collectionParam) list = list.filter(p => p.collection.includes(collectionParam));
 
   if (searchQuery){
     list = list.filter(p =>
       p.name.toLowerCase().includes(searchQuery) ||
-      p.categoryName.toLowerCase().includes(searchQuery) ||
-      (p.subcategoryName || '').toLowerCase().includes(searchQuery) ||
+      productPlacements(p).some(pl =>
+        (pl.categoryName || '').toLowerCase().includes(searchQuery) ||
+        (pl.subcategoryName || '').toLowerCase().includes(searchQuery)) ||
       p.material.toLowerCase().includes(searchQuery) ||
       p.color.toLowerCase().includes(searchQuery)
     );
@@ -853,11 +856,32 @@ function scopedProducts(){
   return list;
 }
 
+/* Which CATEGORY-filter checkbox values a product answers to on THIS
+   page — top-level category names on all/room/sale pages, subcategory
+   names (falling back to the category name) on a real category page.
+   It's a list, not one value, because a product placed in several
+   categories legitimately matches several of the boxes. */
+function catFilterValues(p){
+  const placements = productPlacements(p);
+  if (isAll || isRoom || category.virtual) return placements.map(pl => pl.categoryName);
+  return placements.filter(pl => pl.category === catSlug)
+                   .map(pl => pl.subcategoryName || pl.categoryName);
+}
+
+/* The small label under a card: the placement that's relevant to the
+   page you're on, so a Sale piece shown on Accessories reads as
+   "Accessories", not "Sale". */
+function cardCatLabel(p){
+  if (isAll || isRoom || category.virtual) return p.subcategoryName || p.categoryName;
+  const pl = productPlacements(p).find(x => x.category === catSlug);
+  return pl ? (pl.subcategoryName || pl.categoryName) : (p.subcategoryName || p.categoryName);
+}
+
 /* ---------- filtering ---------- */
 function applyFilters(list){
   const f = state.filters;
   return list.filter(p => {
-    if (f.category.length && !f.category.includes((isAll || isRoom || category.virtual) ? p.categoryName : (p.subcategoryName || p.categoryName))) return false;
+    if (f.category.length && !catFilterValues(p).some(v => f.category.includes(v))) return false;
     if (f.color.length && !f.color.includes(p.color)) return false;
     if (f.material.length && !f.material.includes(p.material)) return false;
     if (f.size.length && !f.size.includes(p.size)) return false;
@@ -884,9 +908,7 @@ function sortProducts(list){
 /* ---------- filter panel ---------- */
 function countFor(group, value){
   return scopedProducts().filter(p => {
-    if (group === 'category') return (isAll || isRoom || category.virtual)
-      ? p.categoryName === value
-      : (p.subcategoryName || p.categoryName) === value;
+    if (group === 'category') return catFilterValues(p).includes(value);
     const v = p[group];
     return Array.isArray(v) ? v.includes(value) : v === value;   // works for any future array field
   }).length;
@@ -1044,7 +1066,7 @@ function cardMarkup(p, i){
       ${addBtn}
     </div>
     <h3 class="card-name">${p.name}</h3>
-    <p class="card-cat">${p.subcategoryName || p.categoryName}</p>
+    <p class="card-cat">${cardCatLabel(p)}</p>
     <p class="card-price">${price}</p>
   </a>`;
 }

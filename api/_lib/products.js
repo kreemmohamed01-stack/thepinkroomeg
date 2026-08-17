@@ -35,6 +35,9 @@ function rowToProduct(row){
     collection: extra.collection || [],
     _provisional: extra._provisional || [],
     rooms: extra.rooms || [],
+    // additional categories this product is also listed under, on top of
+    // its primary `category` — see productPlacements() in catalog.js
+    extraCategories: extra.extraCategories || [],
     isNew: !!row.is_new,
     createdAt: new Date(row.created_at).getTime(),
     trackInventory: !!row.track_inventory,
@@ -61,11 +64,34 @@ function validateProduct(p){
   const slug = p.slug ? slugify(p.slug) : slugify(p.name);
   if (!slug) return { error: 'Could not derive a URL slug from the name.' };
 
+  const category = String(p.category).trim();
+
+  /* Extra categories the product is ALSO listed under (dashboard's
+     "Also show in" checkboxes). Same shape as the primary placement so
+     the front end can treat them identically. The primary category and
+     any duplicates are dropped so a product can never be listed twice
+     in the same place. */
+  const seenCats = new Set([category]);
+  const extraCategories = (Array.isArray(p.extraCategories) ? p.extraCategories : [])
+    .map(e => {
+      if (!e) return null;
+      const cat = String(e.category || '').trim();
+      if (!cat || seenCats.has(cat)) return null;
+      seenCats.add(cat);
+      return {
+        category: cat,
+        categoryName: e.categoryName ? String(e.categoryName).trim() : cat,
+        subcategory: e.subcategory || null,
+        subcategoryName: e.subcategoryName || null
+      };
+    })
+    .filter(Boolean);
+
   return {
     values: {
       name: String(p.name).trim(),
       slug,
-      category: String(p.category).trim(),
+      category,
       categoryName: p.categoryName ? String(p.categoryName).trim() : String(p.category).trim(),
       subcategory: p.subcategory || null,
       subcategoryName: p.subcategoryName || null,
@@ -89,6 +115,7 @@ function validateProduct(p){
         finishes: p.finishes || null,
         collection: Array.isArray(p.collection) ? p.collection : [],
         rooms: Array.isArray(p.rooms) ? p.rooms : [],
+        extraCategories,
         _provisional: Array.isArray(p._provisional) ? p._provisional : []
       }
     }

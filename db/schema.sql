@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS products (
   sku               text,
   is_new            boolean NOT NULL DEFAULT false,
   sort_order        integer NOT NULL DEFAULT 0,     -- lets the dashboard reorder within a category later
-  extra             jsonb NOT NULL DEFAULT '{}',    -- dimensions, finish, finishes, collection, rooms, _provisional
+  extra             jsonb NOT NULL DEFAULT '{}',    -- dimensions, finish, finishes, collection, rooms, extraCategories, _provisional
   created_at        timestamptz NOT NULL DEFAULT now(),
   updated_at        timestamptz NOT NULL DEFAULT now()
 );

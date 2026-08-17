@@ -262,3 +262,30 @@ const PRODUCTS_READY = fetch('/api/products')
 function getProductBySlug(slug){
   return PRODUCTS.find(p => p.slug === slug) || null;
 }
+
+/* ------------------------------------------------------------
+   Multi-category placement.
+   Every product has ONE primary category (the one in its breadcrumb,
+   its id prefix, the label on the product page) and, optionally, any
+   number of EXTRA categories picked in the dashboard — so a piece that
+   lives in Sale can also be listed under Accessories, Lighting, etc.
+   `productPlacements()` returns them in one uniform shape, primary
+   first, and everything that asks "is this product in this category?"
+   goes through `productInCategory()` so both kinds count equally.
+   Older products simply have no extraCategories and behave as before.
+   ------------------------------------------------------------ */
+function productPlacements(p){
+  const primary = {
+    category: p.category,
+    categoryName: p.categoryName,
+    subcategory: p.subcategory || null,
+    subcategoryName: p.subcategoryName || null
+  };
+  const extras = Array.isArray(p.extraCategories) ? p.extraCategories : [];
+  return [primary].concat(extras);
+}
+
+function productInCategory(p, catSlug, subSlug){
+  return productPlacements(p).some(pl =>
+    pl.category === catSlug && (!subSlug || pl.subcategory === subSlug));
+}

@@ -102,10 +102,14 @@ let prodSearchTimer = null;
 
 function productRow(p){
   const img = (p.images && p.images[0]) || 'logo-beige.png';
+  // a product can also be listed under extra categories on top of its
+  // primary one — show those under it so the table tells the whole story
+  const extras = (p.extraCategories || [])
+    .map(e => e.categoryName + (e.subcategoryName ? ' — ' + e.subcategoryName : ''));
   return `<tr>
     <td><div class="td-img"><img src="${escAttr(img)}" alt=""></div></td>
     <td class="td-name">${escHtml(p.name)}<span>${escHtml(p.slug)}</span></td>
-    <td>${escHtml(p.categoryName)}${p.subcategoryName ? ' &mdash; ' + escHtml(p.subcategoryName) : ''}</td>
+    <td>${escHtml(p.categoryName)}${p.subcategoryName ? ' &mdash; ' + escHtml(p.subcategoryName) : ''}${extras.length ? `<span class="td-extracats">+ ${escHtml(extras.join(', '))}</span>` : ''}</td>
     <td>${p.price != null ? money(p.price) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.salePrice != null ? money(p.salePrice) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.trackInventory ? `<span style="color:${p.stockQuantity <= 0 ? 'var(--err)' : (p.stockQuantity <= p.lowStockThreshold ? 'var(--warn)' : 'inherit')}">${p.stockQuantity}</span>` : '<span class="no-price">&mdash;</span>'}</td>
@@ -163,6 +167,11 @@ $('prodTableBody').addEventListener('click', async (e)=>{
 /* ---------- product drawer ---------- */
 const prodOverlay = $('prodOverlay'), prodDrawer = $('prodDrawer');
 let drawerImages = [];
+/* Extra categories currently ticked in the open drawer:
+   { categorySlug: subcategorySlug | '' }. '' means the whole category
+   (no subcategory). Kept outside the form markup so the ticks survive
+   the list being re-rendered when the primary category changes. */
+let drawerExtraCats = {};
 
 function closeProductDrawer(){ prodDrawer.classList.remove('open'); prodOverlay.classList.remove('open'); }
 prodOverlay.addEventListener('click', closeProductDrawer);
@@ -171,6 +180,7 @@ $('prodDrawerClose').addEventListener('click', closeProductDrawer);
 async function openProductDrawer(id){
   prodDrawer.classList.add('open'); prodOverlay.classList.add('open');
   drawerImages = [];
+  drawerExtraCats = {};
 
   if (!id){
     $('prodDrawerTitle').textContent = 'Add Product';
@@ -185,6 +195,7 @@ async function openProductDrawer(id){
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || 'Could not load this product.');
     drawerImages = (d.product.images || []).slice();
+    (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
     renderProductForm(d.product);
   } catch(e){
     $('prodDrawerBody').innerHTML = `<p style="color:var(--err);font-size:13px">${escHtml(e.message)}</p>`;
@@ -196,6 +207,50 @@ function populateSubcategories(categoryValue, selectedSub){
   const sel = $('fSubcategory');
   sel.innerHTML = '<option value="">&mdash;</option>' + cat.subs.map(s => `<option value="${s.value}" ${s.value === selectedSub ? 'selected' : ''}>${s.label}</option>`).join('');
   sel.disabled = !cat.subs.length;
+}
+
+/* "Also show in" — every category except the primary one, each with an
+   optional subcategory. Lets one product (a Sale piece, typically) be
+   listed in as many other categories as the shop wants without giving
+   up the primary category that drives its breadcrumb and product page. */
+function renderExtraCategories(){
+  const wrap = $('fExtraCats');
+  if (!wrap) return;
+  const primary = $('fCategory').value;
+  const others = CATEGORY_OPTIONS.filter(c => c.value !== primary);
+
+  if (!others.length){
+    wrap.innerHTML = '<p style="font-size:12px;color:var(--ink-soft)">No other categories to choose from.</p>';
+    return;
+  }
+
+  wrap.innerHTML = others.map(c => {
+    const on  = Object.prototype.hasOwnProperty.call(drawerExtraCats, c.value);
+    const sub = on ? (drawerExtraCats[c.value] || '') : '';
+    return `<div class="db-extracat">
+      <label class="db-checkline"><input type="checkbox" class="fExtraCat" value="${escAttr(c.value)}" ${on ? 'checked' : ''}> ${escHtml(c.label)}</label>
+      ${c.subs.length ? `<select class="fExtraSub" data-cat="${escAttr(c.value)}" ${on ? '' : 'disabled'}>
+        <option value="">Whole category</option>
+        ${c.subs.map(s => `<option value="${escAttr(s.value)}" ${s.value === sub ? 'selected' : ''}>${escHtml(s.label)}</option>`).join('')}
+      </select>` : '<span></span>'}
+    </div>`;
+  }).join('');
+
+  wrap.querySelectorAll('.fExtraCat').forEach(cb => {
+    cb.addEventListener('change', ()=>{
+      const slug = cb.value;
+      const sel = wrap.querySelector(`.fExtraSub[data-cat="${slug}"]`);
+      if (cb.checked) drawerExtraCats[slug] = sel ? sel.value : '';
+      else delete drawerExtraCats[slug];
+      if (sel) sel.disabled = !cb.checked;
+    });
+  });
+  wrap.querySelectorAll('.fExtraSub').forEach(sel => {
+    sel.addEventListener('change', ()=>{
+      const slug = sel.dataset.cat;
+      if (Object.prototype.hasOwnProperty.call(drawerExtraCats, slug)) drawerExtraCats[slug] = sel.value;
+    });
+  });
 }
 
 function renderProductForm(p){
@@ -216,6 +271,12 @@ function renderProductForm(p){
         <select id="fCategory">${CATEGORY_OPTIONS.map(c => `<option value="${c.value}" ${p && p.category === c.value ? 'selected' : ''}>${c.label}</option>`).join('')}</select>
       </div>
       <div class="db-field"><label>Subcategory</label><select id="fSubcategory"></select></div>
+    </div>
+
+    <div class="db-field">
+      <label>Also Show In &mdash; extra categories (optional)</label>
+      <div class="db-extracats" id="fExtraCats"></div>
+      <p class="db-img-hint">Tick any other category this piece should ALSO appear in &mdash; a Sale product can stay in Sale and still be listed under Accessories, Lighting, and so on. The Category above stays the main one (breadcrumb, product page, related items).</p>
     </div>
 
     <div class="db-2col">
@@ -274,7 +335,14 @@ function renderProductForm(p){
 
   renderImageList();
   populateSubcategories(p && p.category, p && p.subcategory);
-  $('fCategory').addEventListener('change', ()=> populateSubcategories($('fCategory').value, null));
+  renderExtraCategories();
+  $('fCategory').addEventListener('change', ()=> {
+    // a category can't be both the primary and an extra — drop the tick
+    // if the newly chosen primary was ticked as an extra a moment ago
+    delete drawerExtraCats[$('fCategory').value];
+    populateSubcategories($('fCategory').value, null);
+    renderExtraCategories();
+  });
   $('fTrackInventory').addEventListener('change', (e)=> $('fStockFields').style.display = e.target.checked ? '' : 'none');
 
   fetch('/api/admin/customers?action=newsletter').then(r=>r.json()).then(d=>{
@@ -403,6 +471,25 @@ async function saveProduct(existingId){
   const subValue = $('fSubcategory').value || null;
   const subMeta = subValue ? catMeta.subs.find(s => s.value === subValue) : null;
 
+  // extra categories the product is also listed under — names resolved
+  // here (same as the primary) so the storefront can render them without
+  // another lookup; the primary category can never be one of them
+  const extraCategories = Object.keys(drawerExtraCats)
+    .filter(slug => slug !== category)
+    .map(slug => {
+      const meta = CATEGORY_OPTIONS.find(c => c.value === slug);
+      if (!meta) return null;
+      const sv = drawerExtraCats[slug] || null;
+      const sm = sv ? meta.subs.find(s => s.value === sv) : null;
+      return {
+        category: slug,
+        categoryName: meta.label,
+        subcategory: sm ? sv : null,
+        subcategoryName: sm ? sm.label : null
+      };
+    })
+    .filter(Boolean);
+
   const payload = {
     id: existingId || undefined,
     name: $('fName').value.trim(),
@@ -410,6 +497,7 @@ async function saveProduct(existingId){
     categoryName: catMeta.label,
     subcategory: subValue,
     subcategoryName: subMeta ? subMeta.label : null,
+    extraCategories,
     price: $('fPrice').value === '' ? null : Number($('fPrice').value),
     salePrice: $('fSalePrice').value === '' ? null : Number($('fSalePrice').value),
     images: drawerImages,

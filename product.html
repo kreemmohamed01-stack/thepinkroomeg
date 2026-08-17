@@ -582,7 +582,13 @@ function buildPage(p){
   const isDim = i => i % 2 === 1;
 
   const hl = highlightsFor(p);
-  const related = PRODUCTS.filter(x => x.category === p.category && x.slug !== p.slug).slice(0, 3);
+  // "related" = anything sharing ANY category with this piece, so a
+  // product placed in several categories (see productPlacements in
+  // catalog.js) is related to everything it sits beside on the site
+  const ownCats = productPlacements(p).map(pl => pl.category);
+  const related = PRODUCTS.filter(x =>
+    x.slug !== p.slug && productPlacements(x).some(pl => ownCats.includes(pl.category))
+  ).slice(0, 3);
 
   const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
   const lowStock = !oos && p.trackInventory && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 5);
