@@ -4,7 +4,8 @@
                                             (?status=, ?payment=, ?method=)
    GET  /api/admin/orders?id=PR-XXXXXX    — full detail of one order
    GET  /api/admin/orders?action=payments — payment-focused summary (see "Payments")
-   PATCH /api/admin/orders                — { id, orderStatus?, paymentStatus? }
+   PATCH  /api/admin/orders               — { id, orderStatus?, paymentStatus? }
+   DELETE /api/admin/orders?id=PR-XXXXXX  — permanently remove an order (test/mistaken orders)
    ============================================================ */
 
 const { sql } = require('../_lib/db');
@@ -200,6 +201,24 @@ async function updateOrder(req, res) {
   return res.status(200).json({ ok: true, order: rowToOrder(rows[0]) });
 }
 
+/* Permanently removes an order — for test/mistaken orders, not a normal
+   part of running the shop (cancelling is what handles a real order that
+   fell through). If the order was never cancelled, any stock it reserved
+   is put back first so deleting it can't leave stock looking short for
+   an order that no longer exists. */
+async function deleteOrder(req, res) {
+  const id = req.query.id;
+  if (!id) return res.status(400).json({ ok: false, error: 'Missing order id.' });
+
+  const rows = await sql`SELECT order_status, items FROM orders WHERE id = ${id}`;
+  if (!rows.length) return res.status(404).json({ ok: false, error: 'Order not found.' });
+
+  if (rows[0].order_status !== 'cancelled') await restockOrderItems(rows[0].items, id, +1);
+  await sql`DELETE FROM inventory_log WHERE order_id = ${id}`;
+  await sql`DELETE FROM orders WHERE id = ${id}`;
+  return res.status(200).json({ ok: true });
+}
+
 module.exports = async (req, res) => {
   const session = requireAuth(req, res);
   if (!session) return;
@@ -209,7 +228,8 @@ module.exports = async (req, res) => {
     if (req.method === 'GET' && req.query.action === 'payments') return await paymentsSummary(req, res);
     if (req.method === 'GET') return req.query.id ? await getOrderDetail(req, res) : await listOrders(req, res);
     if (req.method === 'PATCH') return await updateOrder(req, res);
-    res.setHeader('Allow', 'GET, PATCH');
+    if (req.method === 'DELETE') return await deleteOrder(req, res);
+    res.setHeader('Allow', 'GET, PATCH, DELETE');
     return res.status(405).json({ ok: false, error: 'Method not allowed.' });
   } catch (e) {
     console.error('[admin/orders] error:', e);

@@ -204,6 +204,7 @@ function renderDrawer(o){
       </div>
       <button class="db-save" id="dbSaveBtn">SAVE CHANGES</button>
       <p class="db-save-msg" id="dbSaveMsg"></p>
+      <button class="db-save outline" id="dbDeleteBtn" style="margin-top:10px;border-color:var(--err);color:var(--err)">DELETE THIS ORDER</button>
     </div>
 
     <div class="db-section">
@@ -279,6 +280,23 @@ function renderDrawer(o){
       msg.textContent = e.message; msg.className = 'db-save-msg show bad';
       toast(e.message, 'bad');
     } finally {
+      btn.disabled = false;
+    }
+  });
+
+  $('dbDeleteBtn').addEventListener('click', async ()=>{
+    if (!confirm(`Permanently delete order #${o.id}? This removes it and its details completely and can't be undone.`)) return;
+    const btn = $('dbDeleteBtn');
+    btn.disabled = true;
+    try {
+      const r = await fetch('/api/admin/orders?id=' + encodeURIComponent(o.id), { method: 'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Order deleted.', 'ok');
+      closeDrawer();
+      load();
+    } catch(e){
+      toast(e.message, 'bad');
       btn.disabled = false;
     }
   });
