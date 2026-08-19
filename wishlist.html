@@ -592,7 +592,14 @@ function render(){
     btn.addEventListener('click', e=>{
       e.preventDefault(); e.stopPropagation();
       const product = PRODUCTS.find(p => String(p.id) === btn.dataset.add);
-      if (product && window.TPR) window.TPR.addToCart(product);
+      if (!product) return;
+      // a product with color options needs a color picked first — send
+      // the shopper to its page instead of silently doing nothing
+      if (Array.isArray(product.colors) && product.colors.length){
+        location.href = 'product.html?slug=' + product.slug;
+        return;
+      }
+      if (window.TPR) window.TPR.addToCart(product);
       btn.classList.add('added');
       btn.textContent = 'ADDED';
       setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = 'ADD TO BAG'; }, 1400);

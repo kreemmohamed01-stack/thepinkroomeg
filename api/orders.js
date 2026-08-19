@@ -72,11 +72,80 @@ function rowToOrder(row) {
    nothing else touches stock_quantity between these calls. Items for
    products with track_inventory = false (the default — most items are
    made-to-order/no stock concept) are skipped entirely. */
+/* Reserves one color's stock — an atomic conditional UPDATE just like the
+   plain-product path below, but reaching into extra.colors for both the
+   check and the decrement (jsonb_agg rebuilds the array with just that
+   one element changed). stock_quantity, the top-level "sum of colors"
+   number the rest of the dashboard reads, is decremented in the same
+   statement so it never drifts out of sync with the colors underneath
+   it. Returns true if reserved, false if that color doesn't have enough
+   (or doesn't exist / isn't tracked). */
+async function reserveColorStock(id, color, qty) {
+  const rows = await sql`
+    UPDATE products SET
+      extra = jsonb_set(
+        extra, '{colors}',
+        (SELECT jsonb_agg(
+           CASE WHEN elem->>'name' = ${color}
+                THEN jsonb_set(elem, '{stockQuantity}', to_jsonb((elem->>'stockQuantity')::int - ${qty}))
+                ELSE elem END
+         ) FROM jsonb_array_elements(extra->'colors') elem)
+      ),
+      stock_quantity = stock_quantity - ${qty}
+    WHERE id = ${id} AND track_inventory = true
+      AND EXISTS (
+        SELECT 1 FROM jsonb_array_elements(extra->'colors') elem
+        WHERE elem->>'name' = ${color} AND (elem->>'stockQuantity')::int >= ${qty}
+      )
+    RETURNING id
+  `;
+  return rows.length > 0;
+}
+
+async function releaseColorStock(id, color, qty) {
+  await sql`
+    UPDATE products SET
+      extra = jsonb_set(
+        extra, '{colors}',
+        (SELECT jsonb_agg(
+           CASE WHEN elem->>'name' = ${color}
+                THEN jsonb_set(elem, '{stockQuantity}', to_jsonb((elem->>'stockQuantity')::int + ${qty}))
+                ELSE elem END
+         ) FROM jsonb_array_elements(extra->'colors') elem)
+      ),
+      stock_quantity = stock_quantity + ${qty}
+    WHERE id = ${id}
+  `;
+}
+
+/* Puts back whatever reserveStock successfully took — used both when a
+   later item in the same order fails and when the order row itself
+   fails to save. Mirrors whichever path (color-aware or plain) took it. */
+async function releaseTaken(taken) {
+  for (const t of taken) {
+    if (t.color) await releaseColorStock(t.id, t.color, t.qty);
+    else await sql`UPDATE products SET stock_quantity = stock_quantity + ${t.qty} WHERE id = ${t.id}`;
+  }
+}
+
 async function reserveStock(items, orderId) {
   const taken = [];
   for (const item of items) {
     if (!item || !item.id) continue;
     const qty = Math.max(1, Math.round(Number(item.qty) || 1));
+
+    if (item.color) {
+      const ok = await reserveColorStock(item.id, item.color, qty);
+      if (ok) { taken.push({ id: item.id, qty, color: item.color }); continue; }
+
+      const row = await sql`SELECT track_inventory, name, extra FROM products WHERE id = ${item.id}`;
+      if (!row.length || !row[0].track_inventory) continue; // untracked or unknown product — nothing to reserve
+      const extra = typeof row[0].extra === 'string' ? JSON.parse(row[0].extra) : (row[0].extra || {});
+      const colorRow = (extra.colors || []).find(c => c.name === item.color);
+
+      await releaseTaken(taken);
+      return { error: `"${row[0].name || item.name || item.id}"${item.color ? ' in ' + item.color : ''} only has ${colorRow ? colorRow.stockQuantity : 0} left in stock.` };
+    }
 
     const ok = await sql`
       UPDATE products SET stock_quantity = stock_quantity - ${qty}
@@ -89,14 +158,12 @@ async function reserveStock(items, orderId) {
     if (!row.length || !row[0].track_inventory) continue; // untracked or unknown product — nothing to reserve
 
     // insufficient stock — undo what we already reserved for this order
-    for (const t of taken) {
-      await sql`UPDATE products SET stock_quantity = stock_quantity + ${t.qty} WHERE id = ${t.id}`;
-    }
+    await releaseTaken(taken);
     return { error: `"${row[0].name || item.name || item.id}" only has ${row[0].stock_quantity} left in stock.` };
   }
 
   for (const t of taken) {
-    await sql`INSERT INTO inventory_log (product_id, change, reason, order_id) VALUES (${t.id}, ${-t.qty}, 'order', ${orderId})`;
+    await sql`INSERT INTO inventory_log (product_id, change, reason, order_id, note) VALUES (${t.id}, ${-t.qty}, 'order', ${orderId}, ${t.color ? ('Color: ' + t.color) : null})`;
   }
   return { taken };
 }
@@ -266,9 +333,7 @@ async function createOrder(req, res) {
     `;
   } catch (e) {
     // the order row didn't save — put back any stock we already reserved
-    for (const t of stock.taken || []) {
-      try { await sql`UPDATE products SET stock_quantity = stock_quantity + ${t.qty} WHERE id = ${t.id}`; } catch (e2) {}
-    }
+    try { await releaseTaken(stock.taken || []); } catch (e2) {}
     if (e.message && /duplicate key/i.test(e.message)) {
       return res.status(409).json({ ok: false, error: 'That order id already exists — please try again.' });
     }

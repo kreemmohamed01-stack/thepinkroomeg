@@ -253,6 +253,34 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 .db-img-add.uploading{opacity:.5;pointer-events:none;}
 .db-img-hint{font-size:11px;color:var(--ink-soft);margin-bottom:16px;}
 
+/* ---------- COLOR OPTIONS WIDGET ---------- */
+.db-colors{display:flex;flex-direction:column;gap:12px;margin-bottom:6px;}
+.db-color-row{border:1px solid var(--line);border-radius:4px;background:#fff;padding:12px;}
+.db-color-row-top{display:grid;grid-template-columns:1fr 110px 28px;gap:8px;align-items:center;margin-bottom:10px;}
+.db-color-row-top input[type="text"], .db-color-row-top input[type="number"]{
+  border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:12.5px;font-family:inherit;
+}
+.db-color-row-top input:focus{outline:none;border-color:var(--gold);}
+.db-color-remove{
+  width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:var(--err);font-size:15px;line-height:1;border:1px solid var(--line);
+}
+.db-color-remove:hover{background:var(--err);color:#fff;border-color:var(--err);}
+.db-color-imgs{display:flex;flex-wrap:wrap;gap:8px;}
+.db-color-img-pick{
+  position:relative;width:52px;height:52px;border-radius:3px;overflow:hidden;
+  border:2px solid var(--line);cursor:pointer;flex-shrink:0;opacity:.5;transition:opacity .2s ease,border-color .2s ease;
+}
+.db-color-img-pick img{width:100%;height:100%;object-fit:cover;display:block;}
+.db-color-img-pick input{position:absolute;top:2px;left:2px;width:13px;height:13px;accent-color:var(--gold);}
+.db-color-img-pick.on{opacity:1;border-color:var(--gold);}
+.db-color-add{
+  display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;color:var(--gold);
+  border:1px dashed var(--gold);border-radius:3px;padding:9px 14px;justify-content:center;
+}
+.db-color-add:hover{background:rgba(201,169,124,.1);}
+.db-color-add svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:2;}
+
 .db-item{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);}
 .db-item:last-child{border-bottom:none;}
 .db-item-img{width:50px;height:50px;border-radius:3px;overflow:hidden;border:1px solid var(--line);flex-shrink:0;}

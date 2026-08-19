@@ -36,10 +36,16 @@
 
   /* a product is sold out either because the admin flagged it manually,
      or because its tracked stock quantity has hit zero — "Made to Order"
-     is intentionally NOT sold out, it's just custom-made */
-  function isOutOfStock(p){
+     is intentionally NOT sold out, it's just custom-made.
+     When colorName is given and the product has color options, stock is
+     checked for that specific color instead of the product total. */
+  function isOutOfStock(p, colorName){
     if (!p) return false;
     if (p.availability === 'Out of Stock') return true;
+    if (colorName && Array.isArray(p.colors) && p.colors.length){
+      const c = p.colors.find(c => c.name === colorName);
+      return !c || Number(c.stockQuantity) <= 0;
+    }
     if (p.trackInventory && Number(p.stockQuantity) <= 0) return true;
     return false;
   }
@@ -384,21 +390,33 @@
   /* public API so pages can add to bag / manage the wishlist */
   window.TPR = {
     isOutOfStock,
-    addToCart(product){
-      // safety net — the UI should already stop a sold-out item from
-      // reaching this point (button disabled/hidden), this just makes
-      // sure nothing can add one to the bag even if it somehow does
-      if (isOutOfStock(product)) return;
-      const existing = cart.find(i => String(i.id) === String(product.id));
+    /* colorName is required when the product has color options — the UI
+       (product.html) forces a color pick before this can be called. Two
+       different colors of the same product are kept as separate cart
+       lines (matched by id + color), same as any other store. */
+    addToCart(product, colorName){
+      // safety net — the UI should already stop a sold-out item / an
+      // unpicked color from reaching this point, this just makes sure
+      // nothing can add one to the bag even if it somehow does
+      if (isOutOfStock(product, colorName)) return;
+      if (Array.isArray(product.colors) && product.colors.length && !colorName) return;
+
+      const existing = cart.find(i => String(i.id) === String(product.id) && (i.color || null) === (colorName || null));
       if (existing) existing.qty++;
-      else cart.push({
-        id: product.id,
-        name: product.name,
-        variant: product.subcategoryName || product.categoryName || '',
-        price: product.salePrice || product.price,
-        img: (product.images && product.images[0]) || product.img,
-        qty: 1
-      });
+      else {
+        const colorImg = colorName && Array.isArray(product.colors)
+          ? (product.colors.find(c => c.name === colorName) || {}).images
+          : null;
+        cart.push({
+          id: product.id,
+          name: product.name,
+          variant: colorName || product.subcategoryName || product.categoryName || '',
+          color: colorName || null,
+          price: product.salePrice || product.price,
+          img: (colorImg && colorImg[0]) || (product.images && product.images[0]) || product.img,
+          qty: 1
+        });
+      }
       if (window.TPRAnalytics){
         window.TPRAnalytics.trackEvent('add_to_cart', {
           productId: product.id, productName: product.name,

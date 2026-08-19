@@ -168,6 +168,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   }
   .pdp-tax{font-size:12.5px;color:var(--ink-soft);margin-bottom:24px;}
   .pdp-stock{font-size:12px;font-weight:600;letter-spacing:.4px;margin:-16px 0 24px;}
+  .pdp-stock:empty{display:none;}
   .pdp-stock.oos{color:#b13b3b;}
   .pdp-stock.low{color:#a97a2e;}
   .pdp-rule{height:1px;background:var(--line);margin:24px 0;}
@@ -182,6 +183,17 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     display:block;font-size:11px;letter-spacing:2px;
     color:var(--ink-soft);margin-bottom:10px;
   }
+  .pdp-label .val{color:var(--ink);font-weight:600;text-transform:none;letter-spacing:.3px;font-size:13px;}
+  .pdp-swatches{display:flex;flex-wrap:wrap;gap:9px;}
+  .pdp-swatch{
+    padding:10px 18px;border:1px solid var(--line);border-radius:2px;
+    font-size:12.5px;color:var(--ink);background:#fff;
+    transition:border-color .25s ease,background .25s ease,color .25s ease;
+  }
+  .pdp-swatch:hover{border-color:var(--gold);}
+  .pdp-swatch.active{border-color:var(--gold);background:var(--gold);color:var(--ink);font-weight:500;}
+  .pdp-swatch.oos{color:var(--ink-soft);text-decoration:line-through;opacity:.55;cursor:not-allowed;}
+  .pdp-swatch.oos:hover{border-color:var(--line);}
   .pdp-size-box{
     border:1px solid var(--line);
     background:var(--cream-light);
@@ -474,6 +486,7 @@ const ICON = {
 };
 
 const money = n => 'EGP ' + Number(n).toLocaleString('en-US');
+const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
 const slug  = new URLSearchParams(location.search).get('slug');
 const root  = document.getElementById('pdpRoot');
 
@@ -586,6 +599,32 @@ function updateSeoTags(p){
   document.head.appendChild(ldScript);
 }
 
+/* Color-specific photos if that color has any picked, else every photo
+   (so a color added without picking photos still shows something). No
+   colors on the product at all ⇒ just the product's own image list. */
+function imagesForColor(p, colorName){
+  const all = p.images || [];
+  if (!colorName || !Array.isArray(p.colors)) return all;
+  const c = p.colors.find(x => x.name === colorName);
+  return (c && c.images && c.images.length) ? c.images : all;
+}
+
+/* Stock status for the product as a whole, or for one color when the
+   product has color options — everything that shows "Sold Out"/"Only N
+   left" reads from this instead of the raw fields directly. */
+function stockInfoFor(p, colorName){
+  const isOOS = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock : ()=>false;
+  if (colorName && Array.isArray(p.colors) && p.colors.length){
+    const c = p.colors.find(x => x.name === colorName);
+    const qty = c ? Number(c.stockQuantity) : 0;
+    const oos = isOOS(p, colorName);
+    return { oos, low: !oos && qty > 0 && qty <= (p.lowStockThreshold || 5), qty };
+  }
+  const oos = isOOS(p);
+  const qty = Number(p.stockQuantity) || 0;
+  return { oos, low: !oos && p.trackInventory && qty > 0 && qty <= (p.lowStockThreshold || 5), qty };
+}
+
 function buildPage(p){
   updateSeoTags(p);
   document.title = p.name + ' | The Pink Room';
@@ -593,7 +632,12 @@ function buildPage(p){
   // p.sizeLabel is real client-supplied copy, so only that renders here.
   const sizeText = p.sizeLabel || '';
 
-  const imgs = p.images || [];
+  const hasColors = Array.isArray(p.colors) && p.colors.length > 0;
+  // default to the first color that's actually in stock, so a shopper
+  // isn't greeted by a sold-out selection when another color is available
+  const pdpState = { color: hasColors ? ((p.colors.find(c => c.stockQuantity > 0) || p.colors[0]).name) : null };
+
+  const imgs = imagesForColor(p, pdpState.color);
   // by convention each pair is [lifestyle, dimensions] — odd indices are the dimensions plate
   // (covers both a single 2-image product and multi-finish products with several pairs)
   const isDim = i => i % 2 === 1;
@@ -607,8 +651,8 @@ function buildPage(p){
     x.slug !== p.slug && productPlacements(x).some(pl => ownCats.includes(pl.category))
   ).slice(0, 3);
 
-  const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
-  const lowStock = !oos && p.trackInventory && p.stockQuantity > 0 && p.stockQuantity <= (p.lowStockThreshold || 5);
+  const stock = stockInfoFor(p, pdpState.color);
+  const oos = stock.oos;
 
   // paintings are made to order — offer a custom size straight to
   // WhatsApp instead of only the size shown on the listing
@@ -653,7 +697,7 @@ function buildPage(p){
       <h1 class="pdp-name">${p.name}</h1>
       <div class="pdp-price">${priceMarkup(p)}</div>
       <p class="pdp-tax">Tax included.</p>
-      ${oos ? `<p class="pdp-stock oos">Sold Out</p>` : (lowStock ? `<p class="pdp-stock low">Only ${p.stockQuantity} left in stock</p>` : '')}
+      <p class="pdp-stock ${stock.oos ? 'oos' : (stock.low ? 'low' : '')}" id="pdpStockMsg">${stock.oos ? 'Sold Out' : (stock.low ? `Only ${stock.qty} left in stock` : '')}</p>
       <div class="pdp-rule"></div>
 
       <p class="pdp-desc">${p.shortDescription || ''}</p>
@@ -669,19 +713,29 @@ function buildPage(p){
         <div class="pdp-size-box">${sizeText}</div>
       </div>` : ''}
 
+      ${hasColors ? `<div class="pdp-field">
+        <span class="pdp-label">COLOR<span class="val" id="pdpColorLabel"> &mdash; ${escHtml(pdpState.color)}</span></span>
+        <div class="pdp-swatches" id="pdpSwatches">
+          ${p.colors.map(c => {
+            const cOos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p, c.name) : c.stockQuantity <= 0;
+            return `<button type="button" class="pdp-swatch ${c.name === pdpState.color ? 'active' : ''} ${cOos ? 'oos' : ''}" data-color="${escHtml(c.name)}" ${cOos ? 'disabled' : ''}>${escHtml(c.name)}${cOos ? ' &mdash; Sold Out' : ''}</button>`;
+          }).join('')}
+        </div>
+      </div>` : ''}
+
       ${p.category === 'paintings' ? `<a class="pdp-customize" id="pdpCustomizeWA" href="https://wa.me/${customizeWaNum}?text=${customizeMsg}" target="_blank" rel="noopener">
         ${ICON.ruler}
         <span>Need a different size? Every piece is hand-painted to order — <b>Customize This Piece</b> and we'll work out the size with you.</span>
       </a>` : ''}
 
-      ${oos ? '' : `<div class="pdp-field">
+      <div class="pdp-field" id="qtyFieldWrap" style="${oos ? 'display:none' : ''}">
         <span class="pdp-label">QUANTITY</span>
         <div class="qty-row">
           <button id="qtyMinus" aria-label="Decrease">&minus;</button>
           <span class="val" id="qtyVal">1</span>
           <button id="qtyPlus" aria-label="Increase">+</button>
         </div>
-      </div>`}
+      </div>
 
       <button class="btn-bag" id="btnBag" ${oos ? 'disabled' : ''}><span>${oos ? 'SOLD OUT' : 'ADD TO BAG'}</span></button>
 
@@ -764,10 +818,45 @@ function buildPage(p){
   </section>` : ''}
   `;
 
-  wireGallery(imgs, isDim);
-  wireActions(p);
+  const galleryApi = wireGallery(imgs, isDim, p.name);
+  wireActions(p, pdpState);
+  if (hasColors) wireColorSwatches(p, pdpState, galleryApi);
   wireTabs();
   loadReviews(p);
+}
+
+/* Re-picks the gallery images and refreshes the stock line / quantity /
+   Add to Bag button for the newly chosen color — everything else on the
+   page (name, price, description…) doesn't depend on color, so nothing
+   else needs to change. */
+function wireColorSwatches(p, pdpState, galleryApi){
+  const swatches = document.getElementById('pdpSwatches');
+  if (!swatches) return;
+  swatches.addEventListener('click', e => {
+    const btn = e.target.closest('.pdp-swatch');
+    if (!btn || btn.disabled) return;
+    pdpState.color = btn.dataset.color;
+
+    swatches.querySelectorAll('.pdp-swatch').forEach(b => b.classList.toggle('active', b === btn));
+    const label = document.getElementById('pdpColorLabel');
+    if (label) label.textContent = ' — ' + pdpState.color;
+
+    galleryApi.setImages(imagesForColor(p, pdpState.color));
+
+    const stock = stockInfoFor(p, pdpState.color);
+    const msg = document.getElementById('pdpStockMsg');
+    if (msg){
+      msg.className = 'pdp-stock' + (stock.oos ? ' oos' : (stock.low ? ' low' : ''));
+      msg.textContent = stock.oos ? 'Sold Out' : (stock.low ? `Only ${stock.qty} left in stock` : '');
+    }
+    const qtyWrap = document.getElementById('qtyFieldWrap');
+    if (qtyWrap) qtyWrap.style.display = stock.oos ? 'none' : '';
+    const bag = document.getElementById('btnBag');
+    if (bag){
+      bag.disabled = stock.oos;
+      bag.querySelector('span').textContent = stock.oos ? 'SOLD OUT' : 'ADD TO BAG';
+    }
+  });
 }
 
 /* ---------- reviews ---------- */
@@ -866,14 +955,28 @@ function wireReviewForm(p){
   });
 }
 
-/* ---------- gallery ---------- */
-function wireGallery(imgs, isDim){
+/* ---------- gallery ----------
+   Owns its own thumbs/swipe markup (rebuilt on demand) rather than only
+   indexing into what buildPage first rendered, so a color swap can hand
+   it a whole new image list via the returned setImages(). */
+function wireGallery(initialImgs, isDim, altName){
+  let imgs = initialImgs;
   let idx = 0;
-  const stage  = document.getElementById('galStage');
-  const img    = document.getElementById('galImg');
-  const thumbs = [...document.querySelectorAll('.gal-thumb')];
-  const swipe  = document.getElementById('galSwipe');
-  const count  = document.getElementById('galCount');
+  const stage      = document.getElementById('galStage');
+  const img        = document.getElementById('galImg');
+  const swipe      = document.getElementById('galSwipe');
+  const thumbsWrap = document.getElementById('galThumbs');
+  const count      = document.getElementById('galCount');
+  const prev = document.getElementById('galPrev'), next = document.getElementById('galNext');
+
+  function renderThumbsAndSwipe(){
+    thumbsWrap.innerHTML = imgs.map((src,i)=>`<button class="gal-thumb ${isDim(i)?'contain':''}" data-i="${i}"><img src="${src}" alt="View ${i+1}"></button>`).join('');
+    if (swipe) swipe.innerHTML = imgs.map((src,i)=>`<div><img src="${src}" alt="${altName} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}"></div>`).join('');
+    thumbsWrap.querySelectorAll('.gal-thumb').forEach(t => t.addEventListener('click', ()=> show(+t.dataset.i)));
+    const showArrows = imgs.length > 1;
+    if (prev) prev.style.display = showArrows ? '' : 'none';
+    if (next) next.style.display = showArrows ? '' : 'none';
+  }
 
   function show(i){
     idx = (i + imgs.length) % imgs.length;
@@ -883,14 +986,12 @@ function wireGallery(imgs, isDim){
       img.classList.toggle('contain', isDim(idx));
       img.style.opacity = '1';
     }, 160);
-    thumbs.forEach((t,n)=> t.classList.toggle('active', n === idx));
+    thumbsWrap.querySelectorAll('.gal-thumb').forEach((t,n)=> t.classList.toggle('active', n === idx));
     if (count) count.textContent = (idx+1) + ' / ' + imgs.length;
     stage.classList.remove('zoomed');
     if (swipe) swipe.scrollTo({ left: swipe.clientWidth * idx, behavior:'smooth' });
   }
 
-  thumbs.forEach(t => t.addEventListener('click', ()=> show(+t.dataset.i)));
-  const prev = document.getElementById('galPrev'), next = document.getElementById('galNext');
   if (prev) prev.addEventListener('click', ()=> show(idx - 1));
   if (next) next.addEventListener('click', ()=> show(idx + 1));
   const cPrev = document.getElementById('cntPrev'), cNext = document.getElementById('cntNext');
@@ -913,21 +1014,33 @@ function wireGallery(imgs, isDim){
         const i = Math.round(swipe.scrollLeft / swipe.clientWidth);
         if (i !== idx){
           idx = i;
-          thumbs.forEach((th,n)=> th.classList.toggle('active', n === idx));
+          thumbsWrap.querySelectorAll('.gal-thumb').forEach((th,n)=> th.classList.toggle('active', n === idx));
           if (count) count.textContent = (idx+1) + ' / ' + imgs.length;
         }
       }, 90);
     }, { passive:true });
   }
+
+  renderThumbsAndSwipe();
+  show(0);
+
+  return {
+    setImages(newImgs){
+      imgs = (newImgs && newImgs.length) ? newImgs : imgs;
+      renderThumbsAndSwipe();
+      show(0);
+    }
+  };
 }
 
 /* ---------- quantity, bag, wishlist, share ---------- */
-function wireActions(p){
+function wireActions(p, pdpState){
   let qty = 1;
   const val = document.getElementById('qtyVal');
   const bump = ()=>{ val.classList.add('bump'); setTimeout(()=> val.classList.remove('bump'), 300); };
 
-  // quantity controls aren't rendered at all for a sold-out product
+  // hidden (via qtyFieldWrap) rather than unrendered now, since a color
+  // swap can show/hide it, but the buttons themselves are always present
   const qtyPlusEl = document.getElementById('qtyPlus');
   const qtyMinusEl = document.getElementById('qtyMinus');
   if (qtyPlusEl) qtyPlusEl.addEventListener('click', ()=>{ qty++; val.textContent = qty; bump(); });
@@ -936,7 +1049,7 @@ function wireActions(p){
   const bag = document.getElementById('btnBag');
   bag.addEventListener('click', ()=>{
     if (bag.disabled) return;
-    if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p);
+    if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p, pdpState.color);
     bag.classList.add('added');
     bag.querySelector('span').textContent = 'ADDED TO BAG';
     setTimeout(()=>{ bag.classList.remove('added'); bag.querySelector('span').textContent = 'ADD TO BAG'; }, 1600);

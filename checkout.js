@@ -239,7 +239,7 @@
       billingAddress: state.billingAddress && !state.billingAddress.sameAsShipping ? state.billingAddress : { sameAsShipping:true },
       paymentMethod: { id: provider.id, label: provider.label },
       notes: state.notes || '',
-      items: cart.map(i => ({ id:i.id, name:i.name, variant:i.variant||'', price:i.price, img:i.img, qty:i.qty })),
+      items: cart.map(i => ({ id:i.id, name:i.name, variant:i.variant||'', color:i.color||null, price:i.price, img:i.img, qty:i.qty })),
       pricing,
       promo,
       paymentStatus: paymentResult.status,       // pending | processing | paid | failed | cancelled

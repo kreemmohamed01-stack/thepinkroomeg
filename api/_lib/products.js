@@ -38,6 +38,10 @@ function rowToProduct(row){
     // additional categories this product is also listed under, on top of
     // its primary `category` — see productPlacements() in catalog.js
     extraCategories: extra.extraCategories || [],
+    // color options a customer picks between before adding to bag — each
+    // { name, images: [indices into `images` above], stockQuantity }.
+    // Empty array = no color choice for this product (the common case).
+    colors: extra.colors || [],
     isNew: !!row.is_new,
     createdAt: new Date(row.created_at).getTime(),
     trackInventory: !!row.track_inventory,
@@ -87,6 +91,34 @@ function validateProduct(p){
     })
     .filter(Boolean);
 
+  /* Color options — each { name, images: [urls from p.images], stockQuantity }.
+     Images are matched by URL rather than index so reordering/removing a
+     photo in the dashboard (which shifts indices) never silently points a
+     color at the wrong picture. Names are deduped (case-insensitive). A
+     product with colors is inventory-tracked by definition — its
+     top-level stockQuantity becomes the sum of every color's, kept here
+     so the rest of the dashboard/site (low-stock badges, the inventory
+     page) that only look at the one number keep working without knowing
+     colors exist. */
+  const validImages = new Set(p.images.filter(Boolean));
+  const seenColorNames = new Set();
+  const colors = (Array.isArray(p.colors) ? p.colors : [])
+    .map(c => {
+      if (!c) return null;
+      const name = String(c.name || '').trim();
+      if (!name) return null;
+      const key = name.toLowerCase();
+      if (seenColorNames.has(key)) return null;
+      seenColorNames.add(key);
+      const images = (Array.isArray(c.images) ? c.images : [])
+        .filter(u => typeof u === 'string' && validImages.has(u));
+      const stockQuantity = Math.max(0, Math.round(Number(c.stockQuantity) || 0));
+      return { name, images, stockQuantity };
+    })
+    .filter(Boolean);
+
+  const colorStockTotal = colors.reduce((sum, c) => sum + c.stockQuantity, 0);
+
   return {
     values: {
       name: String(p.name).trim(),
@@ -106,8 +138,10 @@ function validateProduct(p){
       availability: p.availability || 'In Stock',
       sku: p.sku || null,
       isNew: !!p.isNew,
-      trackInventory: !!p.trackInventory,
-      stockQuantity: p.stockQuantity == null || p.stockQuantity === '' ? 0 : Math.max(0, Math.round(Number(p.stockQuantity))),
+      trackInventory: colors.length ? true : !!p.trackInventory,
+      stockQuantity: colors.length
+        ? colorStockTotal
+        : (p.stockQuantity == null || p.stockQuantity === '' ? 0 : Math.max(0, Math.round(Number(p.stockQuantity)))),
       lowStockThreshold: p.lowStockThreshold == null || p.lowStockThreshold === '' ? 5 : Math.max(0, Math.round(Number(p.lowStockThreshold))),
       extra: {
         dimensions: p.dimensions || null,
@@ -116,6 +150,7 @@ function validateProduct(p){
         collection: Array.isArray(p.collection) ? p.collection : [],
         rooms: Array.isArray(p.rooms) ? p.rooms : [],
         extraCategories,
+        colors,
         _provisional: Array.isArray(p._provisional) ? p._provisional : []
       }
     }
