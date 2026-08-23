@@ -724,6 +724,11 @@ const roomSlug = params.get('room') || null;
 let   catSlug  = params.get('cat') || 'all';
 const subSlug  = params.get('sub') || null;
 const room     = roomSlug && typeof ROOMS !== 'undefined' ? ROOMS[roomSlug] : null;
+// ?promo=<id> — the homepage offer section's "Shop the Offer" button
+// links here, scoped to only the products picked for that one Sale
+// Campaign. Declared up here (not down by scopedProducts()) because the
+// header title block below also reads it, before it's assigned.
+const promoParam = params.get('promo');
 
 /* "all" is a virtual category: every product, with the main categories as its tabs */
 const ALL_CATEGORY = {
@@ -854,11 +859,6 @@ if ((isAll || isRoom) && typeof SITE_STRUCTURE_READY !== 'undefined') {
 /* ---------- scope ---------- */
 const searchQuery = (params.get('q') || '').trim().toLowerCase();
 const collectionParam = params.get('collection');
-// ?promo=<id> — the offer section's "Shop the Offer" button links here,
-// scoped to only the products the admin actually picked for that one
-// Sale Campaign (not every product with any sale price) — activePromotion
-// is set by the server's price overlay, see api/_lib/promotions.js
-const promoParam = params.get('promo');
 
 function scopedProducts(){
   let list;
