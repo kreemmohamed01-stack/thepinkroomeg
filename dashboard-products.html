@@ -600,7 +600,11 @@ async function saveProduct(existingId){
     notifySubscribers: $('fNotifySubs').checked
   };
   const wantsTopSeller = $('fTopSeller').checked;
-  const wantsCampaignId = $('fCampaign').value ? Number($('fCampaign').value) : null;
+  // kept as a string throughout — PROMOTIONS.id comes back from the API
+  // as a string (bigint columns aren't auto-numbered), and comparing it
+  // against a Number() version always mismatched, re-toggling on every
+  // single save even when the dropdown choice hadn't changed
+  const wantsCampaignId = $('fCampaign').value || null;
 
   try {
     const resp = await fetch('/api/admin/products', {
@@ -617,7 +621,7 @@ async function saveProduct(existingId){
     // product with no campaign picked stays untouched on every save.
     const savedIdForCampaign = d.product.id;
     const wasInCampaign = PROMOTIONS.find(pm => pm.productIds.includes(savedIdForCampaign));
-    const currentCampaignId = wasInCampaign ? wasInCampaign.id : null;
+    const currentCampaignId = wasInCampaign ? String(wasInCampaign.id) : null;
     if (wantsCampaignId !== currentCampaignId) {
       const campR = await fetch('/api/admin/coupons?action=toggle-promotion-product', {
         method: 'POST', headers: { 'Content-Type': 'application/json' },

@@ -300,7 +300,7 @@ $('btnAddPromo').addEventListener('click', ()=> openPromoDrawer(null));
 $('pmTableBody').addEventListener('click', async (e)=>{
   const editBtn = e.target.closest('.btnEditPm');
   const delBtn = e.target.closest('.btnDeletePm');
-  if (editBtn){ openPromoDrawer(PROMOTIONS.find(p => p.id === Number(editBtn.dataset.id))); return; }
+  if (editBtn){ openPromoDrawer(PROMOTIONS.find(p => String(p.id) === editBtn.dataset.id)); return; }
   if (delBtn){
     if (!confirm('Delete this campaign? Its products go back to their normal price immediately.')) return;
     try {
