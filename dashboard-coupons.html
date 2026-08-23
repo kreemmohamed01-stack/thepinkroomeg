@@ -40,6 +40,27 @@
             <p>No coupons yet — add one to offer a real discount at checkout.</p>
           </div>
         </div>
+
+        <div class="db-page-head" style="margin-top:44px">
+          <div><h1>Sale Campaigns</h1><p>An automatic discount on picked products — no code needed. Shows as a banner across the site and applies itself in the cart and at checkout.</p></div>
+          <button class="db-add" id="btnAddPromo">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            ADD CAMPAIGN
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr><th>CAMPAIGN</th><th>DISCOUNT</th><th>PRODUCTS</th><th>EXPIRES</th><th>STATUS</th><th></th></tr>
+            </thead>
+            <tbody id="pmTableBody"></tbody>
+          </table>
+          <div class="db-empty" id="pmEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
+            <p>No sale campaigns yet — add one to put a live discount + banner on picked products.</p>
+          </div>
+        </div>
       </div>
     </main>
   </div>
@@ -51,6 +72,15 @@
       <button class="db-drawer-close" id="cpDrawerClose">&times;</button>
     </div>
     <div class="db-drawer-body" id="cpDrawerBody"></div>
+  </aside>
+
+  <div class="db-overlay" id="pmOverlay"></div>
+  <aside class="db-drawer" id="pmDrawer">
+    <div class="db-drawer-head">
+      <h2 id="pmDrawerTitle">Campaign</h2>
+      <button class="db-drawer-close" id="pmDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="pmDrawerBody"></div>
   </aside>
 
 <script src="dashboard-ui.js"></script>
@@ -211,8 +241,184 @@ async function saveCoupon(originalCode){
   }
 }
 
+/* ============================================================
+   Sale Campaigns — automatic, no-code discounts on picked products.
+   Same list/drawer/save pattern as coupons above, plus a product
+   multi-select (search + checkboxes) since a campaign can cover any
+   number of pieces from the whole catalogue.
+   ============================================================ */
+let PROMOTIONS = [];
+let ALL_PRODUCTS = []; // fetched once, used for the product picker + name lookups
+
+function promoStatusOf(p){
+  if (!p.active) return { text: 'DISABLED', cls: 'cancelled' };
+  if (p.expiresAt && p.expiresAt < Date.now()) return { text: 'EXPIRED', cls: 'cancelled' };
+  if (p.startsAt && p.startsAt > Date.now()) return { text: 'SCHEDULED', cls: 'pending' };
+  return { text: 'LIVE', cls: 'confirmed' };
+}
+
+function promoRow(p){
+  const st = promoStatusOf(p);
+  return `<tr>
+    <td class="td-name"><b>${escHtml(p.label)}</b></td>
+    <td>${p.value}% off</td>
+    <td>${p.productIds.length} product${p.productIds.length===1?'':'s'}</td>
+    <td>${p.expiresAt ? fmtDateShort(p.expiresAt) : '<span class="no-price">&mdash;</span>'}</td>
+    <td><span class="badge st-${st.cls}"><i></i>${st.text}</span></td>
+    <td class="td-actions">
+      <button class="btnEditPm" data-id="${p.id}" title="Edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
+      <button class="btnDeletePm danger" data-id="${p.id}" title="Delete"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
+    </td>
+  </tr>`;
+}
+
+async function loadPromotions(){
+  const tbody = $('pmTableBody');
+  const empty = $('pmEmpty');
+  try {
+    if (!ALL_PRODUCTS.length){
+      const pr = await fetch('/api/admin/products');
+      const pd = await pr.json();
+      if (pd.ok) ALL_PRODUCTS = pd.products;
+    }
+    const r = await fetch('/api/admin/coupons?action=promotions');
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Could not load sale campaigns.');
+    PROMOTIONS = d.promotions;
+    if (!PROMOTIONS.length){ tbody.innerHTML = ''; empty.style.display = 'block'; return; }
+    empty.style.display = 'none';
+    tbody.innerHTML = PROMOTIONS.map(promoRow).join('');
+  } catch(e){
+    tbody.innerHTML = '';
+    empty.style.display = 'block';
+    empty.querySelector('p').textContent = e.message;
+  }
+}
+$('btnAddPromo').addEventListener('click', ()=> openPromoDrawer(null));
+
+$('pmTableBody').addEventListener('click', async (e)=>{
+  const editBtn = e.target.closest('.btnEditPm');
+  const delBtn = e.target.closest('.btnDeletePm');
+  if (editBtn){ openPromoDrawer(PROMOTIONS.find(p => p.id === Number(editBtn.dataset.id))); return; }
+  if (delBtn){
+    if (!confirm('Delete this campaign? Its products go back to their normal price immediately.')) return;
+    try {
+      const r = await fetch('/api/admin/coupons?action=promotions&id=' + encodeURIComponent(delBtn.dataset.id), { method: 'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Campaign deleted.', 'ok');
+      loadPromotions();
+    } catch(err){ toast(err.message, 'bad'); }
+  }
+});
+
+/* ---------- promo drawer ---------- */
+const pmOverlay = $('pmOverlay'), pmDrawer = $('pmDrawer');
+function closePromoDrawer(){ pmDrawer.classList.remove('open'); pmOverlay.classList.remove('open'); }
+pmOverlay.addEventListener('click', closePromoDrawer);
+$('pmDrawerClose').addEventListener('click', closePromoDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePromoDrawer(); });
+
+let drawerPromoProductIds = [];
+
+function openPromoDrawer(p){
+  pmDrawer.classList.add('open'); pmOverlay.classList.add('open');
+  $('pmDrawerTitle').textContent = p ? 'Edit Campaign' : 'Add Campaign';
+  drawerPromoProductIds = p ? p.productIds.slice() : [];
+
+  $('pmDrawerBody').innerHTML = `
+    <div class="db-field"><label>Campaign name</label><input type="text" id="gLabel" value="${escAttr(p ? p.label : '')}" placeholder="e.g. Summer Sale"></div>
+
+    <div class="db-2col">
+      <div class="db-field"><label>Discount</label><input type="number" id="gValue" value="${p ? p.value : ''}" min="1" max="90" placeholder="e.g. 15"><p style="font-size:11px;color:var(--ink-soft);margin-top:5px">Percent off each product's current price.</p></div>
+      <div class="db-field"><label>Expires on (optional)</label><input type="date" id="gExpiresAt" value="${toDateInput(p && p.expiresAt)}"></div>
+    </div>
+
+    <label class="db-checkline"><input type="checkbox" id="gActive" ${!p || p.active ? 'checked' : ''}> Active (banner + discount are live)</label>
+
+    <div class="db-field">
+      <label>Products in this campaign</label>
+      <input type="text" id="gProductSearch" placeholder="Search products…" style="margin-bottom:8px">
+      <div class="db-extracats" id="gProductList" style="max-height:280px;overflow-y:auto"></div>
+      <p class="db-img-hint" id="gProductCount"></p>
+    </div>
+
+    <button class="db-save" id="pmSaveBtn">${p ? 'SAVE CHANGES' : 'CREATE CAMPAIGN'}</button>
+    <p class="db-save-msg" id="pmSaveMsg"></p>
+    ${p ? `<button class="db-save outline" id="pmDeleteBtn" style="margin-top:10px;border-color:var(--err);color:var(--err)">DELETE THIS CAMPAIGN</button>` : ''}
+  `;
+
+  renderPromoProductList('');
+  $('gProductSearch').addEventListener('input', (e)=> renderPromoProductList(e.target.value));
+  $('pmSaveBtn').addEventListener('click', ()=> savePromotion(p ? p.id : null));
+  if (p) $('pmDeleteBtn').addEventListener('click', async ()=>{
+    if (!confirm('Delete this campaign? Its products go back to their normal price immediately.')) return;
+    try {
+      const r = await fetch('/api/admin/coupons?action=promotions&id=' + encodeURIComponent(p.id), { method: 'DELETE' });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Delete failed.');
+      toast('Campaign deleted.', 'ok');
+      closePromoDrawer();
+      loadPromotions();
+    } catch(err){ toast(err.message, 'bad'); }
+  });
+}
+
+function renderPromoProductList(filter){
+  const wrap = $('gProductList');
+  const term = filter.trim().toLowerCase();
+  const list = term ? ALL_PRODUCTS.filter(pr => pr.name.toLowerCase().includes(term)) : ALL_PRODUCTS;
+  wrap.innerHTML = list.map(pr => `
+    <label class="db-checkline" style="margin-bottom:8px">
+      <input type="checkbox" class="gProductPick" value="${escAttr(pr.id)}" ${drawerPromoProductIds.includes(pr.id) ? 'checked' : ''}>
+      ${escHtml(pr.name)} <span style="color:var(--ink-soft);margin-left:4px">${pr.categoryName || ''}</span>
+    </label>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No products match.</p>';
+
+  wrap.querySelectorAll('.gProductPick').forEach(cb => cb.addEventListener('change', ()=>{
+    if (cb.checked) { if (!drawerPromoProductIds.includes(cb.value)) drawerPromoProductIds.push(cb.value); }
+    else drawerPromoProductIds = drawerPromoProductIds.filter(id => id !== cb.value);
+    $('gProductCount').textContent = `${drawerPromoProductIds.length} product${drawerPromoProductIds.length===1?'':'s'} selected.`;
+  }));
+  $('gProductCount').textContent = `${drawerPromoProductIds.length} product${drawerPromoProductIds.length===1?'':'s'} selected.`;
+}
+
+async function savePromotion(existingId){
+  const btn = $('pmSaveBtn');
+  const msg = $('pmSaveMsg');
+  btn.disabled = true;
+  msg.className = 'db-save-msg';
+
+  const payload = {
+    id: existingId || undefined,
+    label: $('gLabel').value.trim(),
+    value: $('gValue').value === '' ? null : Number($('gValue').value),
+    active: $('gActive').checked,
+    expiresAt: $('gExpiresAt').value || null,
+    productIds: drawerPromoProductIds.slice()
+  };
+
+  try {
+    const resp = await fetch('/api/admin/coupons?action=promotions', {
+      method: existingId ? 'PATCH' : 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    const d = await resp.json();
+    if (!d.ok) throw new Error(d.error || 'Save failed.');
+    msg.textContent = 'Saved.'; msg.className = 'db-save-msg show ok';
+    toast(existingId ? 'Campaign updated.' : 'Campaign created.', 'ok');
+    loadPromotions();
+    setTimeout(closePromoDrawer, 700);
+  } catch(e){
+    msg.textContent = e.message; msg.className = 'db-save-msg show bad';
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 /* ---------- go ---------- */
-DashUI.requireAuth(()=> load());
+DashUI.requireAuth(()=> { load(); loadPromotions(); });
 </script>
 </body>
 </html>

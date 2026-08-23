@@ -122,6 +122,36 @@ CREATE TABLE IF NOT EXISTS coupons (
 
 
 -- ------------------------------------------------------------
+-- promotions — "sale campaigns": an automatic percent discount applied
+-- to a hand-picked set of products, no code needed at checkout (unlike
+-- coupons above, which the customer types in). Lives on the same
+-- Coupons dashboard page as a separate section. Effective sale price
+-- for a product in an active promotion = its own sale_price (if set,
+-- else price) minus this percent — computed on the fly wherever
+-- products are read (api/_lib/promotions.js), never written back onto
+-- products.sale_price, so removing a product from the promotion (or
+-- turning the promotion off) instantly reverts it to its real price
+-- with nothing to undo. product_ids is the admin's picks, in no
+-- particular order; when several promotions are active and overlap on
+-- the same product, the one giving the bigger discount wins (see
+-- applyPromotions()). The homepage/nav banner reads every active row
+-- to announce "X% off", one strip per campaign.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS promotions (
+  id                bigserial PRIMARY KEY,
+  label             text NOT NULL,              -- customer-facing text, e.g. "Summer Sale"
+  type              text NOT NULL DEFAULT 'percent',  -- percent only for now, kept for symmetry with coupons
+  value             numeric NOT NULL,           -- percent off, 0-100
+  product_ids       jsonb NOT NULL DEFAULT '[]', -- [productId, ...] picked from the dashboard
+  active            boolean NOT NULL DEFAULT true,
+  starts_at         timestamptz,
+  expires_at        timestamptz,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now()
+);
+
+
+-- ------------------------------------------------------------
 -- analytics_events — every pageview / product view / category view /
 -- add-to-cart, sent by analytics.js on every page. session_id is an
 -- anonymous id generated client-side (localStorage), not tied to any

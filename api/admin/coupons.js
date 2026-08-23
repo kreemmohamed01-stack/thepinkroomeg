@@ -1,13 +1,34 @@
 /* ============================================================
-   THE PINK ROOM — admin coupons API (auth required on every route)
+   THE PINK ROOM — admin coupons + promotions API (auth required on
+   every route). Coupons and "sale campaign" promotions both live here
+   (rather than promotions getting their own file) purely to stay under
+   Vercel Hobby's serverless-function-per-deployment cap — they're
+   otherwise unrelated features, just shown on the same dashboard page.
+
+   ---- coupons (customer types a code at checkout) ----
    GET    /api/admin/coupons              — list all
    GET    /api/admin/coupons?code=...     — single coupon
    POST   /api/admin/coupons              — create
    PATCH  /api/admin/coupons              — update (code in body)
    DELETE /api/admin/coupons?code=...     — delete
+
+   ---- promotions ("sale campaigns" — automatic, no code needed) ----
+   GET    /api/admin/coupons?action=promotions          — list all
+   GET    /api/admin/coupons?action=promotions&id=...    — single
+   POST   /api/admin/coupons?action=promotions           — create
+   PATCH  /api/admin/coupons?action=promotions            — update (id in body)
+   DELETE /api/admin/coupons?action=promotions&id=...     — delete
+   POST   /api/admin/coupons?action=toggle-promotion-product
+     { productId, promotionId | null } — used by the product edit
+     drawer's single "Campaign" dropdown: puts productId in the chosen
+     promotion's product list and takes it out of every other one, so a
+     product is only ever in the one campaign picked there (a campaign
+     can still be given more products from its own drawer on this page,
+     which allows the usual multi-select).
    ============================================================ */
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
+const { rowToPromotion } = require('../_lib/promotions');
 
 function rowToCoupon(r) {
   return {
@@ -115,12 +136,129 @@ async function deleteCoupon(req, res) {
   return res.status(200).json({ ok: true });
 }
 
+/* ------------------------------------------------------------
+   promotions — "sale campaigns"
+   ------------------------------------------------------------ */
+function validatePromotion(body) {
+  if (!body || !body.label || !String(body.label).trim()) return { error: 'Campaign name is required.' };
+  const value = Number(body.value);
+  if (isNaN(value) || value <= 0) return { error: 'Discount must be a positive number.' };
+  if (value > 90) return { error: "A campaign discount can't exceed 90%." };
+  const productIds = Array.isArray(body.productIds) ? [...new Set(body.productIds.filter(Boolean).map(String))] : [];
+
+  return {
+    values: {
+      label: String(body.label).trim().slice(0, 100),
+      type: 'percent',
+      value,
+      productIds,
+      active: body.active !== false,
+      startsAt: body.startsAt ? new Date(body.startsAt) : null,
+      expiresAt: body.expiresAt ? new Date(body.expiresAt) : null
+    }
+  };
+}
+
+async function listPromotions(req, res) {
+  const rows = await sql`SELECT * FROM promotions ORDER BY created_at DESC`;
+  return res.status(200).json({ ok: true, promotions: rows.map(rowToPromotion) });
+}
+
+async function getPromotion(req, res) {
+  const rows = await sql`SELECT * FROM promotions WHERE id = ${req.query.id}`;
+  if (!rows.length) return res.status(404).json({ ok: false, error: 'Campaign not found.' });
+  return res.status(200).json({ ok: true, promotion: rowToPromotion(rows[0]) });
+}
+
+async function createPromotion(req, res) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const { error, values: v } = validatePromotion(body);
+  if (error) return res.status(400).json({ ok: false, error });
+
+  const rows = await sql`
+    INSERT INTO promotions (label, type, value, product_ids, active, starts_at, expires_at)
+    VALUES (${v.label}, ${v.type}, ${v.value}, ${JSON.stringify(v.productIds)}::jsonb, ${v.active}, ${v.startsAt}, ${v.expiresAt})
+    RETURNING *
+  `;
+  return res.status(200).json({ ok: true, promotion: rowToPromotion(rows[0]) });
+}
+
+async function updatePromotion(req, res) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const id = body && body.id;
+  if (!id) return res.status(400).json({ ok: false, error: 'Missing campaign id.' });
+
+  const { error, values: v } = validatePromotion(body);
+  if (error) return res.status(400).json({ ok: false, error });
+
+  const rows = await sql`
+    UPDATE promotions SET
+      label = ${v.label}, type = ${v.type}, value = ${v.value}, product_ids = ${JSON.stringify(v.productIds)}::jsonb,
+      active = ${v.active}, starts_at = ${v.startsAt}, expires_at = ${v.expiresAt}, updated_at = now()
+    WHERE id = ${id}
+    RETURNING *
+  `;
+  if (!rows.length) return res.status(404).json({ ok: false, error: 'Campaign not found.' });
+  return res.status(200).json({ ok: true, promotion: rowToPromotion(rows[0]) });
+}
+
+async function deletePromotion(req, res) {
+  const id = req.query.id;
+  if (!id) return res.status(400).json({ ok: false, error: 'Missing campaign id.' });
+  const rows = await sql`DELETE FROM promotions WHERE id = ${id} RETURNING id`;
+  if (!rows.length) return res.status(404).json({ ok: false, error: 'Campaign not found.' });
+  return res.status(200).json({ ok: true });
+}
+
+/* Moves one product between campaigns in a single round trip — pulls it
+   out of every promotion's product_ids (jsonb array subtraction via a
+   rebuild, there being no built-in "remove element" jsonb op) and, if a
+   target promotion was given, adds it there. */
+async function togglePromotionProduct(req, res) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const productId = body && body.productId ? String(body.productId) : null;
+  const promotionId = body && body.promotionId ? Number(body.promotionId) : null;
+  if (!productId) return res.status(400).json({ ok: false, error: 'Missing product id.' });
+
+  const rows = await sql`SELECT id, product_ids FROM promotions`;
+  for (const r of rows) {
+    const ids = Array.isArray(r.product_ids) ? r.product_ids : [];
+    const shouldContain = promotionId != null && r.id === promotionId;
+    const contains = ids.includes(productId);
+    if (shouldContain && !contains) {
+      await sql`UPDATE promotions SET product_ids = product_ids || ${JSON.stringify([productId])}::jsonb, updated_at = now() WHERE id = ${r.id}`;
+    } else if (!shouldContain && contains) {
+      const next = ids.filter(x => x !== productId);
+      await sql`UPDATE promotions SET product_ids = ${JSON.stringify(next)}::jsonb, updated_at = now() WHERE id = ${r.id}`;
+    }
+  }
+  return res.status(200).json({ ok: true });
+}
+
 module.exports = async (req, res) => {
   const session = requireAuth(req, res);
   if (!session) return;
   if (!sql) return res.status(500).json({ ok: false, error: 'Database is not configured.' });
 
+  const action = req.query.action;
+
   try {
+    if (action === 'promotions') {
+      if (req.method === 'GET') return req.query.id ? await getPromotion(req, res) : await listPromotions(req, res);
+      if (req.method === 'POST') return await createPromotion(req, res);
+      if (req.method === 'PATCH') return await updatePromotion(req, res);
+      if (req.method === 'DELETE') return await deletePromotion(req, res);
+      res.setHeader('Allow', 'GET, POST, PATCH, DELETE');
+      return res.status(405).json({ ok: false, error: 'Method not allowed.' });
+    }
+    if (action === 'toggle-promotion-product') {
+      if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+      return await togglePromotionProduct(req, res);
+    }
+
     if (req.method === 'GET') return req.query.code ? await getCoupon(req, res) : await listCoupons(req, res);
     if (req.method === 'POST') return await createCoupon(req, res);
     if (req.method === 'PATCH') return await updateCoupon(req, res);

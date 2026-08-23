@@ -18,22 +18,26 @@ const { sql } = require('./_lib/db');
 const { rowToProduct } = require('./_lib/products');
 const { getSetting } = require('./_lib/settings');
 const { sendNewsletterWelcome, verifyUnsubscribeToken } = require('./_lib/notify');
+const { getActivePromotions, applyPromotions } = require('./_lib/promotions');
 
 const SITE_URL = 'https://thepinkroomeg.com';
 
 async function siteStructure(req, res) {
-  const empty = { categories: null, rooms: null, topSellers: null, homepageContent: null, storeSettings: null };
+  const empty = { categories: null, rooms: null, topSellers: null, homepageContent: null, storeSettings: null, activePromotions: [] };
   if (!sql) return res.status(200).json({ ok: true, ...empty });
   try {
-    const [categories, rooms, topSellers, homepageContent, storeSettings] = await Promise.all([
+    const [categories, rooms, topSellers, homepageContent, storeSettings, activePromotions] = await Promise.all([
       getSetting('categories', null),
       getSetting('rooms', null),
       getSetting('top_sellers', null),
       getSetting('homepage_content', null),
-      getSetting('store_settings', null)
+      getSetting('store_settings', null),
+      getActivePromotions()
     ]);
+    // the banner only needs label/value, not the product id list
+    const bannerPromotions = activePromotions.map(p => ({ id: p.id, label: p.label, value: p.value }));
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
-    return res.status(200).json({ ok: true, categories, rooms, topSellers, homepageContent, storeSettings });
+    return res.status(200).json({ ok: true, categories, rooms, topSellers, homepageContent, storeSettings, activePromotions: bannerPromotions });
   } catch (e) {
     console.error('[products] site-structure error:', e);
     return res.status(200).json({ ok: true, ...empty }); // never break the homepage over this
@@ -218,11 +222,15 @@ module.exports = async (req, res) => {
   if (!sql) return res.status(500).json({ ok: false, error: 'Database is not configured.' });
 
   try {
-    const rows = await sql`SELECT * FROM products ORDER BY sort_order ASC, created_at DESC`;
+    const [rows, activePromotions] = await Promise.all([
+      sql`SELECT * FROM products ORDER BY sort_order ASC, created_at DESC`,
+      getActivePromotions()
+    ]);
+    const products = applyPromotions(rows.map(rowToProduct), activePromotions);
     // cache at the edge for a minute — product data doesn't change every
     // second, and this cuts DB load on a page that every visitor loads
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
-    return res.status(200).json({ ok: true, products: rows.map(rowToProduct) });
+    return res.status(200).json({ ok: true, products });
   } catch (e) {
     console.error('[products] error:', e);
     return res.status(500).json({ ok: false, error: 'Could not load products.' });

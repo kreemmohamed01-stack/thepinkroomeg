@@ -76,6 +76,18 @@ const { money, escHtml, escAttr, toast } = DashUI;
 let CATEGORY_OPTIONS = [];
 let ROOM_OPTIONS = [];
 let TOP_SELLER_IDS = [];
+// Sale campaigns (dashboard-coupons.html) — loaded here too so the
+// product drawer's "Campaign" dropdown can show/edit which one (if any)
+// this product belongs to, same source of truth as that page.
+let PROMOTIONS = [];
+
+async function loadPromotions(){
+  try {
+    const r = await fetch('/api/admin/coupons?action=promotions');
+    const d = await r.json();
+    if (d.ok) PROMOTIONS = d.promotions;
+  } catch(e){ /* the dropdown just shows "None" if this fails — not fatal */ }
+}
 
 async function loadCatalogStructure(){
   try {
@@ -186,6 +198,7 @@ async function openProductDrawer(id){
   drawerImages = [];
   drawerExtraCats = {};
   drawerColors = [];
+  loadPromotions(); // refresh in the background so the dropdown reflects the latest campaigns
 
   if (!id){
     $('prodDrawerTitle').textContent = 'Add Product';
@@ -295,6 +308,15 @@ function renderProductForm(p){
     <div class="db-2col">
       <div class="db-field"><label>Price (EGP)</label><input type="number" id="fPrice" value="${p && p.price != null ? p.price : ''}" min="0"></div>
       <div class="db-field"><label>Sale Price (EGP, optional)</label><input type="number" id="fSalePrice" value="${p && p.salePrice != null ? p.salePrice : ''}" min="0"></div>
+    </div>
+
+    <div class="db-field">
+      <label>Sale Campaign (optional)</label>
+      <select id="fCampaign">
+        <option value="">None</option>
+        ${PROMOTIONS.map(pm => `<option value="${pm.id}" ${p && pm.productIds.includes(p.id) ? 'selected' : ''}>${escHtml(pm.label)} — ${pm.value}% off${pm.active ? '' : ' (disabled)'}</option>`).join('')}
+      </select>
+      <p class="db-img-hint">Puts this product in an automatic sale campaign — the discount applies itself everywhere (banner, cart, checkout) with no code needed. Manage campaigns from the Coupons page.</p>
     </div>
 
     <div class="db-2col">
@@ -578,6 +600,7 @@ async function saveProduct(existingId){
     notifySubscribers: $('fNotifySubs').checked
   };
   const wantsTopSeller = $('fTopSeller').checked;
+  const wantsCampaignId = $('fCampaign').value ? Number($('fCampaign').value) : null;
 
   try {
     const resp = await fetch('/api/admin/products', {
@@ -587,6 +610,22 @@ async function saveProduct(existingId){
     });
     const d = await resp.json();
     if (!d.ok) throw new Error(d.error || 'Save failed.');
+
+    // Sale Campaign membership lives on the promotion row (product_ids),
+    // not on the product itself — same reasoning as Top Sellers below.
+    // Only touches it if the dropdown's choice actually changed, so a
+    // product with no campaign picked stays untouched on every save.
+    const savedIdForCampaign = d.product.id;
+    const wasInCampaign = PROMOTIONS.find(pm => pm.productIds.includes(savedIdForCampaign));
+    const currentCampaignId = wasInCampaign ? wasInCampaign.id : null;
+    if (wantsCampaignId !== currentCampaignId) {
+      const campR = await fetch('/api/admin/coupons?action=toggle-promotion-product', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ productId: savedIdForCampaign, promotionId: wantsCampaignId })
+      });
+      const campD = await campR.json();
+      if (campD.ok) await loadPromotions();
+    }
 
     // Top Sellers is a separate list (settings key `top_sellers`), not a
     // field on the product — sync it here so the checkbox actually does
@@ -621,7 +660,7 @@ async function saveProduct(existingId){
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeProductDrawer(); });
 
 /* ---------- go ---------- */
-DashUI.requireAuth(async ()=>{ await loadCatalogStructure(); loadProducts(); });
+DashUI.requireAuth(async ()=>{ await Promise.all([loadCatalogStructure(), loadPromotions()]); loadProducts(); });
 </script>
 </body>
 </html>

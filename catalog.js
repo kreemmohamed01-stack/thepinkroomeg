@@ -147,6 +147,14 @@ let STORE_SETTINGS = {
   seoDescription: 'Curated home accessories, paintings, lighting and furniture — The Pink Room, an Egyptian home decor brand.'
 };
 
+/* Active "sale campaign" promotions — dashboard-editable (Coupons page,
+   Sale Campaigns section). Just [{ id, label, value }, ...] for
+   whichever campaigns are currently live; shared-ui.js reads this to
+   render the shiny top banner. Empty by default so a fresh page load
+   shows no banner until SITE_STRUCTURE_READY resolves with the real
+   list (never a placeholder/fake campaign). */
+let ACTIVE_PROMOTIONS = [];
+
 /* Refreshes CATEGORIES / ROOMS / TOP_SELLER_IDS from the dashboard's
    real settings, mutating each IN PLACE (never reassigned) so anything
    holding a reference to these exact objects/array sees the update —
@@ -174,6 +182,10 @@ const SITE_STRUCTURE_READY = fetch('/api/products?action=site-structure')
       }
       if (data.storeSettings && Object.keys(data.storeSettings).length) {
         Object.assign(STORE_SETTINGS, data.storeSettings);
+      }
+      if (Array.isArray(data.activePromotions)) {
+        ACTIVE_PROMOTIONS.length = 0;
+        ACTIVE_PROMOTIONS.push(...data.activePromotions);
       }
     }
     return true;

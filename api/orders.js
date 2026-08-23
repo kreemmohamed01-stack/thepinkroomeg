@@ -16,6 +16,7 @@ const { sql } = require('./_lib/db');
 const { notifyOrder } = require('./_lib/notify');
 const { validateCoupon } = require('./_lib/coupons');
 const { getSetting } = require('./_lib/settings');
+const { getActivePromotions, effectivePrice } = require('./_lib/promotions');
 
 // same shape/values as the seed row in db/schema.sql — used only if the
 // settings table row is ever missing, so checkout never hard-fails.
@@ -178,8 +179,18 @@ async function reserveStock(items, orderId) {
    until Phase 4 moves it server-side; documented as a known gap. */
 async function recomputePricing(order) {
   const ids = (order.items || []).map(i => i && i.id).filter(Boolean);
-  const rows = ids.length ? await sql`SELECT id, price, sale_price FROM products WHERE id = ANY(${ids})` : [];
-  const priceMap = new Map(rows.map(r => [r.id, r.sale_price != null ? Number(r.sale_price) : (r.price != null ? Number(r.price) : null)]));
+  const [rows, activePromotions] = await Promise.all([
+    ids.length ? sql`SELECT id, price, sale_price FROM products WHERE id = ANY(${ids})` : Promise.resolve([]),
+    getActivePromotions()
+  ]);
+  // same overlay the public product list applies — a product in a live
+  // sale campaign is charged its campaign price here too, never just
+  // its raw price/sale_price, so the banner's "15% off" is never a lie
+  // at the register
+  const priceMap = new Map(rows.map(r => [
+    r.id,
+    effectivePrice(r.id, r.price != null ? Number(r.price) : null, r.sale_price != null ? Number(r.sale_price) : null, activePromotions)
+  ]));
 
   let subtotal = 0;
   const items = order.items.map(item => {
