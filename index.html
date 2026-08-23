@@ -422,32 +422,6 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .offer-btn:hover{background:#2c261f;transform:translateY(-2px);}
   .offer-btn svg{width:clamp(16px,1.6vw,24px);height:12px;stroke:#e9d5b4;fill:none;stroke-width:1.2;}
   .offer-ends{font-size:clamp(9px,.82vw,11.5px);letter-spacing:.26em;color:#4f483d;}
-  /* positioned where the client marked it — upper-right of the photo,
-     by the vase neck/branches, not centred on the card */
-  .offer-badge{
-    position:absolute;top:36%;left:79%;transform:translate(-50%,-50%);
-    width:clamp(90px,13vw,190px);aspect-ratio:1;border-radius:50%;
-    background:#14120f;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;
-    color:#fff;text-align:center;box-shadow:0 16px 44px rgba(20,18,15,.3);
-    border:1px solid rgba(201,169,124,.55);
-    z-index:3;
-  }
-  /* the thin inner gold ring the reference badge has */
-  .offer-badge::before{
-    content:'';position:absolute;inset:7px;border-radius:50%;
-    border:1px solid rgba(201,169,124,.42);
-  }
-  .offer-badge-label{font-size:clamp(7px,.78vw,11.5px);letter-spacing:.34em;color:#c9a97c;}
-  .offer-badge-pct{
-    font-family:'Playfair Display',serif;font-size:clamp(23px,3.2vw,47px);
-    line-height:1.16;letter-spacing:.01em;
-  }
-  .offer-badge-off{
-    font-family:'Poppins',sans-serif;font-size:clamp(9px,1.2vw,18px);
-    letter-spacing:.3em;font-weight:300;
-  }
-  .offer-badge-star{color:#c9a97c;font-size:clamp(7px,.75vw,11px);margin-top:clamp(2px,.4vw,6px);}
 
   /* mobile keeps the exact same side-by-side layout as desktop — every
      size below is already vw-scaled via clamp(), so this query only
@@ -2437,14 +2411,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <!-- ===== SALE OFFER (only shown when a Sale Campaign is active — see catalog.js/ACTIVE_PROMOTIONS) ===== -->
   <section class="offer-section" id="offerSection" style="display:none">
     <div class="offer-card">
-      <div class="offer-photo">
-        <div class="offer-badge">
-          <span class="offer-badge-label">ENJOY</span>
-          <span class="offer-badge-pct" id="offerBadgePct">15%</span>
-          <span class="offer-badge-off">OFF</span>
-          <span class="offer-badge-star">&#10022;</span>
-        </div>
-      </div>
+      <div class="offer-photo"></div>
       <div class="offer-copy">
         <p class="offer-eyebrow">LIMITED TIME OFFER</p>
         <div class="offer-rule"><span>&#10022;</span></div>
@@ -2966,10 +2933,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       const promo = promos[0];
       const section = document.getElementById('offerSection');
       const pctEl = document.getElementById('offerPct');
-      const badgePctEl = document.getElementById('offerBadgePct');
       const labelEl = document.getElementById('offerLabel');
       if (pctEl) pctEl.textContent = promo.value + '%';
-      if (badgePctEl) badgePctEl.textContent = promo.value + '%';
       if (labelEl) labelEl.textContent = promo.label || 'On Selected Products';
       if (section) section.style.display = '';
     });
