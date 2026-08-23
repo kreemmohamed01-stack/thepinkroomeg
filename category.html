@@ -781,6 +781,12 @@ if ((params.get('q') || '').trim()){
   document.getElementById('catTitle').textContent = c;
   document.getElementById('catDesc').textContent = COLLECTION_COPY[c] || category.description;
   document.querySelector('.cat-eyebrow').textContent = 'CURATED COLLECTION';
+} else if (promoParam){
+  // real label/percent only known once a matching product's
+  // activePromotion has loaded — patched in below, once PRODUCTS_READY
+  document.getElementById('catTitle').textContent = 'Limited Time Offer';
+  document.getElementById('catDesc').textContent = 'Selected pieces at a special price, for a limited time.';
+  document.querySelector('.cat-eyebrow').textContent = 'LIMITED TIME OFFER';
 }
 document.getElementById('catHeroImg').style.backgroundImage = `url('${category.hero}')`;
 
@@ -848,6 +854,11 @@ if ((isAll || isRoom) && typeof SITE_STRUCTURE_READY !== 'undefined') {
 /* ---------- scope ---------- */
 const searchQuery = (params.get('q') || '').trim().toLowerCase();
 const collectionParam = params.get('collection');
+// ?promo=<id> — the offer section's "Shop the Offer" button links here,
+// scoped to only the products the admin actually picked for that one
+// Sale Campaign (not every product with any sale price) — activePromotion
+// is set by the server's price overlay, see api/_lib/promotions.js
+const promoParam = params.get('promo');
 
 function scopedProducts(){
   let list;
@@ -859,6 +870,7 @@ function scopedProducts(){
   else                     list = PRODUCTS.filter(p => productInCategory(p, catSlug, subSlug));
 
   if (collectionParam) list = list.filter(p => p.collection.includes(collectionParam));
+  if (promoParam) list = list.filter(p => p.activePromotion && String(p.activePromotion.id) === String(promoParam));
 
   if (searchQuery){
     list = list.filter(p =>
@@ -1202,6 +1214,13 @@ document.getElementById('catBack').addEventListener('click', ()=>{
 PRODUCTS_READY.then(()=>{
   mountFilters();
   render();
+  if (promoParam){
+    const match = PRODUCTS.find(p => p.activePromotion && String(p.activePromotion.id) === String(promoParam));
+    if (match){
+      document.getElementById('catTitle').textContent = match.activePromotion.value + '% Off';
+      document.getElementById('catDesc').textContent = (match.activePromotion.label || 'Selected pieces') + ' — at a special price, for a limited time.';
+    }
+  }
 });
 </script>
 </body>

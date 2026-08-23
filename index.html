@@ -2419,7 +2419,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
         <p class="offer-sub" id="offerLabel">On Selected Products</p>
         <div class="offer-rule"><span>&#10022;</span></div>
         <p class="offer-desc">Elevate your space with pieces you&rsquo;ll love for less.</p>
-        <a href="category.html?cat=sale-offers" class="offer-btn"><span>SHOP THE OFFER</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
+        <a href="category.html?cat=sale-offers" class="offer-btn" id="offerBtn"><span>SHOP THE OFFER</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
         <p class="offer-ends">OFFER ENDS SOON</p>
       </div>
     </div>
@@ -2934,8 +2934,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       const section = document.getElementById('offerSection');
       const pctEl = document.getElementById('offerPct');
       const labelEl = document.getElementById('offerLabel');
+      const btnEl = document.getElementById('offerBtn');
       if (pctEl) pctEl.textContent = promo.value + '%';
       if (labelEl) labelEl.textContent = promo.label || 'On Selected Products';
+      // send the button to only this campaign's own products, not the
+      // whole Sale category (see category.html's ?promo= handling)
+      if (btnEl && promo.id != null) btnEl.href = 'category.html?promo=' + encodeURIComponent(promo.id);
       if (section) section.style.display = '';
     });
   }
