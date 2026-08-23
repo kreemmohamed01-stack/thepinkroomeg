@@ -250,7 +250,7 @@
     if (!Array.isArray(promotions) || !promotions.length){ promoBar.innerHTML = ''; return; }
     promoBar.innerHTML = promotions.map(p => `
       <a class="tpr-promo-item" href="category.html?cat=sale-offers">
-        ${SALE_ICON}<span><span class="tpr-promo-pct">${p.value}% OFF</span> &mdash; ${escapePromoLabel(p.label)}</span>
+        ${SALE_ICON}<span class="tpr-promo-pct">${p.value}% OFF</span><span class="tpr-promo-dot">&middot;</span>${escapePromoLabel(p.label)}
       </a>`).join('');
   }
   function escapePromoLabel(s){

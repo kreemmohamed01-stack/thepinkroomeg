@@ -14,54 +14,57 @@
    normal document flow (not fixed), so a sticky navbar right after it
    simply sticks below it, and index.html's static hero topbar just
    gets pushed down — no offset math needed anywhere. Hidden entirely
-   (and collapses to zero height) when there's no live campaign. */
+   (and collapses to zero height) when there's no live campaign.
+   Styled to match the site's own language — deep ink (the same colour
+   every CTA/button on the site turns on hover) with a thin gold rule
+   and a restrained, single glint across the percentage rather than a
+   loud gold-on-gold gradient the rest of the site never uses. */
 .tpr-promo-bar{
   display:flex;overflow-x:auto;scrollbar-width:none;
-  background:linear-gradient(100deg, #caa46a 0%, #e9cd9a 22%, #caa46a 48%, #b9895a 72%, #caa46a 100%);
-  background-size:220% 100%;
-  animation:tprPromoSheen 9s ease-in-out infinite;
+  background:#1c1a17; /* var(--ink) — not defined in this file, so spelled out to match exactly */
+  border-bottom:1px solid rgba(201,169,124,.4);
 }
 .tpr-promo-bar::-webkit-scrollbar{display:none;}
 .tpr-promo-bar:empty{display:none;}
-@keyframes tprPromoSheen{
-  0%{background-position:0% 50%;}
-  50%{background-position:100% 50%;}
-  100%{background-position:0% 50%;}
-}
 .tpr-promo-item{
-  position:relative;overflow:hidden;flex:1 0 auto;
-  display:flex;align-items:center;justify-content:center;gap:10px;
-  padding:9px 20px;white-space:nowrap;
-  font-family:'Poppins',sans-serif;font-size:12px;font-weight:500;letter-spacing:.8px;
-  color:#241d12;text-transform:uppercase;
+  position:relative;flex:1 0 auto;
+  display:flex;align-items:center;justify-content:center;gap:9px;
+  padding:10px 22px;white-space:nowrap;
+  font-family:'Poppins',sans-serif;font-size:11px;font-weight:400;letter-spacing:2px;
+  color:rgba(248,244,238,.86);text-transform:uppercase;
+  transition:color .25s ease;
 }
-.tpr-promo-item + .tpr-promo-item{border-left:1px solid rgba(36,29,18,.18);}
-html[dir="rtl"] .tpr-promo-item + .tpr-promo-item{border-left:none;border-right:1px solid rgba(36,29,18,.18);}
-.tpr-promo-item svg{width:13px;height:13px;flex-shrink:0;stroke:#241d12;fill:none;stroke-width:1.8;}
+.tpr-promo-item:hover{color:#f8f4ee;}
+.tpr-promo-item + .tpr-promo-item{border-left:1px solid rgba(248,244,238,.16);}
+html[dir="rtl"] .tpr-promo-item + .tpr-promo-item{border-left:none;border-right:1px solid rgba(248,244,238,.16);}
+.tpr-promo-item svg{width:11px;height:11px;flex-shrink:0;stroke:#c9a97c;fill:none;stroke-width:1.6;}
 .tpr-promo-pct{
-  font-family:'Playfair Display',serif;font-style:italic;font-weight:600;
-  font-size:13.5px;letter-spacing:0;text-transform:none;
+  position:relative;overflow:hidden;
+  font-family:'Playfair Display',serif;font-style:italic;font-weight:500;
+  font-size:14.5px;letter-spacing:.2px;text-transform:none;color:#dcbb85;
+  padding:0 1px;
 }
-/* the diagonal light sweep that crosses each item in turn */
-.tpr-promo-item::after{
-  content:'';position:absolute;top:0;left:-60%;width:40%;height:100%;
-  background:linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent);
-  transform:skewX(-20deg);
-  animation:tprPromoShine 4.5s ease-in-out infinite;
+/* one soft glint that crosses just the percentage figure, not the whole
+   bar — a quiet accent rather than a constant shimmer sweep */
+.tpr-promo-pct::after{
+  content:'';position:absolute;top:0;left:-140%;width:60%;height:100%;
+  background:linear-gradient(100deg, transparent, rgba(255,240,214,.75), transparent);
+  transform:skewX(-18deg);
+  animation:tprPromoGlint 5.5s ease-in-out infinite;
 }
-.tpr-promo-item:nth-child(2)::after{animation-delay:.6s;}
-.tpr-promo-item:nth-child(3)::after{animation-delay:1.2s;}
-@keyframes tprPromoShine{
-  0%,60%{left:-60%;}
-  100%{left:140%;}
+.tpr-promo-dot{color:rgba(201,169,124,.65);font-size:14px;line-height:0;}
+.tpr-promo-item:nth-child(2) .tpr-promo-pct::after{animation-delay:.9s;}
+.tpr-promo-item:nth-child(3) .tpr-promo-pct::after{animation-delay:1.8s;}
+@keyframes tprPromoGlint{
+  0%, 55%{left:-140%;}
+  85%, 100%{left:140%;}
 }
 @media (prefers-reduced-motion: reduce){
-  .tpr-promo-bar{animation:none;}
-  .tpr-promo-item::after{animation:none;display:none;}
+  .tpr-promo-pct::after{animation:none;display:none;}
 }
 @media (max-width:640px){
-  .tpr-promo-item{padding:8px 16px;font-size:10.5px;gap:7px;}
-  .tpr-promo-pct{font-size:12px;}
+  .tpr-promo-item{padding:9px 16px;font-size:9.5px;gap:7px;letter-spacing:1.4px;}
+  .tpr-promo-pct{font-size:12.5px;}
 }
 
 /* ---------- GLASS NAVBAR ---------- */
