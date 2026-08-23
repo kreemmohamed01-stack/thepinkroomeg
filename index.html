@@ -355,6 +355,53 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .video-hero-btn:hover::before{left:120%;}
   .video-hero-btn:hover svg{transform:translateX(4px);}
 
+  /* ---------- SALE OFFER SECTION (between hero and Shop by Category) ----------
+     Only rendered/visible when a Sale Campaign is active in the dashboard
+     (Coupons page) — percentage + copy come from that live campaign, this
+     block just supplies the fixed layout/imagery. */
+  .offer-section{padding:56px 40px;background:var(--cream-light);}
+  .offer-card{
+    position:relative;max-width:1400px;margin:0 auto;overflow:hidden;
+    border:1px solid var(--gold);border-radius:4px;
+    min-height:420px;display:flex;align-items:center;
+    background:#efe6d8 url('collectionnnn/pinkofferr.jpeg') center/cover no-repeat;
+  }
+  .offer-card::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(100deg, rgba(245,240,232,.96) 0%, rgba(245,240,232,.92) 32%, rgba(245,240,232,.55) 52%, rgba(28,26,23,.28) 100%);
+  }
+  .offer-copy{position:relative;z-index:2;padding:60px 56px;max-width:560px;}
+  .offer-eyebrow{
+    font-size:11px;letter-spacing:3px;color:var(--gold);font-weight:600;
+    display:flex;align-items:center;gap:14px;margin-bottom:18px;
+  }
+  .offer-eyebrow::after{content:'';flex:1;height:1px;background:var(--line);max-width:70px;}
+  .offer-pct{
+    font-family:'Playfair Display',serif;font-weight:500;color:var(--ink);
+    font-size:clamp(44px,6vw,72px);line-height:1;margin-bottom:8px;
+  }
+  .offer-pct span{color:var(--gold);}
+  .offer-sub{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:19px;color:var(--ink-soft);
+    letter-spacing:.5px;margin-bottom:20px;
+  }
+  .offer-desc{font-size:14px;color:var(--ink-soft);line-height:1.7;margin-bottom:30px;max-width:400px;}
+  .offer-btn{
+    display:inline-flex;align-items:center;gap:10px;background:var(--ink);color:#fdfaf5;
+    padding:15px 28px;font-size:11.5px;letter-spacing:2.5px;font-weight:500;
+    border-radius:2px;transition:background .3s ease, transform .3s ease;
+  }
+  .offer-btn:hover{background:var(--gold);transform:scale(1.03);}
+  .offer-btn svg{width:14px;height:14px;stroke:#fdfaf5;fill:none;stroke-width:1.6;}
+  @media (max-width:760px){
+    .offer-section{padding:32px 16px;}
+    .offer-card{min-height:auto;}
+    .offer-card::before{background:linear-gradient(180deg, rgba(245,240,232,.97) 0%, rgba(245,240,232,.9) 55%, rgba(28,26,23,.35) 100%);}
+    .offer-copy{padding:38px 26px;max-width:100%;text-align:center;}
+    .offer-eyebrow{justify-content:center;}
+    .offer-desc{margin-left:auto;margin-right:auto;}
+  }
+
   /* ---------- SHOP BY CATEGORY ---------- */
   .cats{
     background-color:#f8ecde;
@@ -2321,6 +2368,19 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     </div>
   </section>
 
+  <!-- ===== SALE OFFER (only shown when a Sale Campaign is active — see catalog.js/ACTIVE_PROMOTIONS) ===== -->
+  <section class="offer-section" id="offerSection" style="display:none">
+    <div class="offer-card">
+      <div class="offer-copy">
+        <p class="offer-eyebrow">LIMITED TIME OFFER</p>
+        <h2 class="offer-pct"><span id="offerPct">15%</span> OFF</h2>
+        <p class="offer-sub" id="offerLabel">On Selected Products</p>
+        <p class="offer-desc">Elevate your space with pieces you'll love for less.</p>
+        <a href="category.html?cat=sale-offers" class="offer-btn"><span>SHOP THE OFFER</span> <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></a>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== SHOP BY CATEGORY ===== -->
   <section class="cats">
     <p class="cats-eyebrow">EXPLORE OUR RANGE</p>
@@ -2816,6 +2876,23 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
         if (HOMEPAGE_CONTENT.heroButtonText) btnEl.querySelector('span').textContent = HOMEPAGE_CONTENT.heroButtonText;
         if (HOMEPAGE_CONTENT.heroButtonLink) btnEl.setAttribute('href', HOMEPAGE_CONTENT.heroButtonLink);
       }
+    });
+  }
+
+  // ---- Sale offer section — mirrors whichever Sale Campaign is active
+  //      in the dashboard (Coupons page). Hidden until a live campaign is
+  //      confirmed; percentage/label always match that campaign exactly. ----
+  if (typeof SITE_STRUCTURE_READY !== 'undefined') {
+    SITE_STRUCTURE_READY.then(()=>{
+      const promos = typeof ACTIVE_PROMOTIONS !== 'undefined' ? ACTIVE_PROMOTIONS : [];
+      if (!promos.length) return;
+      const promo = promos[0];
+      const section = document.getElementById('offerSection');
+      const pctEl = document.getElementById('offerPct');
+      const labelEl = document.getElementById('offerLabel');
+      if (pctEl) pctEl.textContent = promo.value + '%';
+      if (labelEl) labelEl.textContent = promo.label || 'On Selected Products';
+      if (section) section.style.display = '';
     });
   }
 

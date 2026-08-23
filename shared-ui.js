@@ -233,33 +233,6 @@
     ${tabbar}`;
   }
 
-  /* ---------- sale campaign banner ----------
-     Shown site-wide (including the homepage, which skips the rest of
-     this file's nav injection) the moment a promotion is live —
-     dashboard-coupons.html's "Sale Campaigns" section is the only place
-     that edits this. Sits as the very first thing in <body>, ahead of
-     everything else this file/page injects, so it's always the topmost
-     strip regardless of which page's own header comes after it. */
-  const SALE_ICON = '<svg viewBox="0 0 24 24"><path d="M20.59 13.41 13.42 20.6a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82Z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>';
-  const promoBar = document.createElement('div');
-  promoBar.className = 'tpr-promo-bar';
-  promoBar.id = 'tprPromoBar';
-  document.body.insertBefore(promoBar, document.body.firstChild);
-
-  function renderPromoBar(promotions){
-    if (!Array.isArray(promotions) || !promotions.length){ promoBar.innerHTML = ''; return; }
-    promoBar.innerHTML = promotions.map(p => `
-      <a class="tpr-promo-item" href="category.html?cat=sale-offers">
-        ${SALE_ICON}<span class="tpr-promo-pct">${p.value}% OFF</span><span class="tpr-promo-dot">&middot;</span>${escapePromoLabel(p.label)}
-      </a>`).join('');
-  }
-  function escapePromoLabel(s){
-    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  }
-  if (typeof SITE_STRUCTURE_READY !== 'undefined') {
-    SITE_STRUCTURE_READY.then(()=> renderPromoBar(typeof ACTIVE_PROMOTIONS !== 'undefined' ? ACTIVE_PROMOTIONS : []));
-  }
-
   /* ---------- mount ---------- */
   const navHost = document.querySelector('[data-tpr-nav]');
   if (navHost) navHost.outerHTML = navMarkup();
