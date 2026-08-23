@@ -363,14 +363,14 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
      "Enjoy X% Off" badge overlapping the photo). */
   .offer-section{padding:56px 40px;background:var(--cream-light);}
   .offer-card{
-    position:relative;max-width:1400px;margin:0 auto;overflow:visible;
+    position:relative;max-width:1400px;margin:0 auto;overflow:hidden;
     border:1px solid var(--gold);border-radius:6px;
-    display:grid;grid-template-columns:1fr 1fr;align-items:stretch;
-    background:var(--cream-light);
+    display:grid;grid-template-columns:1.1fr 1fr;align-items:center;
+    background:var(--cream-light);padding:44px;gap:36px;
   }
   .offer-copy{
-    position:relative;z-index:2;padding:64px 60px;
-    display:flex;flex-direction:column;align-items:center;text-align:center;justify-content:center;
+    position:relative;z-index:2;
+    display:flex;flex-direction:column;align-items:flex-start;text-align:left;
   }
   .offer-eyebrow{
     font-size:11px;letter-spacing:3px;color:var(--gold);font-weight:600;
@@ -397,29 +397,32 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .offer-btn svg{width:14px;height:14px;stroke:#fdfaf5;fill:none;stroke-width:1.6;}
   .offer-ends{font-size:10.5px;letter-spacing:2px;color:var(--ink-soft);opacity:.75;}
   .offer-photo{
-    position:relative;min-height:420px;
+    position:relative;height:340px;border-radius:4px;overflow:visible;
     background:#efe6d8 url('خلفيه عرض.jpeg') center/cover no-repeat;
   }
   .offer-badge{
-    position:absolute;top:50%;left:-64px;transform:translateY(-50%);
-    width:150px;height:150px;border-radius:50%;background:var(--ink);
+    position:absolute;top:50%;left:-56px;transform:translateY(-50%);
+    width:130px;height:130px;border-radius:50%;background:var(--ink);
     display:flex;flex-direction:column;align-items:center;justify-content:center;
     color:#fdfaf5;text-align:center;box-shadow:0 10px 30px rgba(28,26,23,.35);
     z-index:3;
   }
-  .offer-badge-label{font-size:9.5px;letter-spacing:2.5px;color:var(--gold);margin-bottom:4px;}
-  .offer-badge-pct{font-family:'Playfair Display',serif;font-size:26px;line-height:1.15;}
+  .offer-badge-label{font-size:9px;letter-spacing:2.5px;color:var(--gold);margin-bottom:3px;}
+  .offer-badge-pct{font-family:'Playfair Display',serif;font-size:22px;line-height:1.15;}
   @media (max-width:900px){
-    .offer-card{grid-template-columns:1fr;}
-    .offer-photo{min-height:280px;order:-1;}
-    .offer-badge{left:50%;top:auto;bottom:-40px;transform:translateX(-50%);}
-    .offer-copy{padding:64px 30px 30px;}
+    .offer-card{grid-template-columns:1fr;padding:36px 30px;gap:60px 0;}
+    .offer-photo{height:260px;order:-1;margin-top:44px;}
+    .offer-badge{left:50%;top:0;transform:translate(-50%,-50%);}
+    .offer-copy{align-items:center;text-align:center;}
+    .offer-rule{justify-content:center;}
+    .offer-desc{margin-left:auto;margin-right:auto;}
   }
   @media (max-width:600px){
     .offer-section{padding:32px 16px;}
-    .offer-copy{padding:56px 20px 24px;}
-    .offer-badge{width:118px;height:118px;bottom:-30px;}
-    .offer-badge-pct{font-size:20px;}
+    .offer-card{padding:28px 20px;}
+    .offer-photo{height:220px;margin-top:38px;}
+    .offer-badge{width:104px;height:104px;}
+    .offer-badge-pct{font-size:18px;}
   }
 
   /* ---------- SHOP BY CATEGORY ---------- */
