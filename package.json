@@ -8,7 +8,6 @@
   },
   "dependencies": {
     "nodemailer": "^9.0.5",
-    "@neondatabase/serverless": "^0.10.4",
-    "@vercel/blob": "^2.8.0"
+    "@neondatabase/serverless": "^0.10.4"
   }
 }

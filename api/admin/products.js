@@ -26,7 +26,6 @@
    modules get added.
    ============================================================ */
 
-const { put } = require('@vercel/blob');
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
 const { rowToProduct, validateProduct } = require('../_lib/products');
@@ -72,20 +71,54 @@ async function uploadImage(req, res) {
   const buffer = Buffer.from(base64, 'base64');
   if (buffer.length > 8 * 1024 * 1024) return res.status(400).json({ ok: false, error: 'Image is too large (max 8MB).' });
 
-  const ext = mime.split('/')[1].replace('jpeg', 'jpg');
   const safeName = (filename || 'product').replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 40);
 
+  /* Vercel Blob's Hobby-plan free storage got exhausted (store suspended
+     by Vercel), so uploads moved to Cloudinary's free tier instead —
+     same job (public URL for a product image), no other code needed to
+     change since callers only ever cared about getting back { ok, url }. */
   try {
-    const blob = await put(`products/${Date.now()}-${safeName}.${ext}`, buffer, {
-      access: 'public',
-      contentType: mime,
-      addRandomSuffix: true
-    });
-    return res.status(200).json({ ok: true, url: blob.url });
+    const url = await uploadToCloudinary(buffer, mime, `${Date.now()}-${safeName}`);
+    return res.status(200).json({ ok: true, url });
   } catch (e) {
     console.error('[admin/products] upload error:', e);
-    return res.status(500).json({ ok: false, error: 'Upload failed.' });
+    return res.status(500).json({ ok: false, error: e.message || 'Upload failed.' });
   }
+}
+
+/* Signed upload via Cloudinary's raw REST API — no SDK dependency needed,
+   just fetch + a SHA-1 signature per Cloudinary's auth scheme. Requires
+   CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET. */
+async function uploadToCloudinary(buffer, mime, publicId) {
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
+  const apiKey = process.env.CLOUDINARY_API_KEY;
+  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  if (!cloudName || !apiKey || !apiSecret) {
+    throw new Error('Image storage is not configured (missing Cloudinary env vars).');
+  }
+
+  const crypto = require('crypto');
+  const timestamp = Math.floor(Date.now() / 1000);
+  const folder = 'products';
+  // Cloudinary signs the alphabetically-sorted param string, excluding file/api_key/signature themselves.
+  const toSign = `folder=${folder}&public_id=${publicId}&timestamp=${timestamp}${apiSecret}`;
+  const signature = crypto.createHash('sha1').update(toSign).digest('hex');
+
+  const form = new FormData();
+  form.append('file', new Blob([buffer], { type: mime }));
+  form.append('api_key', apiKey);
+  form.append('timestamp', String(timestamp));
+  form.append('signature', signature);
+  form.append('folder', folder);
+  form.append('public_id', publicId);
+
+  const resp = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+    method: 'POST',
+    body: form
+  });
+  const data = await resp.json();
+  if (!resp.ok) throw new Error(data?.error?.message || 'Cloudinary upload failed.');
+  return data.secure_url;
 }
 
 async function listInventory(req, res) {
