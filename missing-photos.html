@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex, nofollow">
+<title>Missing Product Photos | The Pink Room</title>
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,600;1,400&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#faf7f6;
+    --surface:#ffffff;
+    --surface-2:#f3ede9;
+    --ink:#2b2320;
+    --muted:#8a7a73;
+    --accent:#b5677a;
+    --accent-ink:#ffffff;
+    --line:#e8dfda;
+    --ok-bg:#e8f3ea;
+    --ok-ink:#2f6b3f;
+    --ok-line:#bfe0c6;
+    --warn-bg:#fbeeea;
+    --warn-ink:#a34a2c;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Poppins', -apple-system, sans-serif;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:960px; margin:0 auto; padding:48px 24px 96px; }
+
+  header{ margin-bottom:32px; }
+  .eyebrow{
+    font-size:12px; font-weight:600; letter-spacing:.12em; text-transform:uppercase;
+    color:var(--accent); margin:0 0 10px;
+  }
+  h1{
+    font-family:'Playfair Display', Georgia, serif;
+    font-size:clamp(26px,4vw,36px); font-weight:600; margin:0 0 12px; letter-spacing:-.01em;
+  }
+  .lede{ font-size:15.5px; color:var(--muted); max-width:64ch; margin:0; }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(140px,1fr)); gap:1px;
+    background:var(--line); border:1px solid var(--line); border-radius:12px; overflow:hidden; margin:28px 0;
+  }
+  .stat{ background:var(--surface); padding:16px 20px; }
+  .stat .n{ font-family:'Playfair Display', serif; font-size:26px; font-weight:600; line-height:1; }
+  .stat .l{ font-size:12px; color:var(--muted); margin-top:6px; }
+  .stat.remaining .n{ color:var(--accent); }
+  .stat.done .n{ color:var(--ok-ink); }
+
+  .progress-track{
+    height:8px; background:var(--surface-2); border-radius:999px; overflow:hidden;
+    margin:0 0 28px; border:1px solid var(--line);
+  }
+  .progress-fill{ height:100%; background:var(--accent); border-radius:999px; width:0%; transition:width .3s ease; }
+
+  .howto{
+    background:var(--surface); border:1px solid var(--line); border-radius:12px;
+    padding:18px 22px; margin-bottom:32px;
+  }
+  .howto h2{ font-family:'Playfair Display', serif; font-size:16px; font-weight:600; margin:0 0 10px; }
+  .howto ol{ margin:0; padding-left:20px; font-size:14px; color:var(--muted); }
+  .howto li{ margin-bottom:4px; }
+  .howto strong{ color:var(--ink); font-weight:600; }
+
+  .section-label{
+    font-size:11.5px; font-weight:600; letter-spacing:.1em; text-transform:uppercase;
+    color:var(--muted); margin:0 0 12px;
+  }
+
+  .table-wrap{ overflow-x:auto; border-radius:12px; margin-bottom:16px; }
+  table{ width:100%; border-collapse:collapse; background:var(--surface); border:1px solid var(--line); border-radius:12px; overflow:hidden; }
+  thead th{
+    text-align:left; font-size:11px; font-weight:600; letter-spacing:.08em; text-transform:uppercase;
+    color:var(--muted); padding:11px 14px; border-bottom:1px solid var(--line); background:var(--surface-2); white-space:nowrap;
+  }
+  tbody tr{ border-bottom:1px solid var(--line); }
+  tbody tr:last-child{ border-bottom:none; }
+  tbody tr.is-done{ background:var(--ok-bg); }
+  td{ padding:11px 14px; font-size:14px; vertical-align:middle; }
+  td.num{ color:var(--muted); text-align:center; }
+  .cat-pill{
+    display:inline-block; font-size:11px; font-weight:600; color:var(--muted);
+    background:var(--surface-2); border:1px solid var(--line); border-radius:999px; padding:2px 9px; text-transform:capitalize;
+  }
+  .prod-name{ font-weight:600; }
+  .img-count{
+    display:inline-flex; align-items:center; justify-content:center; min-width:22px; height:22px; padding:0 6px;
+    border-radius:999px; background:var(--warn-bg); color:var(--warn-ink); font-size:12px; font-weight:700;
+  }
+  tr.is-done .img-count{ background:var(--ok-bg); color:var(--ok-ink); border:1px solid var(--ok-line); }
+
+  .check-cell{ text-align:center; }
+  .checkbox{
+    appearance:none; -webkit-appearance:none; width:19px; height:19px; border-radius:6px;
+    border:1.5px solid var(--line); background:var(--surface); cursor:pointer; position:relative; display:inline-block; vertical-align:middle;
+  }
+  .checkbox:checked{ background:var(--accent); border-color:var(--accent); }
+  .checkbox:checked::after{
+    content:""; position:absolute; left:5.5px; top:2px; width:5px; height:9px;
+    border:solid var(--accent-ink); border-width:0 2px 2px 0; transform:rotate(45deg);
+  }
+
+  footer{ margin-top:32px; padding-top:18px; border-top:1px solid var(--line); font-size:13px; color:var(--muted); }
+  footer button{ font:inherit; color:var(--accent); background:none; border:none; cursor:pointer; padding:0; text-decoration:underline; font-weight:600; }
+  footer a{ color:var(--accent); font-weight:600; }
+
+  @media (max-width:600px){
+    .wrap{ padding:32px 16px 64px; }
+    thead th:nth-child(2), td:nth-child(2){ display:none; }
+    td, thead th{ padding:9px 8px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">The Pink Room — internal</p>
+    <h1>Products with missing photos</h1>
+    <p class="lede">These 46 products lost their photos when the old image host got suspended. Send the photos for these — grouped by category below — and they'll go back up. Tick a row once you've sent that one.</p>
+  </header>
+
+  <div class="stats">
+    <div class="stat remaining"><div class="n" id="statRemaining">46</div><div class="l">Products remaining</div></div>
+    <div class="stat done"><div class="n" id="statDone">0</div><div class="l">Marked sent</div></div>
+    <div class="stat"><div class="n">81</div><div class="l">Total photos needed</div></div>
+  </div>
+
+  <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+
+  <div class="howto">
+    <h2>How this works</h2>
+    <ol>
+      <li>Go through the list below and gather the photo(s) for each product from your phone/drive.</li>
+      <li>Send them over (label which photo belongs to which product name).</li>
+      <li>They'll be uploaded and linked back to the right product — nothing else on the site changes.</li>
+      <li>Tick a row once you've sent it, so you know what's left. Your ticks are saved in this browser only.</li>
+    </ol>
+  </div>
+
+  <p class="section-label">Sorted by category, A–Z</p>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:32px"></th>
+          <th>Category</th>
+          <th>Product</th>
+          <th style="text-align:center">Photos needed</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+
+  <footer>
+    <span id="footerNote">0 of 46 marked sent.</span>
+    &nbsp;·&nbsp;
+    <button id="resetBtn" type="button">Reset</button>
+    &nbsp;·&nbsp;
+    <a href="index.html">Back to the site</a>
+  </footer>
+</div>
+
+<script>
+  const PRODUCTS = [
+    {"id":"acce-amber-marble-ginger-jar-duo","name":"Amber Marble Ginger Jar Duo","category":"accessories","missingImages":2},
+    {"id":"acce-black-faceted-lion-sculpture","name":"Black Faceted Lion Sculpture","category":"accessories","missingImages":3},
+    {"id":"acce-golden-mist-art-glass-vase-set","name":"Emerald Citrus Art Glass Vase Set","category":"accessories","missingImages":1},
+    {"id":"acce-gold-textured-floor-vase-arrangement","name":"Gold Textured Floor Vase Arrangement","category":"accessories","missingImages":1},
+    {"id":"acce-ivory-black-elephant-duo","name":"Ivory & Black Elephant Duo","category":"accessories","missingImages":8},
+    {"id":"plan-noir-glass-vase-set","name":"Noir Glass Vase Set","category":"accessories","missingImages":1},
+    {"id":"acce-ocean-amber-art-glass-vase","name":"Ocean Amber Art Glass Vase","category":"accessories","missingImages":2},
+    {"id":"acce-smoky-sculptural-glass-vase-duo","name":"Smoky Sculptural Glass Vase Duo","category":"accessories","missingImages":4},
+    {"id":"acce-terra-sage-sculptural-vase-set","name":"Terra & Sage Sculptural Vase Set","category":"accessories","missingImages":1},
+    {"id":"acce-turquoise-blossom-vase-arrangement","name":"Turquoise Blossom Vase Arrangement","category":"accessories","missingImages":1},
+    {"id":"acce-vibrant-swirl-art-glass-vase","name":"Vibrant Swirl Art Glass Vase","category":"accessories","missingImages":2},
+    {"id":"acce-white-boho-chic","name":"White Boho chic","category":"accessories","missingImages":2},
+    {"id":"ligh-sculptural-glass-sphere-floor-lamp","name":"Sculptural Glass Sphere Floor Lamp","category":"lighting","missingImages":1},
+    {"id":"ligh-textured-ivory-table-lamp","name":"Textured Ivory Table Lamp","category":"lighting","missingImages":2},
+    {"id":"ligh-trio-glass-statement-lamp","name":"Trio Glass Statement Lamp","category":"lighting","missingImages":1},
+    {"id":"pain-botanical-serenity-painting-set-of-2","name":"Botanical Serenity Painting set of 2","category":"paintings","missingImages":3},
+    {"id":"pain-botanical-texture-painting-duo","name":"Botanical Texture Painting Duo","category":"paintings","missingImages":1},
+    {"id":"pain-coastal-grace-figurative-painting","name":"Coastal Grace Figurative Painting","category":"paintings","missingImages":2},
+    {"id":"pain-golden-blossom-bird-painting","name":"Golden Blossom Bird Painting","category":"paintings","missingImages":2},
+    {"id":"pain-golden-flight-crane-painting","name":"Golden Flight Crane Painting","category":"paintings","missingImages":3},
+    {"id":"pain-golden-veil-portrait","name":"Golden Veil Portrait","category":"paintings","missingImages":2},
+    {"id":"pain-olive-harmony-abstract-painting","name":"Olive Harmony Abstract Painting","category":"paintings","missingImages":2},
+    {"id":"pain-palm-serenity-painting","name":"Palm Serenity Painting","category":"paintings","missingImages":2},
+    {"id":"pain-serene-horizon-abstract-painting","name":"Serene Horizon Abstract Painting","category":"paintings","missingImages":2},
+    {"id":"plan-amber-botanical-vase-arrangement","name":"Amber Botanical Vase Arrangement","category":"plants","missingImages":1},
+    {"id":"plan-autumn-bloom-golden-bowl-arrangement","name":"Autumn Bloom Golden Bowl Arrangement","category":"plants","missingImages":2},
+    {"id":"plan-blue-white-botanical-planter","name":"Blue & White Botanical Planter","category":"plants","missingImages":1},
+    {"id":"plan-emerald-blossom-arrangement","name":"Emerald Blossom Arrangement","category":"plants","missingImages":2},
+    {"id":"plan-golden-blossom-bowl-arrangement","name":"Golden Blossom Bowl Arrangement","category":"plants","missingImages":2},
+    {"id":"plan-golden-lily-arrangement","name":"Golden Lily Arrangement","category":"plants","missingImages":2},
+    {"id":"plan-monochrome-sculptural-vase","name":"Monochrome Sculptural Vase","category":"plants","missingImages":1},
+    {"id":"plan-pink-lily-elegance-arrangement","name":"Pink Lily Elegance Arrangement","category":"plants","missingImages":1},
+    {"id":"plan-purple-orchid-sculptural-arrangement","name":"Purple Orchid Sculptural Arrangement","category":"plants","missingImages":1},
+    {"id":"sale-coastal-blush-vase-set","name":"Coastal Blush Vase Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-cobalt-wave-decorative-jar-set","name":"Cobalt Wave Decorative Jar Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-golden-safari-jar-set","name":"Golden Safari Jar Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-ivory-dried-floral-vase","name":"Ivory Dried Floral Vase","category":"sale-offers","missingImages":1},
+    {"id":"sale-monochrome-artisan-vase-set","name":"Monochrome Artisan Vase Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-rose-marble-glass-vase-set","name":"Rose Marble Glass Vase Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-smoky-gold-accent-vase-set","name":"Smoky Gold Accent Vase Set","category":"sale-offers","missingImages":1},
+    {"id":"sale-terracotta-glow-table-lamp","name":"Terracotta Glow Table Lamp","category":"sale-offers","missingImages":1},
+    {"id":"wall-botanical-bloom-metal-wall-art-set","name":"Botanical Bloom Metal Wall Art Set","category":"wall-art","missingImages":3},
+    {"id":"plan-golden-botanical-wall-sculpture","name":"Golden Botanical Wall Sculpture","category":"wall-art","missingImages":2},
+    {"id":"wall-golden-petal-round-mirror","name":"Golden Petal Round Mirror","category":"wall-art","missingImages":2},
+    {"id":"wall-mandala-harmony-metal-wall-art","name":"Mandala Harmony Metal Wall Art","category":"wall-art","missingImages":1},
+    {"id":"wall-sage-medallion-wall-art","name":"Sage Medallion Wall Art","category":"wall-art","missingImages":1}
+  ];
+
+  const STORAGE_KEY = 'pinkroom-missing-photos-v1';
+  function loadDone(){ try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}'); } catch(e){ return {}; } }
+  function saveDone(state){ try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e){} }
+
+  let doneState = loadDone();
+  const tbody = document.getElementById('tbody');
+  const statRemaining = document.getElementById('statRemaining');
+  const statDone = document.getElementById('statDone');
+  const progressFill = document.getElementById('progressFill');
+  const footerNote = document.getElementById('footerNote');
+
+  function render(){
+    tbody.innerHTML = '';
+    let doneCount = 0;
+    PRODUCTS.forEach(p => {
+      const isDone = !!doneState[p.id];
+      if (isDone) doneCount++;
+      const tr = document.createElement('tr');
+      tr.className = isDone ? 'is-done' : '';
+      tr.innerHTML = `
+        <td class="check-cell"><input type="checkbox" class="checkbox" data-id="${p.id}" ${isDone ? 'checked' : ''} aria-label="Mark ${p.name} sent"></td>
+        <td><span class="cat-pill">${p.category.replace('-', ' ')}</span></td>
+        <td class="prod-name">${p.name}</td>
+        <td class="num"><span class="img-count">${p.missingImages}</span></td>
+      `;
+      tbody.appendChild(tr);
+    });
+    const total = PRODUCTS.length;
+    statRemaining.textContent = total - doneCount;
+    statDone.textContent = doneCount;
+    progressFill.style.width = (doneCount / total * 100).toFixed(1) + '%';
+    footerNote.textContent = `${doneCount} of ${total} marked sent.`;
+  }
+
+  tbody.addEventListener('change', (e) => {
+    const cb = e.target.closest('.checkbox');
+    if (!cb) return;
+    if (cb.checked) doneState[cb.dataset.id] = true; else delete doneState[cb.dataset.id];
+    saveDone(doneState);
+    render();
+  });
+
+  document.getElementById('resetBtn').addEventListener('click', () => {
+    if (!confirm('Reset all progress?')) return;
+    doneState = {};
+    saveDone(doneState);
+    render();
+  });
+
+  render();
+</script>
+</body>
+</html>

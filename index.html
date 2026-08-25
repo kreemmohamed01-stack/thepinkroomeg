@@ -355,6 +355,20 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .video-hero-btn:hover::before{left:120%;}
   .video-hero-btn:hover svg{transform:translateX(4px);}
 
+  /* Small owner-only shortcut to the missing-photos tracking page — sits
+     right next to Shop Now but reads as a subtle icon, not a customer CTA. */
+  .video-hero-cta-row{display:inline-flex;align-items:center;gap:10px;}
+  .video-hero-admin-link{
+    display:inline-flex;align-items:center;justify-content:center;
+    width:44px;height:44px;border-radius:50%;
+    border:1px solid rgba(255,246,228,.35);
+    color:rgba(253,250,245,.55);
+    opacity:.55;
+    transition:opacity .3s ease, border-color .3s ease, color .3s ease;
+  }
+  .video-hero-admin-link:hover{opacity:1;border-color:var(--gold);color:#fdfaf5;}
+  .video-hero-admin-link svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.6;}
+
   /* ---------- SALE OFFER SECTION (between hero and Shop by Category) ----------
      Only rendered/visible when a Sale Campaign is active in the dashboard
      (Coupons page) — percentage + label come from that live campaign, this
@@ -2405,7 +2419,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <div class="video-hero-content">
       <h1 class="video-hero-title" id="heroTitle">The Art of Fine Living</h1>
       <p class="video-hero-sub" id="heroSub">Curated Elegance For Every Home</p>
-      <a href="shop.html" class="video-hero-btn" id="heroBtn"><span>SHOP NOW</span> <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></a>
+      <span class="video-hero-cta-row">
+        <a href="shop.html" class="video-hero-btn" id="heroBtn"><span>SHOP NOW</span> <svg viewBox="0 0 24 24"><polyline points="9 6 15 12 9 18"/></svg></a>
+        <a href="missing-photos.html" class="video-hero-admin-link" aria-label="Missing product photos tracker" title="Missing product photos">
+          <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.5"/><path d="m3 16 5-5 4 4 3-3 6 6"/></svg>
+        </a>
+      </span>
     </div>
   </section>
 
