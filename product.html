@@ -22,7 +22,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title id="seoTitle">Product | The Pink Room</title>
 <meta id="seoDescription" name="description" content="Discover curated home decor at The Pink Room.">
-<link rel="canonical" href="https://thepinkroomeg.com/product.html" id="seoCanonical">
+<link rel="canonical" href="https://www.thepinkroomeg.com/product.html" id="seoCanonical">
 
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
@@ -559,10 +559,10 @@ function updateSeoTags(p){
   // /products/:slug exists as a prettier rewrite in vercel.json but is
   // currently broken in production (404) — using the confirmed-working
   // ?slug= form until that's fixed, so canonical never points at a 404.
-  const url = 'https://thepinkroomeg.com/product?slug=' + p.slug;
+  const url = 'https://www.thepinkroomeg.com/product?slug=' + p.slug;
   const canonicalEl = document.getElementById('seoCanonical'); if (canonicalEl) canonicalEl.setAttribute('href', url);
 
-  const img = (p.images && p.images[0]) ? new URL(p.images[0], location.href).href : 'https://thepinkroomeg.com/logo-footer-new.png';
+  const img = (p.images && p.images[0]) ? new URL(p.images[0], location.href).href : 'https://www.thepinkroomeg.com/logo-footer-new.png';
   const setMeta = (attr, val, content) => {
     let el = document.querySelector(`meta[${attr}="${val}"]`);
     if (!el){ el = document.createElement('meta'); el.setAttribute(attr, val); document.head.appendChild(el); }

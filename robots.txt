@@ -10,4 +10,4 @@ Disallow: /api/
 # of the index without hiding them from crawlers entirely (a robots.txt
 # block would prevent Google from ever seeing that noindex tag).
 
-Sitemap: https://thepinkroomeg.com/sitemap.xml
+Sitemap: https://www.thepinkroomeg.com/sitemap.xml

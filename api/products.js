@@ -20,7 +20,7 @@ const { getSetting } = require('./_lib/settings');
 const { sendNewsletterWelcome, verifyUnsubscribeToken } = require('./_lib/notify');
 const { getActivePromotions, applyPromotions } = require('./_lib/promotions');
 
-const SITE_URL = 'https://thepinkroomeg.com';
+const SITE_URL = 'https://www.thepinkroomeg.com';
 
 async function siteStructure(req, res) {
   const empty = { categories: null, rooms: null, topSellers: null, homepageContent: null, storeSettings: null, activePromotions: [] };
