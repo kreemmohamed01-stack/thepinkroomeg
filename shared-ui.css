@@ -421,8 +421,7 @@
   .tpr-nav{padding:11px 18px;}
   .tpr-nav .tpr-side{gap:14px;}
   .tpr-logo{width:212px;max-width:50vw;}
-  .tpr-menu{width:100%;max-width:100%;}
-  .tpr-drawer{width:100%;padding:20px 18px 0;padding-top:max(20px, env(safe-area-inset-top));}
+  .tpr-drawer{width:94%;padding:20px 18px 0;padding-top:max(20px, env(safe-area-inset-top));}
   .tpr-drawer-title{font-size:21px;}
   .tpr-rule{margin:16px 0;}
   .tpr-cart-item{gap:12px;padding:16px 0;}
