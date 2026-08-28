@@ -672,16 +672,16 @@ function buildPage(p){
         <button class="gal-zoom" id="galZoom" aria-label="Zoom">${ICON.zoom}</button>
         ${imgs.length > 1 ? `<button class="gal-arrow prev" id="galPrev" aria-label="Previous image">${ICON.prev}</button>
         <button class="gal-arrow next" id="galNext" aria-label="Next image">${ICON.next}</button>` : ''}
-        <img id="galImg" src="${imgs[0]}" alt="${p.name}">
+        <img id="galImg" src="${imgs[0]}" alt="${p.name}" fetchpriority="high">
       </div>
 
       <div class="gal-swipe" id="galSwipe">
-        ${imgs.map((src,i)=>`<div><img src="${src}" alt="${p.name} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}"></div>`).join('')}
+        ${imgs.map((src,i)=>`<div><img src="${src}" alt="${p.name} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}" ${i===0?'':'loading="lazy"'}></div>`).join('')}
       </div>
 
       <div class="gal-thumbs" id="galThumbs">
         ${imgs.map((src,i)=>`<button class="gal-thumb ${i===0?'active':''} ${isDim(i)?'contain':''}" data-i="${i}">
-          <img src="${src}" alt="View ${i+1}">
+          <img src="${src}" alt="View ${i+1}" ${i===0?'':'loading="lazy"'}>
         </button>`).join('')}
       </div>
 
@@ -970,8 +970,8 @@ function wireGallery(initialImgs, isDim, altName){
   const prev = document.getElementById('galPrev'), next = document.getElementById('galNext');
 
   function renderThumbsAndSwipe(){
-    thumbsWrap.innerHTML = imgs.map((src,i)=>`<button class="gal-thumb ${isDim(i)?'contain':''}" data-i="${i}"><img src="${src}" alt="View ${i+1}"></button>`).join('');
-    if (swipe) swipe.innerHTML = imgs.map((src,i)=>`<div><img src="${src}" alt="${altName} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}"></div>`).join('');
+    thumbsWrap.innerHTML = imgs.map((src,i)=>`<button class="gal-thumb ${isDim(i)?'contain':''}" data-i="${i}"><img src="${src}" alt="View ${i+1}" ${i===0?'':'loading="lazy"'}></button>`).join('');
+    if (swipe) swipe.innerHTML = imgs.map((src,i)=>`<div><img src="${src}" alt="${altName} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}" ${i===0?'':'loading="lazy"'}></div>`).join('');
     thumbsWrap.querySelectorAll('.gal-thumb').forEach(t => t.addEventListener('click', ()=> show(+t.dataset.i)));
     const showArrows = imgs.length > 1;
     if (prev) prev.style.display = showArrows ? '' : 'none';

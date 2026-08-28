@@ -545,6 +545,50 @@
 })();
 
 /* ============================================================
+   PAGE TRANSITIONS
+   This is a plain multi-page site (no client-side router), so a
+   "smooth open" between pages means: fade the current page out
+   under a soft veil right before the browser navigates away, and
+   let the next page fade+rise in on load (CSS animation, see
+   shared-ui.css). Skipped for reduced-motion, new tabs, downloads,
+   modified clicks, and any link that isn't a same-site navigation.
+   ============================================================ */
+(function(){
+  if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+  document.documentElement.classList.add('tpr-nav-veil-support');
+
+  const veil = document.createElement('div');
+  veil.className = 'tpr-page-veil';
+  document.body.appendChild(veil);
+
+  document.addEventListener('click', (e) => {
+    if (e.defaultPrevented || e.button !== 0) return;
+    if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
+
+    const a = e.target.closest('a[href]');
+    if (!a) return;
+    if (a.target && a.target !== '_self') return;
+    if (a.hasAttribute('download')) return;
+
+    let url;
+    try { url = new URL(a.href, location.href); } catch(err){ return; }
+    if (url.origin !== location.origin) return;
+    // same-page anchor (e.g. "#") — nothing to transition
+    if (url.pathname === location.pathname && url.hash) return;
+
+    e.preventDefault();
+    veil.classList.add('tpr-veil-show');
+    setTimeout(()=> { location.href = a.href; }, 280);
+  });
+
+  window.addEventListener('pageshow', (e) => {
+    // bfcache restore — make sure the veil isn't left showing
+    if (e.persisted) veil.classList.remove('tpr-veil-show');
+  });
+})();
+
+/* ============================================================
    THE PINK ROOM — scroll reveal
    Sections/cards fade + rise into place as they're scrolled into
    view, instead of everything being visible on load. Entirely

@@ -490,3 +490,29 @@ html[dir="rtl"] .tpr-dd-menu li{text-align:right;}
 @media (prefers-reduced-motion: reduce){
   .tpr-reveal{opacity:1;transform:none;transition:none;}
 }
+
+/* ============================================================
+   PAGE TRANSITIONS — a soft veil fades over the page on the way
+   out (as a same-site link is clicked) and the incoming page
+   fades + rises gently into place on load, so navigation between
+   pages reads as one smooth, unhurried motion instead of a hard
+   flash-cut. See the script near the bottom of shared-ui.js.
+   ============================================================ */
+html.tpr-nav-veil-support body{
+  animation:tprPageIn .7s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes tprPageIn{
+  from{opacity:0;transform:translateY(14px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.tpr-page-veil{
+  position:fixed;inset:0;z-index:9999;
+  background:var(--cream-light,#f8f4ee);
+  opacity:0;pointer-events:none;
+  transition:opacity .45s ease;
+}
+.tpr-page-veil.tpr-veil-show{opacity:1;pointer-events:auto;}
+@media (prefers-reduced-motion: reduce){
+  html.tpr-nav-veil-support body{animation:none;}
+  .tpr-page-veil{display:none;}
+}
