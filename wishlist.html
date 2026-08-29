@@ -27,7 +27,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 <meta name="robots" content="noindex, follow">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="shared-ui.css">
 <style>
   :root{
@@ -554,7 +556,7 @@ function cardMarkup(p, i){
       <button class="card-wish liked" aria-label="Remove from wishlist" data-id="${p.id}">
         <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       </button>
-      <img src="${p.images[0]}" alt="${p.name}" loading="lazy" style="${p.imageFocus && p.imageFocus[p.images[0]] ? `object-position:${p.imageFocus[p.images[0]]}` : ''}">
+      <img src="${window.tprThumb ? window.tprThumb(p.images[0], 500) : p.images[0]}" alt="${p.name}" loading="lazy" style="${p.imageFocus && p.imageFocus[p.images[0]] ? `object-position:${p.imageFocus[p.images[0]]}` : ''}">
       ${addBtn}
     </div>
     <h3 class="card-name">${p.name}</h3>

@@ -23,6 +23,24 @@
    actually creates/edits/deletes them.
    ============================================================ */
 
+/* Product photos are hosted on Cloudinary at their original upload
+   resolution — fine for the full-size gallery view, wasteful for a
+   ~300px card thumbnail. Cloudinary can resize/re-encode on the fly
+   just by inserting a transform segment into the existing URL (no
+   re-upload, no separate asset) — this is used only for card-grid
+   thumbnails; the full-resolution URL is left untouched everywhere
+   else (product page gallery, structured data, etc). Non-Cloudinary
+   URLs (e.g. local fallback images) pass through unchanged. */
+function tprThumb(url, width){
+  if (!url || typeof url !== 'string') return url;
+  const marker = '/image/upload/';
+  const i = url.indexOf(marker);
+  if (i === -1) return url;
+  const w = width || 400;
+  return url.slice(0, i + marker.length) + `f_auto,q_auto,c_limit,w_${w}/` + url.slice(i + marker.length);
+}
+window.tprThumb = tprThumb;
+
 const CATEGORIES = {
   'paintings': {
     name: 'Paintings',

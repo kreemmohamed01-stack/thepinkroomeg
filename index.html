@@ -73,7 +73,11 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<!-- loaded non-render-blocking: same fonts, same display:swap fallback,
+     just doesn't hold up first paint waiting on the Google Fonts round-trip -->
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="shared-ui.css">
 <style>
   :root{
@@ -2816,6 +2820,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   //      wired up exactly like the old static markup was ----
   function tsCardMarkup(p){
     const img = (p.images && p.images[0]) || 'logo-beige.png';
+    const thumb = window.tprThumb ? window.tprThumb(img, 500) : img;
     const sub = p.subcategoryName ? `${p.categoryName} &mdash; ${p.subcategoryName}` : (p.categoryName || '');
     const onSale = p.salePrice != null;
     const priceHtml = onSale
@@ -2825,7 +2830,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       <div class="ts-card-inner">
         <div class="ts-card-img">
           ${onSale ? '<span class="ts-tag">SALE</span>' : ''}
-          <img src="${img}" alt="${p.name.replace(/"/g,'&quot;')}" style="${p.imageFocus && p.imageFocus[img] ? `object-position:${p.imageFocus[img]}` : ''}">
+          <img src="${thumb}" alt="${p.name.replace(/"/g,'&quot;')}" style="${p.imageFocus && p.imageFocus[img] ? `object-position:${p.imageFocus[img]}` : ''}">
           <button class="ts-wish" aria-label="Add to wishlist" data-id="${p.id}"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         </div>
         <div class="ts-card-info">

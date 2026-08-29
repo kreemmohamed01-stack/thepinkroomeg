@@ -34,7 +34,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap"></noscript>
 <link rel="stylesheet" href="shared-ui.css">
 <style>
   :root{
@@ -810,7 +812,7 @@ function buildPage(p){
         <a class="rel-card" href="product.html?slug=${r.slug}" style="animation-delay:${i*0.06}s">
           <div class="rel-media">
             <button class="rel-wish ${window.TPR && window.TPR.isWished(r.id) ? 'liked' : ''}" data-id="${r.id}" aria-label="Add to wishlist">${ICON.heart}</button>
-            <img src="${r.images[0]}" alt="${r.name}" loading="lazy" style="${r.imageFocus && r.imageFocus[r.images[0]] ? `object-position:${r.imageFocus[r.images[0]]}` : ''}">
+            <img src="${window.tprThumb ? window.tprThumb(r.images[0], 400) : r.images[0]}" alt="${r.name}" loading="lazy" style="${r.imageFocus && r.imageFocus[r.images[0]] ? `object-position:${r.imageFocus[r.images[0]]}` : ''}">
           </div>
           <p class="rel-name">${r.name}</p>
           <p class="rel-price">${priceMarkup(r)}</p>

@@ -339,7 +339,7 @@
     list.innerHTML = cart.map((item, i) => {
       subtotal += item.price * item.qty;
       return `<div class="tpr-cart-item" data-id="${item.id}" style="animation-delay:${i*0.06}s">
-        <div class="tpr-cart-img"><img src="${item.img}" alt="${item.name}"></div>
+        <div class="tpr-cart-img"><img src="${tprThumb(item.img, 200)}" alt="${item.name}"></div>
         <div class="tpr-cart-info">
           <h4 class="tpr-cart-name">${item.name}</h4>
           <p class="tpr-cart-variant">${item.variant || ''}</p>
@@ -458,7 +458,7 @@
       const editPicks = [catalogue[0], catalogue[10], catalogue[18]].filter(Boolean);
       $('tprEditGrid').innerHTML = editPicks.map(p => `
         <a class="tpr-edit-card" href="product.html?slug=${p.slug}">
-          <div class="tpr-edit-card-img"><img src="${(p.images&&p.images[0])||'logo-beige.png'}" alt="${p.name}"></div>
+          <div class="tpr-edit-card-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 200)}" alt="${p.name}"></div>
           <span>${p.name}</span>
         </a>`).join('');
     });
@@ -520,7 +520,7 @@
     $('tprViewAll').href = 'category.html?cat=all&q=' + encodeURIComponent(q.trim());
     $('tprResultsList').innerHTML = hits.map((p,i) => `
       <a class="tpr-result" href="product.html?slug=${p.slug}" style="animation-delay:${i*0.05}s">
-        <div class="tpr-result-img"><img src="${(p.images&&p.images[0])||'logo-beige.png'}" alt="${p.name}"></div>
+        <div class="tpr-result-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 150)}" alt="${p.name}"></div>
         <div class="tpr-result-info">
           <div class="tpr-result-name">${p.name}</div>
           <div class="tpr-result-cat">${p.subcategoryName || p.categoryName}</div>
