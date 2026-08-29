@@ -514,6 +514,15 @@ PRODUCTS_READY.then(()=>{
         category: product.category, categoryName: product.categoryName
       });
     }
+    if (typeof fbq === 'function'){
+      fbq('track', 'ViewContent', {
+        content_ids: [String(product.id)],
+        content_type: 'product',
+        content_name: product.name,
+        value: product.salePrice || product.price || 0,
+        currency: 'EGP'
+      });
+    }
     buildPage(product);
     // #pdpWhatsApp is re-patched from the real Store Settings by the
     // shared handler in catalog.js once SITE_STRUCTURE_READY resolves.

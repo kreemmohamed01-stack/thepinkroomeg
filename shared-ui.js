@@ -423,6 +423,15 @@
           category: product.category, categoryName: product.categoryName
         });
       }
+      if (typeof fbq === 'function'){
+        fbq('track', 'AddToCart', {
+          content_ids: [String(product.id)],
+          content_type: 'product',
+          content_name: product.name,
+          value: product.salePrice || product.price || 0,
+          currency: 'EGP'
+        });
+      }
       renderCart();
       open(cartEl);
     },

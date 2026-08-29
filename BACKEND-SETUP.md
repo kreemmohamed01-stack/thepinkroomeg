@@ -86,6 +86,47 @@ Already configured. Reference if the API key ever needs regenerating
 
 ---
 
+## Marketing — Meta Pixel + Conversions API
+
+The browser Pixel (`fbq`, in the `<head>` of every storefront page) fires:
+- **PageView** — every page load (unchanged, was already there)
+- **ViewContent** — opening a product page (`product.html`)
+- **AddToCart** — adding an item to the bag (`shared-ui.js`'s `TPR.addToCart()`,
+  the one place every "add to bag" button on the site goes through)
+- **InitiateCheckout** — landing on `checkout.html` with a non-empty cart
+- **Purchase** — only on `order-success.html`, only once a real,
+  server-confirmed order has rendered (never on a plain visit or a
+  product page view) — includes `value`/`currency`, guarded by
+  `sessionStorage` so refreshing the confirmation page doesn't double-count
+
+**Purchase is also sent server-side** (Conversions API, `api/_lib/capi.js`),
+right after the order is durably saved to Postgres in `createOrder()` —
+this catches sales the browser Pixel alone can miss (ad blockers, Safari
+ITP, the tab closing a moment too soon). Both the browser and server
+Purchase calls carry the same `event_id`/`eventID` (the order id), which
+is Meta's documented way to de-duplicate two calls for the same sale
+into a single counted conversion in Events Manager — so turning both on
+does not double-count revenue.
+
+To enable the server-side half:
+1. Events Manager → **Settings** → **Conversions API** → **Generate access token**.
+2. In Vercel env vars, set:
+   - `META_PIXEL_ID` = `1792484121921078` (same id already in every page's
+     Pixel snippet — kept as its own env var so it isn't hand-typed twice)
+   - `META_CAPI_ACCESS_TOKEN` = the token from step 1
+3. Without these two set, `sendPurchaseCAPI()` is a no-op (logs nothing,
+   never blocks or fails order creation) — the browser Pixel keeps working
+   on its own either way.
+
+**To verify:** Events Manager → **Test Events**, paste the store's URL,
+then walk through: open the homepage (PageView) → open a product
+(ViewContent) → add it to the bag (AddToCart) → go to checkout
+(InitiateCheckout) → place a real order (Purchase, shown twice in Test
+Events — once tagged "Browser", once "Server" — Meta's own UI for
+confirming the dedup is working, not a bug).
+
+---
+
 ## Resilience — what happens when something fails
 
 - **DB save fails, notifications still fire**: not currently possible —

@@ -277,6 +277,28 @@ if (!order){
     </div>
   `;
 
+  // Meta Pixel Purchase — fires only here, only for a real order that
+  // just rendered as confirmed (never on plain page load/visit). Guarded
+  // by sessionStorage so refreshing or reopening this same order's link
+  // in the same tab session doesn't count it twice; event_id is the
+  // order id, matching the server-side Conversions API call in
+  // api/_lib/capi.js so Meta de-dupes the two into a single conversion.
+  if (typeof fbq === 'function'){
+    const firedKey = 'tpr_purchase_fired_' + order.id;
+    let alreadyFired = false;
+    try { alreadyFired = sessionStorage.getItem(firedKey) === '1'; } catch(e){}
+    if (!alreadyFired){
+      fbq('track', 'Purchase', {
+        content_ids: order.items.map(i => String(i.id)),
+        content_type: 'product',
+        num_items: order.items.reduce((s,i)=> s + i.qty, 0),
+        value: p.total,
+        currency: 'EGP'
+      }, { eventID: String(order.id) });
+      try { sessionStorage.setItem(firedKey, '1'); } catch(e){}
+    }
+  }
+
   $('btnTrack').addEventListener('click', ()=>{
     toast('Order tracking is coming soon — we’ll email you as your order moves.');
   });

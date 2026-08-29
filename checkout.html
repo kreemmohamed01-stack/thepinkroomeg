@@ -639,6 +639,18 @@ function persist(){ CO.saveCheckoutState(state); }
 
 /* empty cart anywhere in checkout -> nothing to check out */
 if (!cart.length){ location.href = 'category.html?cat=all'; }
+else if (typeof fbq === 'function'){
+  // fires once per checkout page load (not once per step) — that's the
+  // standard definition of "began checkout": reaching the flow with
+  // items in the bag, same as every other store's InitiateCheckout
+  fbq('track', 'InitiateCheckout', {
+    content_ids: cart.map(i => String(i.id)),
+    content_type: 'product',
+    num_items: cart.reduce((s,i)=> s + i.qty, 0),
+    value: cart.reduce((s,i)=> s + i.price * i.qty, 0),
+    currency: 'EGP'
+  });
+}
 
 /* ---------- governorate <select> options ---------- */
 ['inGov','inBillGov'].forEach(id=>{

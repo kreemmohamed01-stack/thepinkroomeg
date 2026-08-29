@@ -17,6 +17,7 @@ const { notifyOrder } = require('./_lib/notify');
 const { validateCoupon } = require('./_lib/coupons');
 const { getSetting } = require('./_lib/settings');
 const { getActivePromotions, effectivePrice } = require('./_lib/promotions');
+const { sendPurchaseCAPI } = require('./_lib/capi');
 
 // same shape/values as the seed row in db/schema.sql — used only if the
 // settings table row is ever missing, so checkout never hard-fails.
@@ -355,6 +356,12 @@ async function createOrder(req, res) {
   if (order.promo && order.promo.code) {
     try { await sql`UPDATE coupons SET usage_count = usage_count + 1 WHERE code = ${order.promo.code}`; } catch (e) { console.error('[orders] coupon usage increment failed:', e); }
   }
+
+  // never lets a Meta outage/misconfiguration delay or fail order creation —
+  // logged, not thrown; same event_id as the browser Pixel's Purchase call
+  // (order.id) so Meta de-dupes the two into a single counted conversion
+  const capi = await sendPurchaseCAPI(order, req).catch(e => ({ ok: false, error: e.message }));
+  if (!capi.ok && !capi.skipped) console.error('[orders] Meta CAPI Purchase failed:', capi.error);
 
   const notify = await notifyOrder(order);
   return res.status(200).json({ ok: true, order: { ...order, _notify: notify } });
