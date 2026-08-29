@@ -27,13 +27,13 @@ const CATEGORIES = {
   'paintings': {
     name: 'Paintings',
     description: 'Explore our curated collection of paintings, selected to bring character and artistic expression into every space.',
-    hero: 'categ photos/painting-upscaled-2x.png',
+    hero: 'categ photos/painting-upscaled-2x.jpg',
     subcategories: []
   },
   'accessories': {
     name: 'Accessories',
     description: 'Refined objects and finishing touches, chosen to bring warmth and personality to every corner of your home.',
-    hero: 'categ photos/accessories-upscaled-2x.png',
+    hero: 'categ photos/accessories-upscaled-2x.jpg',
     subcategories: [
       { slug: 'vases', name: 'Vases' }
     ]
@@ -41,7 +41,7 @@ const CATEGORIES = {
   'lighting': {
     name: 'Lighting',
     description: 'Sculptural lighting designed to shape the mood of a room, from soft ambient glow to considered statement pieces.',
-    hero: 'categ photos/lighting-upscaled-2x.png',
+    hero: 'categ photos/lighting-upscaled-2x.jpg',
     subcategories: [
       { slug: 'table-lamps', name: 'Table Lamps' }
     ]
@@ -49,7 +49,7 @@ const CATEGORIES = {
   'furniture': {
     name: 'Furniture',
     description: 'Timeless furniture with quiet presence, made to anchor a space and last well beyond a season.',
-    hero: 'categ photos/furniture-upscaled-2x.png',
+    hero: 'categ photos/furniture-upscaled-2x.jpg',
     subcategories: [
       { slug: 'side-tables',   name: 'Side Tables' },
       { slug: 'coffee-tables', name: 'Coffee Tables' }
@@ -58,13 +58,13 @@ const CATEGORIES = {
   'wall-art': {
     name: 'WallArt',
     description: 'Considered wall pieces that give a room its focal point, selected for texture, tone and composition.',
-    hero: 'categ photos/wall art-upscaled-2x.png',
+    hero: 'categ photos/wall art-upscaled-2x.jpg',
     subcategories: []
   },
   'sale-offers': {
     name: 'Sale',
     description: 'Selected pieces at limited prices — a rotating edit of favourites, available while stocks last.',
-    hero: 'categ photos/sale-upscaled-2x.png',
+    hero: 'categ photos/sale-upscaled-2x.jpg',
     subcategories: [
       { slug: 'flower-pots', name: 'Flower Pots' },
       { slug: 'ornaments',   name: 'Ornaments' }
@@ -73,7 +73,7 @@ const CATEGORIES = {
   'plants': {
     name: 'Artificial Plants',
     description: 'Living greenery and botanical pieces, chosen to bring life and texture into every room.',
-    hero: 'categ photos/plants-upscaled-2x.png',
+    hero: 'categ photos/plants-upscaled-2x.jpg',
     subcategories: []
   }
 };
@@ -85,32 +85,32 @@ const ROOMS = {
   'living-room': {
     name: 'Living Room',
     description: 'Pieces that set the tone of the room you share — sculptural lighting, soft textures and quiet statement objects.',
-    hero: 'rooms/livingroom-upscaled-4x.png'
+    hero: 'rooms/livingroom-upscaled-4x.jpg'
   },
   'bedroom': {
     name: 'Bedroom',
     description: 'Calm, tactile pieces chosen to make the most personal room in the home feel considered and restful.',
-    hero: 'rooms/bedroom-upscaled-4x.png'
+    hero: 'rooms/bedroom-upscaled-4x.jpg'
   },
   'dining-area': {
     name: 'Dining Area',
     description: 'Tableware, lighting and centrepieces made for long evenings and the table everyone gathers around.',
-    hero: 'rooms/diningarea-upscaled-4x.png'
+    hero: 'rooms/diningarea-upscaled-4x.jpg'
   },
   'entrance-console': {
     name: 'Entrance Console',
     description: 'The first impression of your home — consoles, mirrors and objects styled for the entryway.',
-    hero: 'rooms/entrance-upscaled-4x.png'
+    hero: 'rooms/entrance-upscaled-4x.jpg'
   },
   'bathroom': {
     name: 'Bathroom',
     description: 'Refined everyday essentials that turn a functional space into something quietly luxurious.',
-    hero: 'rooms/bathroom-upscaled-4x.png'
+    hero: 'rooms/bathroom-upscaled-4x.jpg'
   },
   'outdoor-space': {
     name: 'Outdoor Space',
     description: 'Planters, greenery and durable accents designed to extend your interior beyond the walls.',
-    hero: 'rooms/outdoor-upscaled-4x.png'
+    hero: 'rooms/outdoor-upscaled-4x.jpg'
   }
 };
 
