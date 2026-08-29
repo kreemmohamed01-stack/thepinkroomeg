@@ -299,13 +299,15 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     border-top:1px solid rgba(255,255,255,.08);
   }
   .footer-credit-box{
-    display:inline-flex;align-items:center;gap:6px;
+    display:inline-flex;align-items:center;gap:8px;
     position:relative;overflow:hidden;
-    padding:9px 22px;
-    border:1px solid rgba(201,169,124,.4);
+    padding:10px 26px;
+    border:1px solid rgba(201,169,124,.35);
     border-radius:30px;
-    background:rgba(201,169,124,.07);
-    font-size:11px;letter-spacing:1px;color:rgba(255,255,255,.45);
+    background:linear-gradient(180deg,rgba(201,169,124,.09),rgba(201,169,124,.04));
+    font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
+    font-size:12.5px;font-weight:400;font-style:italic;
+    letter-spacing:1.6px;color:rgba(255,255,255,.45);
     animation:footerCreditGlow 3.2s ease-in-out infinite;
   }
   .footer-credit-box::after{
@@ -315,16 +317,27 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     animation:footerCreditShine 3.8s ease-in-out infinite;
   }
   @keyframes footerCreditGlow{
-    0%,100%{box-shadow:0 0 0 rgba(201,169,124,0);border-color:rgba(201,169,124,.4);}
-    50%{box-shadow:0 0 18px rgba(201,169,124,.4);border-color:rgba(201,169,124,.85);}
+    0%,100%{box-shadow:0 0 0 rgba(201,169,124,0);border-color:rgba(201,169,124,.35);}
+    50%{box-shadow:0 0 20px rgba(201,169,124,.45);border-color:rgba(201,169,124,.9);}
   }
   @keyframes footerCreditShine{
     0%{left:-150%;} 55%{left:150%;} 100%{left:150%;}
   }
   @keyframes heartPulse{0%{transform:scale(1);}45%{transform:scale(1.4);}100%{transform:scale(1);}}
-  .footer-heart{color:var(--gold);display:inline-block;animation:heartPulse 1.8s ease-in-out infinite;}
-  .footer-credit-name{color:var(--gold);transition:opacity .3s ease;}
-  .footer-credit-name:hover{opacity:.75;}
+  .footer-credit-name{
+    position:relative;display:inline-block;margin-left:2px;
+    font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
+    font-style:normal;font-weight:600;letter-spacing:2.5px;
+    background:linear-gradient(90deg,#d8b787 0%,#f7e7c4 25%,#fff8e8 50%,#f7e7c4 75%,#d8b787 100%);
+    background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+    text-decoration:none;
+    animation:textShine 3.5s linear infinite;
+    transition:filter .3s ease, transform .3s ease;
+  }
+  .footer-credit-name:hover{
+    filter:drop-shadow(0 0 12px rgba(247,231,196,.7));
+    transform:scale(1.05);
+  }
   .footer-bottom{
     display:flex;align-items:center;justify-content:space-between;
     max-width:1320px;margin:0 auto;padding:20px 0;
@@ -492,8 +505,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
     <div class="footer-credit">
       <span class="footer-credit-box">
-        CRAFTED WITH <span class="footer-heart">&hearts;</span> BY
-        <a href="https://wa.me/201211179625" target="_blank" rel="noopener" class="footer-credit-name">KREEM ALI STUDIO</a>
+        Powered by
+        <a href="https://wa.me/201211179625" target="_blank" rel="noopener" class="footer-credit-name">Kreem Aly</a>
       </span>
     </div>
 
