@@ -122,6 +122,7 @@
 .tpr-menu-nav{display:flex;flex-direction:column;margin-bottom:26px;}
 .tpr-menu-nav a{
   font-family:'Playfair Display', serif;font-size:19px;
+  text-transform:uppercase;letter-spacing:.6px;
   color:rgba(255,255,255,.82);
   padding:13px 0;border-bottom:1px solid rgba(255,255,255,.08);
   opacity:0;transform:translateX(-18px);

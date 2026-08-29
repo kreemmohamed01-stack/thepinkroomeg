@@ -247,9 +247,11 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     border:1px solid var(--line);
     border-radius:3px;
     margin-bottom:14px;
+    aspect-ratio:1/1;
   }
   .card-media img{
-    width:100%;height:auto;display:block;
+    width:100%;height:100%;display:block;
+    object-fit:contain;
     transition:transform 1s cubic-bezier(.16,1,.3,1);
   }
   .product-card:hover .card-media img{transform:scale(1.07);}
@@ -1103,7 +1105,7 @@ function cardMarkup(p, i){
       <button class="card-wish ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" aria-label="Add to wishlist" data-id="${p.id}">
         <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       </button>
-      <img src="${p.images[0]}" alt="${p.name}" loading="lazy">
+      <img src="${p.images[0]}" alt="${p.name}" loading="lazy" style="${p.imageFocus && p.imageFocus[p.images[0]] ? `object-position:${p.imageFocus[p.images[0]]}` : ''}">
       ${addBtn}
     </div>
     <h3 class="card-name">${p.name}</h3>

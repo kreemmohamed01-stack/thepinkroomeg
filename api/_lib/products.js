@@ -42,6 +42,10 @@ function rowToProduct(row){
     // { name, images: [indices into `images` above], stockQuantity }.
     // Empty array = no color choice for this product (the common case).
     colors: extra.colors || [],
+    // per-image crop focus for the square card thumbnail — { url: "50% 30%" },
+    // used as CSS object-position so the card can show the part of the photo
+    // the admin picked instead of always centering it. Missing entry = center.
+    imageFocus: extra.imageFocus || {},
     isNew: !!row.is_new,
     createdAt: new Date(row.created_at).getTime(),
     trackInventory: !!row.track_inventory,
@@ -119,6 +123,20 @@ function validateProduct(p){
 
   const colorStockTotal = colors.reduce((sum, c) => sum + c.stockQuantity, 0);
 
+  /* Per-image crop focus point, e.g. { "https://…/a.jpg": "50% 20%" } —
+     dropped for any url no longer among this product's images, and any
+     value that isn't a plain "X% Y%" string (guards against junk being
+     posted to the API directly). */
+  const focusPattern = /^\d{1,3}%\s+\d{1,3}%$/;
+  const imageFocus = {};
+  if (p.imageFocus && typeof p.imageFocus === 'object') {
+    for (const [url, pos] of Object.entries(p.imageFocus)) {
+      if (validImages.has(url) && typeof pos === 'string' && focusPattern.test(pos.trim())) {
+        imageFocus[url] = pos.trim();
+      }
+    }
+  }
+
   return {
     values: {
       name: String(p.name).trim(),
@@ -151,6 +169,7 @@ function validateProduct(p){
         rooms: Array.isArray(p.rooms) ? p.rooms : [],
         extraCategories,
         colors,
+        imageFocus,
         _provisional: Array.isArray(p._provisional) ? p._provisional : []
       }
     }

@@ -179,6 +179,10 @@ $('prodTableBody').addEventListener('click', async (e)=>{
 /* ---------- product drawer ---------- */
 const prodOverlay = $('prodOverlay'), prodDrawer = $('prodDrawer');
 let drawerImages = [];
+/* Per-image crop focus point for the square card thumbnail — { url: "50% 30%" }.
+   Set by clicking the "Frame" button on a photo tile below; missing entry
+   just means the card centers that photo (today's default behavior). */
+let drawerImageFocus = {};
 /* Color options for the open drawer — each { name, images: [url,...], stockQuantity }.
    images references the product's own photos (drawerImages) by URL, so a
    customer can be shown just that color's pictures on the product page. */
@@ -198,6 +202,7 @@ async function openProductDrawer(id){
   drawerImages = [];
   drawerExtraCats = {};
   drawerColors = [];
+  drawerImageFocus = {};
   loadPromotions(); // refresh in the background so the dropdown reflects the latest campaigns
 
   if (!id){
@@ -215,6 +220,7 @@ async function openProductDrawer(id){
     drawerImages = (d.product.images || []).slice();
     (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
     drawerColors = (d.product.colors || []).map(c => ({ name: c.name, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
+    drawerImageFocus = Object.assign({}, d.product.imageFocus || {});
     renderProductForm(d.product);
   } catch(e){
     $('prodDrawerBody').innerHTML = `<p style="color:var(--err);font-size:13px">${escHtml(e.message)}</p>`;
@@ -424,8 +430,9 @@ function renderImageList(){
   const wrap = $('imgList');
   wrap.innerHTML = drawerImages.map((url, i) => `
     <div class="db-img-tile ${i === 0 ? 'is-main' : ''}" data-i="${i}" title="${i === 0 ? 'Main photo' : 'Click to make this the main photo'}">
-      <img src="${escAttr(url)}">
+      <img src="${escAttr(url)}" style="${drawerImageFocus[url] ? `object-position:${escAttr(drawerImageFocus[url])}` : ''}">
       ${i === 0 ? '<span class="db-img-tag">MAIN</span>' : ''}
+      <button class="db-img-frame" data-url="${escAttr(url)}" title="Frame — choose what shows in the square card" aria-label="Frame"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="12" cy="12" r="2.5"/></svg></button>
       <button class="db-img-remove" data-i="${i}" aria-label="Remove">&times;</button>
     </div>`).join('') +
     `<div class="db-img-add" id="imgAddTile"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD</div>`;
@@ -437,8 +444,15 @@ function renderImageList(){
       // a color pointing at a photo that just got removed drops that
       // reference — it simply shows one fewer picture on the product page
       if (removed) drawerColors.forEach(c => { c.images = c.images.filter(u => u !== removed); });
+      if (removed) delete drawerImageFocus[removed];
       renderImageList();
       renderColorList();
+    });
+  });
+  wrap.querySelectorAll('.db-img-frame').forEach(btn=>{
+    btn.addEventListener('click', (e)=>{
+      e.stopPropagation();
+      openCropPicker(btn.dataset.url);
     });
   });
   // click anywhere else on a tile — pin that photo as image #1 (MAIN)
@@ -452,6 +466,57 @@ function renderImageList(){
     });
   });
   $('imgAddTile').addEventListener('click', ()=> $('imgFileInput').click());
+}
+
+/* "Frame" picker — click anywhere on the full photo to set which part of
+   it stays visible when the product card crops it square (object-position).
+   Purely a preview aid: the stored value is just "X% Y%", same as what
+   CSS object-position expects, applied to the real card on the storefront. */
+function openCropPicker(url){
+  const current = drawerImageFocus[url]; // e.g. "50% 30%", or undefined = center
+  const [cx, cy] = current ? current.split(/\s+/).map(s => parseFloat(s)) : [50, 50];
+
+  const overlay = document.createElement('div');
+  overlay.className = 'db-crop-overlay';
+  overlay.innerHTML = `
+    <div class="db-crop-modal">
+      <p class="db-crop-title">Frame this photo</p>
+      <p class="db-crop-hint">Click on the part of the photo that should stay visible in the square product card.</p>
+      <div class="db-crop-stage" id="cropStage">
+        <img src="${escAttr(url)}" style="object-position:${cx}% ${cy}%">
+        <div class="db-crop-marker" id="cropMarker" style="left:${cx}%;top:${cy}%"></div>
+      </div>
+      <div class="db-crop-actions">
+        <button class="db-save outline" id="cropReset" type="button">Reset to Center</button>
+        <button class="db-save" id="cropDone" type="button">Done</button>
+      </div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  let pos = { x: cx, y: cy };
+  const stage = overlay.querySelector('#cropStage');
+  const img = stage.querySelector('img');
+  const marker = overlay.querySelector('#cropMarker');
+
+  function setPos(x, y){
+    pos = { x: Math.round(x), y: Math.round(y) };
+    img.style.objectPosition = `${pos.x}% ${pos.y}%`;
+    marker.style.left = `${pos.x}%`;
+    marker.style.top = `${pos.y}%`;
+  }
+
+  stage.addEventListener('click', (e)=>{
+    const r = stage.getBoundingClientRect();
+    setPos(((e.clientX - r.left) / r.width) * 100, ((e.clientY - r.top) / r.height) * 100);
+  });
+  overlay.querySelector('#cropReset').addEventListener('click', ()=> setPos(50, 50));
+  overlay.querySelector('#cropDone').addEventListener('click', ()=>{
+    if (pos.x === 50 && pos.y === 50) delete drawerImageFocus[url];
+    else drawerImageFocus[url] = `${pos.x}% ${pos.y}%`;
+    overlay.remove();
+    renderImageList();
+  });
+  overlay.addEventListener('click', (e)=> { if (e.target === overlay) overlay.remove(); });
 }
 
 function renderColorList(){
@@ -584,6 +649,7 @@ async function saveProduct(existingId){
     price: $('fPrice').value === '' ? null : Number($('fPrice').value),
     salePrice: $('fSalePrice').value === '' ? null : Number($('fSalePrice').value),
     images: drawerImages,
+    imageFocus: drawerImageFocus,
     colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), images: c.images.slice(), stockQuantity: c.stockQuantity })),
     size: $('fSize').value || null,
     sizeLabel: $('fSizeLabel').value.trim() || null,

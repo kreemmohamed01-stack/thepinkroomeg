@@ -339,8 +339,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     position:relative;overflow:hidden;
     border:1px solid var(--line);border-radius:3px;background:#fff;
     margin-bottom:13px;
+    aspect-ratio:1/1;
   }
-  .rel-media img{width:100%;height:auto;display:block;transition:transform 1s cubic-bezier(.16,1,.3,1);}
+  .rel-media img{width:100%;height:100%;display:block;object-fit:contain;transition:transform 1s cubic-bezier(.16,1,.3,1);}
   .rel-card:hover .rel-media img{transform:scale(1.06);}
   .rel-wish{
     position:absolute;top:10px;right:10px;z-index:2;
@@ -809,7 +810,7 @@ function buildPage(p){
         <a class="rel-card" href="product.html?slug=${r.slug}" style="animation-delay:${i*0.06}s">
           <div class="rel-media">
             <button class="rel-wish ${window.TPR && window.TPR.isWished(r.id) ? 'liked' : ''}" data-id="${r.id}" aria-label="Add to wishlist">${ICON.heart}</button>
-            <img src="${r.images[0]}" alt="${r.name}" loading="lazy">
+            <img src="${r.images[0]}" alt="${r.name}" loading="lazy" style="${r.imageFocus && r.imageFocus[r.images[0]] ? `object-position:${r.imageFocus[r.images[0]]}` : ''}">
           </div>
           <p class="rel-name">${r.name}</p>
           <p class="rel-price">${priceMarkup(r)}</p>

@@ -253,6 +253,38 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 .db-img-add.uploading{opacity:.5;pointer-events:none;}
 .db-img-hint{font-size:11px;color:var(--ink-soft);margin-bottom:16px;}
 
+/* crop-focus ("Frame") button on each photo tile + its picker modal —
+   lets the admin choose which part of a non-square photo shows in the
+   square product-card thumbnail on the storefront. */
+.db-img-frame{
+  position:absolute;bottom:2px;left:2px;width:18px;height:18px;border-radius:50%;
+  background:rgba(28,26,23,.85);color:#fff;
+  display:flex;align-items:center;justify-content:center;
+}
+.db-img-frame svg{width:10px;height:10px;stroke:currentColor;fill:none;stroke-width:1.8;}
+.db-img-frame:hover{background:var(--gold);color:var(--ink);}
+.db-crop-overlay{
+  position:fixed;inset:0;z-index:400;background:rgba(20,17,12,.6);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.db-crop-modal{
+  background:#fff;border-radius:6px;padding:20px;max-width:420px;width:100%;
+  display:flex;flex-direction:column;gap:14px;
+}
+.db-crop-title{font-size:14px;font-weight:600;color:var(--ink);}
+.db-crop-hint{font-size:11.5px;color:var(--ink-soft);margin-top:-8px;}
+.db-crop-stage{
+  position:relative;width:100%;aspect-ratio:1/1;border-radius:4px;overflow:hidden;
+  border:1px solid var(--line);background:var(--beige-soft);cursor:crosshair;
+}
+.db-crop-stage img{width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;}
+.db-crop-marker{
+  position:absolute;width:22px;height:22px;border-radius:50%;
+  border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,.5), 0 2px 8px rgba(0,0,0,.35);
+  transform:translate(-50%,-50%);pointer-events:none;
+}
+.db-crop-actions{display:flex;justify-content:flex-end;gap:8px;}
+
 /* ---------- COLOR OPTIONS WIDGET ---------- */
 .db-colors{display:flex;flex-direction:column;gap:12px;margin-bottom:6px;}
 .db-color-row{border:1px solid var(--line);border-radius:4px;background:#fff;padding:12px;}
