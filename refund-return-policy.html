@@ -386,14 +386,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 <script>
   (function(){
     if (!window.TPR_I18N) return;
-    var t = window.TPR_I18N.t;
-    document.querySelectorAll('[data-i18n]').forEach(function(el){
-      el.textContent = t(el.getAttribute('data-i18n'));
-    });
-    document.querySelectorAll('[data-i18n-list]').forEach(function(el){
-      var items = t(el.getAttribute('data-i18n-list'));
-      if (Array.isArray(items)) el.innerHTML = items.map(function(s){ return '<li>' + s + '</li>'; }).join('');
-    });
+    window.TPR_I18N.applyStaticTranslations();
   })();
 
   /* WhatsApp/email on this page are the same "Store Settings" values

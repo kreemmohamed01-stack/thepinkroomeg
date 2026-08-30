@@ -84,7 +84,37 @@
       policyImportantP2: 'For any questions regarding returns, exchanges, or refunds, please contact The Pink Room team.',
       policyStillQuestion: 'Still have a question about your order?',
       policyChatWhatsapp: 'CHAT ON WHATSAPP', policyEmailUs: 'EMAIL US',
-      policyBackToShop: 'Back to shop', policyAllRightsReserved: 'All rights reserved.'
+      policyBackToShop: 'Back to shop', policyAllRightsReserved: 'All rights reserved.',
+
+      // Homepage (index.html)
+      heroTitle: 'The Art of Fine Living', heroSub: 'Curated Elegance For Every Home', heroBtn: 'SHOP NOW',
+      offerEyebrow: 'LIMITED TIME OFFER', offerDesc: 'Elevate your space with pieces you’ll love for less.',
+      offerBtn: 'SHOP THE OFFER', offerEnds: 'OFFER ENDS SOON',
+      catsEyebrow: 'EXPLORE OUR RANGE', catsTitle: 'Shop by Category', catsSub: 'Curated pieces for every corner of your home.',
+      catPaintings: 'Paintings', catAccessories: 'Accessories', catLighting: 'Lighting', catFurniture: 'Furniture',
+      catWallArt: 'WallArt', catPlants: 'Artificial Plants', catSale: 'Sale',
+      catCta: 'Explore Collection', catSaleNote: 'Selected pieces, limited prices.', catSaleCta: 'Shop Now',
+      viewAllProducts: 'VIEW ALL PRODUCTS',
+      tsTagline: 'TOP SELLERS', tsDesc: 'Handpicked favorites that bring beauty, elegance, and character to every space.',
+      tsTitleHtml: 'Pieces <em>Our Community</em><br>Can’t Stop Loving',
+      trustQuality: 'Premium Quality', trustQualitySub: 'Finest materials, made to last',
+      trustPayment: 'Secure Payment', trustPaymentSub: '100% safe & secure checkout',
+      trustDelivery: 'Fast Delivery', trustDeliverySub: 'Quick & reliable delivery',
+      trustReturns: 'Easy Returns', trustReturnsSub: 'Hassle-free returns',
+      trustSupport: 'Support 24/7', trustSupportSub: 'We’re here to help',
+      roomsDecorLeft: 'THE PINK ROOM', roomsDecorRight: 'DESIGNED', roomsDecorRightBr: 'TO INSPIRE',
+      roomsEyebrow: 'SHOP BY', roomsTitle: 'ROOM', roomsSub: 'Discover pieces, curated for every corner of your home.',
+      roomsExploreBtn: 'EXPLORE ALL ROOMS', roomDiscover: 'DISCOVER',
+      roomLivingRoomHtml: 'Living<br>Room', roomBedroom: 'Bedroom', roomDiningAreaHtml: 'Dining<br>Area',
+      roomEntranceConsoleHtml: 'Entrance<br>Console', roomBathroom: 'Bathroom', roomOutdoorSpaceHtml: 'Outdoor<br>Space',
+      journalEyebrow: 'FOLLOW OUR JOURNEY', journalTitle: 'THE PINK ROOM',
+      journalSub: 'Behind the scenes, styling ideas, and timeless pieces.<br>Find daily inspiration on Instagram.',
+      journalStayInspired: 'STAY INSPIRED', journalNewsSub: 'New arrivals, styling ideas & exclusive offers.',
+      newsletterPlaceholder: 'Enter your email', newsletterBtn: 'JOIN THE ROOM',
+      footerAbout: 'The Pink Room is an Egyptian home accessories brand founded in 2020 by Dalia Hassan and Ashraf El Sanjak, bringing together over 20 years of experience across multinational companies, event styling, and trading ventures. Built on the belief that chic doesn’t have to be expensive, The Pink Room offers stylish, carefully selected pieces that bring character and elegance to every space at accessible prices.',
+      footerShop: 'SHOP', footerAllProducts: 'All Products', footerCustomerCare: 'CUSTOMER CARE',
+      footerFollowUs: 'FOLLOW US', footerNeedHelp: 'NEED HELP?', footerChatWhatsapp: 'Chat with us on WhatsApp',
+      footerFindMaps: 'Find us on Google Maps', footerTerms: 'Terms & Conditions', footerPrivacy: 'Privacy Policy'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -146,7 +176,37 @@
       policyImportantP2: 'لأي استفسارات حول الاسترجاع أو الاستبدال أو استرداد الأموال، يُرجى التواصل مع فريق ذا بينك روم.',
       policyStillQuestion: 'لسه عندك سؤال عن طلبك؟',
       policyChatWhatsapp: 'تواصلي عبر واتساب', policyEmailUs: 'راسلينا بالإيميل',
-      policyBackToShop: 'العودة للمتجر', policyAllRightsReserved: 'جميع الحقوق محفوظة.'
+      policyBackToShop: 'العودة للمتجر', policyAllRightsReserved: 'جميع الحقوق محفوظة.',
+
+      // Homepage (index.html)
+      heroTitle: 'فن الحياة الراقية', heroSub: 'أناقة مختارة لكل بيت', heroBtn: 'تسوقي الآن',
+      offerEyebrow: 'عرض لفترة محدودة', offerDesc: 'ارتقي بمساحتك بقطع هتحبيها بسعر أقل.',
+      offerBtn: 'تسوقي العرض', offerEnds: 'العرض لفترة محدودة',
+      catsEyebrow: 'اكتشفي مجموعتنا', catsTitle: 'تسوقي حسب الفئة', catsSub: 'قطع مختارة بعناية لكل ركن في بيتك.',
+      catPaintings: 'لوحات', catAccessories: 'إكسسوارات', catLighting: 'إضاءة', catFurniture: 'أثاث',
+      catWallArt: 'لوحات حائط', catPlants: 'نباتات صناعية', catSale: 'تخفيضات',
+      catCta: 'اكتشفي المجموعة', catSaleNote: 'قطع مختارة، أسعار محدودة.', catSaleCta: 'تسوقي الآن',
+      viewAllProducts: 'عرض كل المنتجات',
+      tsTagline: 'الأكثر مبيعاً', tsDesc: 'مفضلات مختارة بعناية تضيف جمالاً وأناقة وطابعاً مميزاً لكل مساحة.',
+      tsTitleHtml: 'قطع <em>مجتمعنا</em><br>لا يتوقف عن حبها',
+      trustQuality: 'جودة عالية', trustQualitySub: 'أجود الخامات، مصنوعة لتدوم',
+      trustPayment: 'دفع آمن', trustPaymentSub: 'دفع آمن ومضمون 100%',
+      trustDelivery: 'توصيل سريع', trustDeliverySub: 'توصيل سريع وموثوق',
+      trustReturns: 'استرجاع سهل', trustReturnsSub: 'استرجاع بدون تعقيد',
+      trustSupport: 'دعم على مدار الساعة', trustSupportSub: 'إحنا هنا عشان نساعدك',
+      roomsDecorLeft: 'ذا بينك روم', roomsDecorRight: 'مصمم', roomsDecorRightBr: 'ليُلهمك',
+      roomsEyebrow: 'تسوقي حسب', roomsTitle: 'الغرفة', roomsSub: 'اكتشفي قطعاً مختارة بعناية لكل ركن في بيتك.',
+      roomsExploreBtn: 'اكتشفي كل الغرف', roomDiscover: 'اكتشفي',
+      roomLivingRoomHtml: 'غرفة<br>المعيشة', roomBedroom: 'غرفة النوم', roomDiningAreaHtml: 'منطقة<br>الطعام',
+      roomEntranceConsoleHtml: 'المدخل<br>الرئيسي', roomBathroom: 'الحمام', roomOutdoorSpaceHtml: 'المساحة<br>الخارجية',
+      journalEyebrow: 'تابعي رحلتنا', journalTitle: 'ذا بينك روم',
+      journalSub: 'كواليس، أفكار للديكور، وقطع خالدة.<br>اكتشفي إلهاماً يومياً على إنستجرام.',
+      journalStayInspired: 'ابقي ملهمة', journalNewsSub: 'وصولات جديدة، أفكار للديكور وعروض حصرية.',
+      newsletterPlaceholder: 'أدخلي بريدك الإلكتروني', newsletterBtn: 'انضمي إلينا',
+      footerAbout: 'ذا بينك روم هي علامة تجارية مصرية لإكسسوارات المنزل، تأسست عام 2020 على يد داليا حسن وأشرف السنجق، بخبرة تفوق 20 عاماً في الشركات متعددة الجنسيات وتنسيق الفعاليات والتجارة. مبنية على فكرة أن الأناقة لا تحتاج لتكون باهظة الثمن، تقدم ذا بينك روم قطعاً أنيقة ومختارة بعناية تضفي طابعاً وأناقة على كل مساحة بأسعار في متناول الجميع.',
+      footerShop: 'تسوقي', footerAllProducts: 'كل المنتجات', footerCustomerCare: 'خدمة العملاء',
+      footerFollowUs: 'تابعينا', footerNeedHelp: 'محتاجة مساعدة؟', footerChatWhatsapp: 'تواصلي معنا عبر واتساب',
+      footerFindMaps: 'اعثري علينا على خرائط جوجل', footerTerms: 'الشروط والأحكام', footerPrivacy: 'سياسة الخصوصية'
     }
   };
 
@@ -168,7 +228,29 @@
     location.reload();
   }
 
+  /* Shared static-text applier — same [data-i18n] / [data-i18n-list] pattern
+     refund-return-policy.html introduced, plus two additions used by pages
+     added later: [data-i18n-html] for short fragments that legitimately need
+     inline markup (e.g. a <br> or <em> inside a heading) and
+     [data-i18n-placeholder] for input placeholders. Call once per page,
+     after the DOM containing these attributes exists. */
+  function applyStaticTranslations(){
+    document.querySelectorAll('[data-i18n]').forEach(function(el){
+      el.textContent = t(el.getAttribute('data-i18n'));
+    });
+    document.querySelectorAll('[data-i18n-html]').forEach(function(el){
+      el.innerHTML = t(el.getAttribute('data-i18n-html'));
+    });
+    document.querySelectorAll('[data-i18n-placeholder]').forEach(function(el){
+      el.setAttribute('placeholder', t(el.getAttribute('data-i18n-placeholder')));
+    });
+    document.querySelectorAll('[data-i18n-list]').forEach(function(el){
+      var items = t(el.getAttribute('data-i18n-list'));
+      if (Array.isArray(items)) el.innerHTML = items.map(function(s){ return '<li>' + s + '</li>'; }).join('');
+    });
+  }
+
   applyDocumentDirection(); // as early as possible — before any chrome/page markup below reads t()
 
-  window.TPR_I18N = { t, getLang, setLang };
+  window.TPR_I18N = { t, getLang, setLang, applyStaticTranslations };
 })();
