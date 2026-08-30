@@ -21,6 +21,7 @@
     search:'<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
     heart: '<svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>',
     bag:   '<svg viewBox="0 0 24 24"><path d="M6.5 8h11l.9 12.1a2 2 0 0 1-2 2.15H7.6a2 2 0 0 1-2-2.15L6.5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>',
+    globe: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>',
     home:  '<svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>',
     grid:  '<svg viewBox="0 0 24 24"><circle cx="8" cy="8" r="3"/><circle cx="16" cy="8" r="3"/><circle cx="8" cy="16" r="3"/><circle cx="16" cy="16" r="3"/></svg>',
     arrow: '<svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
@@ -87,6 +88,7 @@
       </div>
       <a class="tpr-logo" href="index.html" aria-label="The Pink Room">${LOGO_MARK}</a>
       <div class="tpr-side">
+        <button class="tpr-icon tpr-icon-sm" id="tprLangBtn" aria-label="Switch language">${ICONS.globe}</button>
         <button class="tpr-icon" id="tprSearchBtn" aria-label="Search">${ICONS.search}</button>
         <a class="tpr-icon" href="wishlist.html" aria-label="Wishlist">${ICONS.heart}<span class="tpr-badge" id="tprWishBadge">0</span></a>
         <button class="tpr-icon" id="tprCartBtn" aria-label="Cart">${ICONS.bag}<span class="tpr-badge" id="tprCartBadge">0</span></button>
@@ -140,17 +142,6 @@
               <li class="selected" data-val="EGP">EGP</li>
               <li data-val="USD">USD</li>
               <li data-val="EUR">EUR</li>
-            </ul>
-          </div>
-        </div>
-        <div class="tpr-pref">
-          <span>${t('language')}</span>
-          <div class="tpr-dd" id="tprLangDd">
-            <span id="tprLangLabel">${window.TPR_I18N.getLang() === 'ar' ? 'AR' : 'EN'}</span>
-            <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
-            <ul class="tpr-dd-menu">
-              <li class="${window.TPR_I18N.getLang() === 'en' ? 'selected' : ''}" data-val="EN">English</li>
-              <li class="${window.TPR_I18N.getLang() === 'ar' ? 'selected' : ''}" data-val="AR">العربية</li>
             </ul>
           </div>
         </div>
@@ -268,6 +259,10 @@
   on('tprMenuBtn',   'click', ()=> open(menu));
   on('tprCartBtn',   'click', ()=> { renderCart(); open(cartEl); });
   on('tprSearchBtn', 'click', ()=> { open(searchEl); setTimeout(()=> $('tprSearchInput').focus(), 350); });
+  on('tprLangBtn', 'click', ()=>{
+    const current = window.TPR_I18N.getLang();
+    window.TPR_I18N.setLang(current === 'ar' ? 'en' : 'ar');
+  });
   on('tprMenuClose',   'click', closeAll);
   on('tprCartClose',   'click', closeAll);
   on('tprSearchClose', 'click', closeAll);
@@ -296,13 +291,8 @@
     });
   }
   setupDropdown('tprCurrencyDd', 'tprCurrencyLabel');
-  // language actually switches the site (reloads with the new language
-  // applied) — everything else here is cosmetic-only (currency has no
-  // real effect yet), this one really does something on selection
-  setupDropdown('tprLangDd', 'tprLangLabel', (val) => {
-    const wanted = val === 'AR' ? 'ar' : 'en';
-    if (wanted !== window.TPR_I18N.getLang()) window.TPR_I18N.setLang(wanted);
-  });
+  // language now switches via the small globe icon next to search in the
+  // topbar (see tprLangBtn above) — no longer a dropdown in this drawer.
   document.addEventListener('click', ()=> {
     document.querySelectorAll('.tpr-dd.open').forEach(o => o.classList.remove('open'));
   });

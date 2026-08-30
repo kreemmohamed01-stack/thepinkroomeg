@@ -26,6 +26,7 @@
 .tpr-icon svg{width:18px;height:18px;stroke:var(--ink);fill:none;stroke-width:1.4;transition:stroke .3s ease;}
 .tpr-icon:hover{transform:scale(1.15) translateY(-2px);filter:drop-shadow(0 0 6px var(--shine));}
 .tpr-icon:hover svg{stroke:var(--gold);}
+.tpr-icon-sm svg{width:15px;height:15px;}
 .tpr-badge{
   position:absolute;top:-6px;right:-8px;
   min-width:15px;height:15px;padding:0 3px;border-radius:50%;
