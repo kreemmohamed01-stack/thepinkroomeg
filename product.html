@@ -469,6 +469,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 <script src="i18n.js"></script>
 <script src="shared-ui.js"></script>
 <script>
+if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
+const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
 /* ============================================================
    PRODUCT PAGE — one template, driven entirely by ?slug=
    Fields the client hasn't supplied yet are simply not rendered.
@@ -503,9 +505,9 @@ PRODUCTS_READY.then(()=>{
     document.title = 'Product not found | The Pink Room';
     root.innerHTML = `
       <div class="pdp-missing">
-        <h1>We couldn&rsquo;t find that piece.</h1>
-        <p>It may have been renamed or is no longer available. Browse the full collection to find something you love.</p>
-        <a class="tpr-btn" href="category.html?cat=all">BROWSE THE COLLECTION</a>
+        <h1>${t('pdpNotFoundTitle')}</h1>
+        <p>${t('pdpNotFoundDesc')}</p>
+        <a class="tpr-btn" href="category.html?cat=all">${t('pdpBrowseCollection')}</a>
       </div>`;
   } else {
     if (window.TPRAnalytics){
@@ -673,7 +675,7 @@ function buildPage(p){
 
   root.innerHTML = `
   <nav class="pdp-crumb">
-    <a href="index.html">Home</a>${ICON.chev}
+    <a href="index.html">${t('pdpHome')}</a>${ICON.chev}
     <a href="category.html?cat=${p.category}">${p.categoryName}</a>${ICON.chev}
     <span class="current">${p.name}</span>
   </nav>
@@ -708,8 +710,8 @@ function buildPage(p){
       <p class="pdp-cat">${p.categoryName.toUpperCase()}</p>
       <h1 class="pdp-name">${p.name}</h1>
       <div class="pdp-price">${priceMarkup(p)}</div>
-      <p class="pdp-tax">Tax included.</p>
-      <p class="pdp-stock ${stock.oos ? 'oos' : (stock.low ? 'low' : '')}" id="pdpStockMsg">${stock.oos ? 'Sold Out' : (stock.low ? `Only ${stock.qty} left in stock` : '')}</p>
+      <p class="pdp-tax">${t('pdpTaxIncluded')}</p>
+      <p class="pdp-stock ${stock.oos ? 'oos' : (stock.low ? 'low' : '')}" id="pdpStockMsg">${stock.oos ? t('pdpSoldOut') : (stock.low ? t('pdpOnlyLeftInStock').replace('{n}', stock.qty) : '')}</p>
       <div class="pdp-rule"></div>
 
       <p class="pdp-desc">${p.shortDescription || ''}</p>
@@ -721,27 +723,27 @@ function buildPage(p){
       <div class="pdp-rule"></div>
 
       ${sizeText ? `<div class="pdp-field">
-        <span class="pdp-label">SIZE</span>
+        <span class="pdp-label">${t('pdpSize')}</span>
         <div class="pdp-size-box">${sizeText}</div>
       </div>` : ''}
 
       ${hasColors ? `<div class="pdp-field">
-        <span class="pdp-label">COLOR<span class="val" id="pdpColorLabel"> &mdash; ${escHtml(pdpState.color)}</span></span>
+        <span class="pdp-label">${t('pdpColor')}<span class="val" id="pdpColorLabel"> &mdash; ${escHtml(pdpState.color)}</span></span>
         <div class="pdp-swatches" id="pdpSwatches">
           ${p.colors.map(c => {
             const cOos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p, c.name) : c.stockQuantity <= 0;
-            return `<button type="button" class="pdp-swatch ${c.name === pdpState.color ? 'active' : ''} ${cOos ? 'oos' : ''}" data-color="${escHtml(c.name)}" ${cOos ? 'disabled' : ''}>${escHtml(c.name)}${cOos ? ' &mdash; Sold Out' : ''}</button>`;
+            return `<button type="button" class="pdp-swatch ${c.name === pdpState.color ? 'active' : ''} ${cOos ? 'oos' : ''}" data-color="${escHtml(c.name)}" ${cOos ? 'disabled' : ''}>${escHtml(c.name)}${cOos ? t('pdpSoldOutSuffix') : ''}</button>`;
           }).join('')}
         </div>
       </div>` : ''}
 
       ${p.category === 'paintings' ? `<a class="pdp-customize" id="pdpCustomizeWA" href="https://wa.me/${customizeWaNum}?text=${customizeMsg}" target="_blank" rel="noopener">
         ${ICON.ruler}
-        <span>Need a different size? Every piece is hand-painted to order — <b>Customize This Piece</b> and we'll work out the size with you.</span>
+        <span>${t('pdpCustomizeText').replace('{b}','<b>').replace('{/b}','</b>')}</span>
       </a>` : ''}
 
       <div class="pdp-field" id="qtyFieldWrap" style="${oos ? 'display:none' : ''}">
-        <span class="pdp-label">QUANTITY</span>
+        <span class="pdp-label">${t('pdpQuantity')}</span>
         <div class="qty-row">
           <button id="qtyMinus" aria-label="Decrease">&minus;</button>
           <span class="val" id="qtyVal">1</span>
@@ -749,22 +751,22 @@ function buildPage(p){
         </div>
       </div>
 
-      <button class="btn-bag" id="btnBag" ${oos ? 'disabled' : ''}><span>${oos ? 'SOLD OUT' : 'ADD TO BAG'}</span></button>
+      <button class="btn-bag" id="btnBag" ${oos ? 'disabled' : ''}><span>${oos ? t('pdpSoldOutBtn') : t('pdpAddToBag')}</span></button>
 
       <div class="btn-row">
-        <button class="btn-ghost ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" id="btnWish" data-id="${p.id}">${ICON.heart} ADD TO WISHLIST</button>
-        <button class="btn-ghost" id="btnShare">${ICON.share} SHARE</button>
+        <button class="btn-ghost ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" id="btnWish" data-id="${p.id}">${ICON.heart} ${t('pdpAddToWishlist')}</button>
+        <button class="btn-ghost" id="btnShare">${ICON.share} ${t('pdpShare')}</button>
       </div>
 
       <div class="svc">
         <div class="svc-row">
           ${ICON.truck}
-          <span class="svc-txt"><b>Estimated Delivery</b><span>3 - 5 business days</span></span>
+          <span class="svc-txt"><b>${t('pdpEstimatedDelivery')}</b><span>${t('pdpDeliveryTime')}</span></span>
           <svg class="svc-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </div>
         <a class="svc-row" id="pdpWhatsApp" href="https://wa.me/${String(STORE_SETTINGS.whatsapp||'').replace(/[^0-9]/g,'')}" target="_blank" rel="noopener">
           ${ICON.help}
-          <span class="svc-txt"><b>Need Help?</b><span>Contact us anytime</span></span>
+          <span class="svc-txt"><b>${t('pdpNeedHelp')}</b><span>${t('pdpContactAnytime')}</span></span>
           <svg class="svc-chev" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
         </a>
       </div>
@@ -773,10 +775,10 @@ function buildPage(p){
 
   <div class="pdp-tabs">
     <div class="tab-heads" id="tabHeads">
-      <button class="tab-head active" data-t="details">DETAILS</button>
-      ${sizeText ? `<button class="tab-head" data-t="dimensions">DIMENSIONS</button>` : ''}
-      ${(p.material || p.color) ? `<button class="tab-head" data-t="material">MATERIAL &amp; CARE</button>` : ''}
-      <button class="tab-head" data-t="shipping">SHIPPING &amp; RETURNS</button>
+      <button class="tab-head active" data-t="details">${t('tabDetails')}</button>
+      ${sizeText ? `<button class="tab-head" data-t="dimensions">${t('tabDimensions')}</button>` : ''}
+      ${(p.material || p.color) ? `<button class="tab-head" data-t="material">${t('tabMaterialCare')}</button>` : ''}
+      <button class="tab-head" data-t="shipping">${t('tabShippingReturns')}</button>
     </div>
     <div class="tab-panels">
       <div class="tab-panel active" data-p="details">
@@ -787,9 +789,9 @@ function buildPage(p){
         <div>
           <h4>${sizeText}</h4>
           <dl class="spec">
-            ${p.dimensions && p.dimensions.width ? `<div class="spec-row"><dt>Width</dt><dd>${p.dimensions.width}</dd></div>` : ''}
-            ${p.dimensions && p.dimensions.height ? `<div class="spec-row"><dt>Height</dt><dd>${p.dimensions.height}</dd></div>` : ''}
-            ${p.dimensions && p.dimensions.note ? `<div class="spec-row"><dt>Note</dt><dd>${p.dimensions.note}</dd></div>` : ''}
+            ${p.dimensions && p.dimensions.width ? `<div class="spec-row"><dt>${t('specWidth')}</dt><dd>${p.dimensions.width}</dd></div>` : ''}
+            ${p.dimensions && p.dimensions.height ? `<div class="spec-row"><dt>${t('specHeight')}</dt><dd>${p.dimensions.height}</dd></div>` : ''}
+            ${p.dimensions && p.dimensions.note ? `<div class="spec-row"><dt>${t('specNote')}</dt><dd>${p.dimensions.note}</dd></div>` : ''}
           </dl>
         </div>
         ${imgs[1] ? `<div class="dim-img"><img src="${imgs[1]}" alt="${p.name} dimensions"></div>` : ''}
@@ -797,25 +799,25 @@ function buildPage(p){
 
       ${(p.material || p.color) ? `<div class="tab-panel" data-p="material">
         <dl class="spec">
-          ${p.material ? `<div class="spec-row"><dt>Material</dt><dd>${p.material}</dd></div>` : ''}
-          ${p.color ? `<div class="spec-row"><dt>Colour</dt><dd>${p.color}</dd></div>` : ''}
+          ${p.material ? `<div class="spec-row"><dt>${t('specMaterial')}</dt><dd>${p.material}</dd></div>` : ''}
+          ${p.color ? `<div class="spec-row"><dt>${t('specColour')}</dt><dd>${p.color}</dd></div>` : ''}
         </dl>
       </div>` : ''}
 
       <div class="tab-panel" data-p="shipping">
-        <p>We offer reliable delivery across Egypt. Estimated delivery is 3 - 5 business days.</p>
-        <p>If you&rsquo;re not completely satisfied, you can return your item within <strong>14 days</strong> of delivery.
-        <a href="refund-return-policy.html" style="color:var(--gold);border-bottom:1px solid var(--gold)">View our Return Policy &rarr;</a></p>
+        <p>${t('shippingReturnsP1')}</p>
+        <p>${t('shippingReturnsP2').replace('{b}','<strong>').replace('{/b}','</strong>')}
+        <a href="refund-return-policy.html" style="color:var(--gold);border-bottom:1px solid var(--gold)">${t('viewReturnPolicy')}</a></p>
       </div>
     </div>
   </div>
 
   <section class="pdp-reviews" id="pdpReviews">
-    <p style="font-size:12.5px;color:var(--ink-soft)">Loading reviews&hellip;</p>
+    <p style="font-size:12.5px;color:var(--ink-soft)">${t('loadingReviews')}</p>
   </section>
 
   ${related.length ? `<section class="related">
-    <h2 class="related-title">You May Also Like</h2>
+    <h2 class="related-title">${t('youMayAlsoLike')}</h2>
     <div class="related-grid">
       ${related.map((r,i)=>`
         <a class="rel-card" href="product.html?slug=${r.slug}" style="animation-delay:${i*0.06}s">
@@ -859,14 +861,14 @@ function wireColorSwatches(p, pdpState, galleryApi){
     const msg = document.getElementById('pdpStockMsg');
     if (msg){
       msg.className = 'pdp-stock' + (stock.oos ? ' oos' : (stock.low ? ' low' : ''));
-      msg.textContent = stock.oos ? 'Sold Out' : (stock.low ? `Only ${stock.qty} left in stock` : '');
+      msg.textContent = stock.oos ? t('pdpSoldOut') : (stock.low ? t('pdpOnlyLeftInStock').replace('{n}', stock.qty) : '');
     }
     const qtyWrap = document.getElementById('qtyFieldWrap');
     if (qtyWrap) qtyWrap.style.display = stock.oos ? 'none' : '';
     const bag = document.getElementById('btnBag');
     if (bag){
       bag.disabled = stock.oos;
-      bag.querySelector('span').textContent = stock.oos ? 'SOLD OUT' : 'ADD TO BAG';
+      bag.querySelector('span').textContent = stock.oos ? t('pdpSoldOutBtn') : t('pdpAddToBag');
     }
   });
 }
@@ -898,27 +900,27 @@ async function loadReviews(p){
         <div class="rev-stars">${starsHtml(rv.rating)}</div>
         ${rv.title ? `<p class="rev-item-title">${rv.title.replace(/[<>&]/g,'')}</p>` : ''}
         ${rv.body ? `<p class="rev-item-body">${rv.body.replace(/[<>&]/g,'')}</p>` : ''}
-      </div>`).join('')}</div>` : `<p class="rev-empty">No reviews yet — be the first to share your thoughts.</p>`;
+      </div>`).join('')}</div>` : `<p class="rev-empty">${t('noReviewsYet')}</p>`;
 
     el.innerHTML = `
       <div class="rev-head">
-        <h2 class="rev-title">Customer Reviews</h2>
-        ${d.count ? `<div class="rev-summary"><div class="rev-stars">${starsHtml(Math.round(d.average))}</div><span class="rev-avg">${d.average.toFixed(1)} out of 5 &middot; ${d.count} review${d.count===1?'':'s'}</span></div>` : ''}
+        <h2 class="rev-title">${t('customerReviews')}</h2>
+        ${d.count ? `<div class="rev-summary"><div class="rev-stars">${starsHtml(Math.round(d.average))}</div><span class="rev-avg">${d.average.toFixed(1)} ${t('outOfReviews')} &middot; ${d.count} ${d.count===1?t('reviewSingular'):t('reviewPlural')}</span></div>` : ''}
       </div>
       ${list}
       <div class="rev-form">
-        <h3>Write a Review</h3>
-        <div class="rev-field"><label>Your rating</label><div class="rev-star-input" id="revStarInput">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}">${STAR_SVG}</button>`).join('')}</div></div>
-        <div class="rev-field"><label>Your name</label><input type="text" id="revName"></div>
-        <div class="rev-field"><label>Review title (optional)</label><input type="text" id="revTitle"></div>
-        <div class="rev-field"><label>Your review</label><textarea id="revBody"></textarea></div>
-        <button class="rev-submit" id="revSubmit">SUBMIT REVIEW</button>
+        <h3>${t('writeReview')}</h3>
+        <div class="rev-field"><label>${t('yourRating')}</label><div class="rev-star-input" id="revStarInput">${[1,2,3,4,5].map(i=>`<button type="button" data-v="${i}">${STAR_SVG}</button>`).join('')}</div></div>
+        <div class="rev-field"><label>${t('yourName')}</label><input type="text" id="revName"></div>
+        <div class="rev-field"><label>${t('reviewTitleOptional')}</label><input type="text" id="revTitle"></div>
+        <div class="rev-field"><label>${t('yourReview')}</label><textarea id="revBody"></textarea></div>
+        <button class="rev-submit" id="revSubmit">${t('submitReview')}</button>
         <p class="rev-msg" id="revMsg"></p>
       </div>
     `;
     wireReviewForm(p);
   } catch(e){
-    el.innerHTML = `<h2 class="rev-title">Customer Reviews</h2><p class="rev-empty">Reviews are unavailable right now.</p>`;
+    el.innerHTML = `<h2 class="rev-title">${t('customerReviews')}</h2><p class="rev-empty">${t('reviewsUnavailable')}</p>`;
   }
 }
 
@@ -941,9 +943,9 @@ function wireReviewForm(p){
     const title = document.getElementById('revTitle').value.trim();
     const body = document.getElementById('revBody').value.trim();
 
-    if (!selectedRating){ msg.textContent = 'Please choose a star rating.'; msg.className = 'rev-msg show bad'; return; }
-    if (!name){ msg.textContent = 'Please enter your name.'; msg.className = 'rev-msg show bad'; return; }
-    if (!body){ msg.textContent = 'Please write your review.'; msg.className = 'rev-msg show bad'; return; }
+    if (!selectedRating){ msg.textContent = t('reviewErrRating'); msg.className = 'rev-msg show bad'; return; }
+    if (!name){ msg.textContent = t('reviewErrName'); msg.className = 'rev-msg show bad'; return; }
+    if (!body){ msg.textContent = t('reviewErrBody'); msg.className = 'rev-msg show bad'; return; }
 
     btn.disabled = true;
     try {
@@ -953,7 +955,7 @@ function wireReviewForm(p){
       });
       const d = await r.json();
       if (!d.ok) throw new Error(d.error || 'Could not submit review.');
-      msg.textContent = 'Thank you — your review is awaiting a quick check before it appears here.';
+      msg.textContent = t('reviewThanks');
       msg.className = 'rev-msg show ok';
       document.getElementById('revName').value = '';
       document.getElementById('revTitle').value = '';
@@ -1063,8 +1065,8 @@ function wireActions(p, pdpState){
     if (bag.disabled) return;
     if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p, pdpState.color);
     bag.classList.add('added');
-    bag.querySelector('span').textContent = 'ADDED TO BAG';
-    setTimeout(()=>{ bag.classList.remove('added'); bag.querySelector('span').textContent = 'ADD TO BAG'; }, 1600);
+    bag.querySelector('span').textContent = t('pdpAddedToBag');
+    setTimeout(()=>{ bag.classList.remove('added'); bag.querySelector('span').textContent = t('pdpAddToBag'); }, 1600);
   });
 
   const wish = document.getElementById('btnWish');
@@ -1081,7 +1083,7 @@ function wireActions(p, pdpState){
         await navigator.clipboard.writeText(location.href);
         const b = document.getElementById('btnShare');
         const old = b.innerHTML;
-        b.textContent = 'LINK COPIED';
+        b.textContent = t('pdpLinkCopied');
         setTimeout(()=>{ b.innerHTML = old; }, 1500);
       }
     } catch(e){ /* user dismissed the share sheet */ }

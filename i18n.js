@@ -139,7 +139,35 @@
       collectionSummerDesc: 'Light, fresh and perfect for the season.',
       collectionHandPaintedDesc: 'Artisanal pieces with unique character, painted by hand.',
       allProductsCatName: 'All Products',
-      allProductsCatDesc: 'The complete collection — every piece we carry, from paintings and lighting to accessories and furniture.'
+      allProductsCatDesc: 'The complete collection — every piece we carry, from paintings and lighting to accessories and furniture.',
+
+      // Product page (product.html)
+      pdpNotFoundTitle: 'We couldn’t find that piece.',
+      pdpNotFoundDesc: 'It may have been renamed or is no longer available. Browse the full collection to find something you love.',
+      pdpBrowseCollection: 'BROWSE THE COLLECTION',
+      pdpHome: 'Home', pdpTaxIncluded: 'Tax included.', pdpSoldOut: 'Sold Out',
+      pdpOnlyLeftInStock: 'Only {n} left in stock',
+      pdpSize: 'SIZE', pdpColor: 'COLOR', pdpSoldOutSuffix: ' — Sold Out',
+      pdpCustomizeText: 'Need a different size? Every piece is hand-painted to order — {b}Customize This Piece{/b} and we’ll work out the size with you.',
+      pdpQuantity: 'QUANTITY', pdpSoldOutBtn: 'SOLD OUT', pdpAddToBag: 'ADD TO BAG', pdpAddedToBag: 'ADDED TO BAG',
+      pdpAddToWishlist: 'ADD TO WISHLIST', pdpShare: 'SHARE', pdpLinkCopied: 'LINK COPIED',
+      pdpEstimatedDelivery: 'Estimated Delivery', pdpDeliveryTime: '3 - 5 business days',
+      pdpNeedHelp: 'Need Help?', pdpContactAnytime: 'Contact us anytime',
+      tabDetails: 'DETAILS', tabDimensions: 'DIMENSIONS', tabMaterialCare: 'MATERIAL & CARE', tabShippingReturns: 'SHIPPING & RETURNS',
+      specWidth: 'Width', specHeight: 'Height', specNote: 'Note', specMaterial: 'Material', specColour: 'Colour',
+      shippingReturnsP1: 'We offer reliable delivery across Egypt. Estimated delivery is 3 - 5 business days.',
+      shippingReturnsP2: 'If you’re not completely satisfied, you can return your item within {b}14 days{/b} of delivery.',
+      viewReturnPolicy: 'View our Return Policy →',
+      loadingReviews: 'Loading reviews…', customerReviews: 'Customer Reviews',
+      noReviewsYet: 'No reviews yet — be the first to share your thoughts.',
+      reviewsUnavailable: 'Reviews are unavailable right now.',
+      outOfReviews: 'out of 5', reviewSingular: 'review', reviewPlural: 'reviews',
+      writeReview: 'Write a Review', yourRating: 'Your rating', yourName: 'Your name',
+      reviewTitleOptional: 'Review title (optional)', yourReview: 'Your review', submitReview: 'SUBMIT REVIEW',
+      reviewErrRating: 'Please choose a star rating.', reviewErrName: 'Please enter your name.',
+      reviewErrBody: 'Please write your review.',
+      reviewThanks: 'Thank you — your review is awaiting a quick check before it appears here.',
+      youMayAlsoLike: 'You May Also Like'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -256,7 +284,35 @@
       collectionSummerDesc: 'خفيفة، منعشة ومثالية للموسم.',
       collectionHandPaintedDesc: 'قطع حرفية بطابع مميز، مرسومة يدوياً.',
       allProductsCatName: 'كل المنتجات',
-      allProductsCatDesc: 'المجموعة الكاملة — كل قطعة نقدمها، من اللوحات والإضاءة إلى الإكسسوارات والأثاث.'
+      allProductsCatDesc: 'المجموعة الكاملة — كل قطعة نقدمها، من اللوحات والإضاءة إلى الإكسسوارات والأثاث.',
+
+      // Product page (product.html)
+      pdpNotFoundTitle: 'لم نتمكن من إيجاد هذه القطعة.',
+      pdpNotFoundDesc: 'ربما تم تغيير اسمها أو لم تعد متوفرة. تصفحي المجموعة الكاملة لتجدي شيئاً تحبينه.',
+      pdpBrowseCollection: 'تصفحي المجموعة',
+      pdpHome: 'الرئيسية', pdpTaxIncluded: 'شامل الضريبة.', pdpSoldOut: 'نفدت الكمية',
+      pdpOnlyLeftInStock: 'باقي {n} فقط في المخزون',
+      pdpSize: 'المقاس', pdpColor: 'اللون', pdpSoldOutSuffix: ' — نفدت الكمية',
+      pdpCustomizeText: 'محتاجة مقاس مختلف؟ كل قطعة مرسومة يدوياً حسب الطلب — {b}خصصي هذه القطعة{/b} وهنتفق سوا على المقاس المناسب.',
+      pdpQuantity: 'الكمية', pdpSoldOutBtn: 'نفدت الكمية', pdpAddToBag: 'أضيفي للحقيبة', pdpAddedToBag: 'تمت الإضافة للحقيبة',
+      pdpAddToWishlist: 'أضيفي للمفضلة', pdpShare: 'مشاركة', pdpLinkCopied: 'تم نسخ الرابط',
+      pdpEstimatedDelivery: 'موعد التوصيل المتوقع', pdpDeliveryTime: '3 - 5 أيام عمل',
+      pdpNeedHelp: 'محتاجة مساعدة؟', pdpContactAnytime: 'تواصلي معنا في أي وقت',
+      tabDetails: 'التفاصيل', tabDimensions: 'الأبعاد', tabMaterialCare: 'الخامة والعناية', tabShippingReturns: 'الشحن والاسترجاع',
+      specWidth: 'العرض', specHeight: 'الارتفاع', specNote: 'ملاحظة', specMaterial: 'الخامة', specColour: 'اللون',
+      shippingReturnsP1: 'نوفر توصيلاً موثوقاً في جميع أنحاء مصر. موعد التوصيل المتوقع 3 - 5 أيام عمل.',
+      shippingReturnsP2: 'إذا لم تكوني راضية تماماً، يمكنك إرجاع المنتج خلال {b}14 يوماً{/b} من الاستلام.',
+      viewReturnPolicy: 'اطلعي على سياسة الاسترجاع ←',
+      loadingReviews: 'جاري تحميل التقييمات…', customerReviews: 'تقييمات العملاء',
+      noReviewsYet: 'لا توجد تقييمات بعد — كوني أول من يشارك رأيه.',
+      reviewsUnavailable: 'التقييمات غير متاحة حالياً.',
+      outOfReviews: 'من 5', reviewSingular: 'تقييم', reviewPlural: 'تقييمات',
+      writeReview: 'اكتبي تقييماً', yourRating: 'تقييمك', yourName: 'اسمك',
+      reviewTitleOptional: 'عنوان التقييم (اختياري)', yourReview: 'تقييمك', submitReview: 'إرسال التقييم',
+      reviewErrRating: 'من فضلك اختاري تقييماً بالنجوم.', reviewErrName: 'من فضلك أدخلي اسمك.',
+      reviewErrBody: 'من فضلك اكتبي تقييمك.',
+      reviewThanks: 'شكراً لكِ — تقييمك قيد المراجعة السريعة قبل ظهوره هنا.',
+      youMayAlsoLike: 'قد يعجبك أيضاً'
     }
   };
 
