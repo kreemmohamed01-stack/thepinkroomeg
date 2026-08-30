@@ -114,7 +114,32 @@
       footerAbout: 'The Pink Room is an Egyptian home accessories brand founded in 2020 by Dalia Hassan and Ashraf El Sanjak, bringing together over 20 years of experience across multinational companies, event styling, and trading ventures. Built on the belief that chic doesn’t have to be expensive, The Pink Room offers stylish, carefully selected pieces that bring character and elegance to every space at accessible prices.',
       footerShop: 'SHOP', footerAllProducts: 'All Products', footerCustomerCare: 'CUSTOMER CARE',
       footerFollowUs: 'FOLLOW US', footerNeedHelp: 'NEED HELP?', footerChatWhatsapp: 'Chat with us on WhatsApp',
-      footerFindMaps: 'Find us on Google Maps', footerTerms: 'Terms & Conditions', footerPrivacy: 'Privacy Policy'
+      footerFindMaps: 'Find us on Google Maps', footerTerms: 'Terms & Conditions', footerPrivacy: 'Privacy Policy',
+
+      // Category page (category.html)
+      freeDelivery: 'FREE DELIVERY ON ORDERS OVER EGP 5000',
+      catBack: 'BACK', catEyebrow: 'THE COLLECTION', catSearchResults: 'SEARCH RESULTS',
+      catCuratedCollection: 'CURATED COLLECTION', catShopByRoom: 'SHOP BY ROOM',
+      catShowingSearch: 'Showing everything matching your search.',
+      catLimitedOfferTitle: 'Limited Time Offer', catLimitedOfferDesc: 'Selected pieces at a special price, for a limited time.',
+      catLimitedOfferEyebrow: 'LIMITED TIME OFFER',
+      products: 'Products', sortBy: 'Sort by',
+      sortFeatured: 'Featured', sortNewest: 'Newest', sortPriceAsc: 'Price: Low to High', sortPriceDesc: 'Price: High to Low',
+      filtersLabel: 'FILTERS', sortByLabel: 'SORT BY',
+      noProductsFound: 'NO PRODUCTS FOUND', noProductsSub: 'Try adjusting your filters or explore another collection.',
+      clearFilters: 'CLEAR FILTERS', clearAll: 'CLEAR ALL', showResults: 'SHOW RESULTS',
+      filtersHeading: 'Filters', filterCategory: 'CATEGORY', filterColor: 'COLOR', filterMaterial: 'MATERIAL',
+      filterSize: 'SIZE', filterAvailability: 'AVAILABILITY', filterCollection: 'COLLECTION', filterPrice: 'PRICE',
+      moreLabel: '+ More', lessLabel: '– Less',
+      soldOut: 'SOLD OUT', saleTag: 'SALE', newTag: 'NEW', addToBag: 'ADD TO BAG', added: 'ADDED',
+      catFooterAbout: 'Curated elegance for every home. Timeless pieces, selected with love.',
+      collectionNewArrivals: 'New Arrivals', collectionSale: 'Sale', collectionSummer: 'Summer', collectionHandPainted: 'Hand-Painted',
+      collectionNewArrivalsDesc: 'Fresh pieces to elevate your home, added to the collection most recently.',
+      collectionSaleDesc: 'Beautiful pieces at special prices, for a limited time.',
+      collectionSummerDesc: 'Light, fresh and perfect for the season.',
+      collectionHandPaintedDesc: 'Artisanal pieces with unique character, painted by hand.',
+      allProductsCatName: 'All Products',
+      allProductsCatDesc: 'The complete collection — every piece we carry, from paintings and lighting to accessories and furniture.'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -206,7 +231,32 @@
       footerAbout: 'ذا بينك روم هي علامة تجارية مصرية لإكسسوارات المنزل، تأسست عام 2020 على يد داليا حسن وأشرف السنجق، بخبرة تفوق 20 عاماً في الشركات متعددة الجنسيات وتنسيق الفعاليات والتجارة. مبنية على فكرة أن الأناقة لا تحتاج لتكون باهظة الثمن، تقدم ذا بينك روم قطعاً أنيقة ومختارة بعناية تضفي طابعاً وأناقة على كل مساحة بأسعار في متناول الجميع.',
       footerShop: 'تسوقي', footerAllProducts: 'كل المنتجات', footerCustomerCare: 'خدمة العملاء',
       footerFollowUs: 'تابعينا', footerNeedHelp: 'محتاجة مساعدة؟', footerChatWhatsapp: 'تواصلي معنا عبر واتساب',
-      footerFindMaps: 'اعثري علينا على خرائط جوجل', footerTerms: 'الشروط والأحكام', footerPrivacy: 'سياسة الخصوصية'
+      footerFindMaps: 'اعثري علينا على خرائط جوجل', footerTerms: 'الشروط والأحكام', footerPrivacy: 'سياسة الخصوصية',
+
+      // Category page (category.html)
+      freeDelivery: 'توصيل مجاني للطلبات فوق 5000 جنيه',
+      catBack: 'رجوع', catEyebrow: 'المجموعة', catSearchResults: 'نتائج البحث',
+      catCuratedCollection: 'مجموعة مختارة', catShopByRoom: 'تسوقي حسب الغرفة',
+      catShowingSearch: 'عرض كل ما يطابق بحثك.',
+      catLimitedOfferTitle: 'عرض لفترة محدودة', catLimitedOfferDesc: 'قطع مختارة بسعر خاص، لفترة محدودة.',
+      catLimitedOfferEyebrow: 'عرض لفترة محدودة',
+      products: 'منتج', sortBy: 'ترتيب حسب',
+      sortFeatured: 'مميز', sortNewest: 'الأحدث', sortPriceAsc: 'السعر: من الأقل للأعلى', sortPriceDesc: 'السعر: من الأعلى للأقل',
+      filtersLabel: 'الفلاتر', sortByLabel: 'ترتيب حسب',
+      noProductsFound: 'لا توجد منتجات', noProductsSub: 'جربي تعديل الفلاتر أو اكتشفي مجموعة أخرى.',
+      clearFilters: 'مسح الفلاتر', clearAll: 'مسح الكل', showResults: 'عرض النتائج',
+      filtersHeading: 'الفلاتر', filterCategory: 'الفئة', filterColor: 'اللون', filterMaterial: 'الخامة',
+      filterSize: 'المقاس', filterAvailability: 'التوفر', filterCollection: 'المجموعة', filterPrice: 'السعر',
+      moreLabel: '+ المزيد', lessLabel: '– أقل',
+      soldOut: 'نفدت الكمية', saleTag: 'تخفيض', newTag: 'جديد', addToBag: 'أضيفي للحقيبة', added: 'تمت الإضافة',
+      catFooterAbout: 'أناقة مختارة لكل بيت. قطع خالدة، مُختارة بحب.',
+      collectionNewArrivals: 'وصل حديثاً', collectionSale: 'تخفيضات', collectionSummer: 'الصيف', collectionHandPainted: 'مرسوم يدوياً',
+      collectionNewArrivalsDesc: 'قطع جديدة ترتقي ببيتك، أُضيفت للمجموعة مؤخراً.',
+      collectionSaleDesc: 'قطع جميلة بأسعار خاصة، لفترة محدودة.',
+      collectionSummerDesc: 'خفيفة، منعشة ومثالية للموسم.',
+      collectionHandPaintedDesc: 'قطع حرفية بطابع مميز، مرسومة يدوياً.',
+      allProductsCatName: 'كل المنتجات',
+      allProductsCatDesc: 'المجموعة الكاملة — كل قطعة نقدمها، من اللوحات والإضاءة إلى الإكسسوارات والأثاث.'
     }
   };
 

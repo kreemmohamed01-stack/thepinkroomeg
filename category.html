@@ -570,7 +570,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
   <div class="announce">
     <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
-    FREE DELIVERY ON ORDERS OVER EGP 5000
+    <span data-i18n="freeDelivery">FREE DELIVERY ON ORDERS OVER EGP 5000</span>
   </div>
 
   <div data-tpr-nav></div>
@@ -580,10 +580,10 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <div class="cat-head-text">
       <button class="tpr-back" id="catBack" style="margin-bottom:16px">
         <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-        BACK
+        <span data-i18n="catBack">BACK</span>
       </button>
       <nav class="crumb" id="breadcrumb"></nav>
-      <p class="cat-eyebrow">THE COLLECTION</p>
+      <p class="cat-eyebrow" data-i18n="catEyebrow">THE COLLECTION</p>
       <h1 class="cat-title" id="catTitle">Paintings</h1>
       <p class="cat-desc" id="catDesc"></p>
     </div>
@@ -597,23 +597,23 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
   <!-- ===== TOOLBAR ===== -->
   <div class="toolbar">
-    <span class="prod-count"><span id="prodCount">0</span> Products</span>
+    <span class="prod-count"><span id="prodCount">0</span> <span data-i18n="products">Products</span></span>
     <div class="toolbar-right">
-      <span class="sort-label">Sort by</span>
+      <span class="sort-label" data-i18n="sortBy">Sort by</span>
       <select class="sort-select" id="sortSelect">
-        <option value="featured">Featured</option>
-        <option value="newest">Newest</option>
-        <option value="price-asc">Price: Low to High</option>
-        <option value="price-desc">Price: High to Low</option>
+        <option value="featured" data-i18n="sortFeatured">Featured</option>
+        <option value="newest" data-i18n="sortNewest">Newest</option>
+        <option value="price-asc" data-i18n="sortPriceAsc">Price: Low to High</option>
+        <option value="price-desc" data-i18n="sortPriceDesc">Price: High to Low</option>
       </select>
     </div>
     <div class="toolbar-mobile-btns">
       <button class="tool-btn" id="openFilters">
         <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="20" y2="7"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="7" r="2" fill="var(--cream-light)"/><circle cx="15" cy="12" r="2" fill="var(--cream-light)"/><circle cx="8" cy="17" r="2" fill="var(--cream-light)"/></svg>
-        FILTERS
+        <span data-i18n="filtersLabel">FILTERS</span>
       </button>
       <button class="tool-btn" id="openSort">
-        SORT BY
+        <span data-i18n="sortByLabel">SORT BY</span>
         <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
       </button>
     </div>
@@ -628,9 +628,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
       <div class="empty-state" id="emptyState">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <h3>NO PRODUCTS FOUND</h3>
-        <p>Try adjusting your filters or explore another collection.</p>
-        <button class="btn-outline" id="clearFiltersEmpty">CLEAR FILTERS</button>
+        <h3 data-i18n="noProductsFound">NO PRODUCTS FOUND</h3>
+        <p data-i18n="noProductsSub">Try adjusting your filters or explore another collection.</p>
+        <button class="btn-outline" id="clearFiltersEmpty" data-i18n="clearFilters">CLEAR FILTERS</button>
       </div>
 
       <div class="pagination" id="pagination"></div>
@@ -641,13 +641,13 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <div class="sheet-overlay" id="sheetOverlay"></div>
   <div class="filter-sheet" id="filterSheet">
     <div class="sheet-head">
-      <h3>Filters</h3>
+      <h3 data-i18n="filtersHeading">Filters</h3>
       <button class="sheet-close" id="sheetClose" aria-label="Close">&times;</button>
     </div>
     <div class="sheet-body" id="filtersMobile"></div>
     <div class="sheet-foot">
-      <button class="btn-clear" id="clearFiltersSheet">CLEAR ALL</button>
-      <button class="btn-apply" id="applyFilters">SHOW RESULTS</button>
+      <button class="btn-clear" id="clearFiltersSheet" data-i18n="clearAll">CLEAR ALL</button>
+      <button class="btn-apply" id="applyFilters" data-i18n="showResults">SHOW RESULTS</button>
     </div>
   </div>
 
@@ -659,31 +659,31 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
           <div class="logo-main"><span>T</span><span>H</span><span>E</span><span class="sp"></span><span>P</span><span>I</span><span>N</span><span>K</span><span class="sp"></span><span>R</span><span>O</span><span>O</span><span>M</span></div>
           <div class="logo-tagline"><i class="logo-rule"></i><span>HOME ACCESSORIES</span></div>
         </div>
-        <p class="footer-about">Curated elegance for every home. Timeless pieces, selected with love.</p>
+        <p class="footer-about" data-i18n="catFooterAbout">Curated elegance for every home. Timeless pieces, selected with love.</p>
       </div>
 
       <div>
-        <h4 class="footer-heading">SHOP</h4>
+        <h4 class="footer-heading" data-i18n="footerShop">SHOP</h4>
         <ul class="footer-links">
-          <li><a href="category.html?cat=paintings">Paintings</a></li>
-          <li><a href="category.html?cat=accessories">Accessories</a></li>
-          <li><a href="category.html?cat=lighting">Lighting</a></li>
-          <li><a href="category.html?cat=furniture">Furniture</a></li>
-          <li><a href="category.html?cat=wall-art">WallArt</a></li>
-          <li><a href="category.html?cat=plants">Artificial Plants</a></li>
-          <li><a href="category.html?cat=sale-offers">Sale</a></li>
+          <li><a href="category.html?cat=paintings" data-i18n="catPaintings">Paintings</a></li>
+          <li><a href="category.html?cat=accessories" data-i18n="catAccessories">Accessories</a></li>
+          <li><a href="category.html?cat=lighting" data-i18n="catLighting">Lighting</a></li>
+          <li><a href="category.html?cat=furniture" data-i18n="catFurniture">Furniture</a></li>
+          <li><a href="category.html?cat=wall-art" data-i18n="catWallArt">WallArt</a></li>
+          <li><a href="category.html?cat=plants" data-i18n="catPlants">Artificial Plants</a></li>
+          <li><a href="category.html?cat=sale-offers" data-i18n="catSale">Sale</a></li>
         </ul>
       </div>
 
       <div>
-        <h4 class="footer-heading">CUSTOMER CARE</h4>
+        <h4 class="footer-heading" data-i18n="footerCustomerCare">CUSTOMER CARE</h4>
         <ul class="footer-links">
-          <li><a href="refund-return-policy.html">Refund &amp; Return Policy</a></li>
+          <li><a href="refund-return-policy.html" data-i18n="refundPolicy">Refund &amp; Return Policy</a></li>
         </ul>
       </div>
 
       <div class="footer-contact">
-        <h4 class="footer-heading">FOLLOW US</h4>
+        <h4 class="footer-heading" data-i18n="footerFollowUs">FOLLOW US</h4>
         <div class="footer-socials">
           <a href="https://www.instagram.com/thepinkroom_eg?igsh=dnZrbW9xazV2dGp5" target="_blank" rel="noopener" class="footer-social footer-instagram-badge" aria-label="Instagram" id="footIG">
             <svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg>
@@ -701,7 +701,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
         </a>
         <a href="https://maps.app.goo.gl/s7NcLQyFgrmkZEms6?g_st=ac" target="_blank" rel="noopener" class="footer-contact-item" id="footMapContact">
           <svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg>
-          <span>Find us on Google Maps</span>
+          <span data-i18n="footerFindMaps">Find us on Google Maps</span>
         </a>
       </div>
     </div>
@@ -714,11 +714,11 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     </div>
 
     <div class="footer-bottom">
-      <p class="footer-copy">&copy; 2025 The Pink Room. All rights reserved.</p>
+      <p class="footer-copy">&copy; 2025 The Pink Room. <span data-i18n="policyAllRightsReserved">All rights reserved.</span></p>
       <div class="footer-legal">
-        <a href="#">Terms &amp; Conditions</a><span>|</span>
-        <a href="#">Privacy Policy</a><span>|</span>
-        <a href="refund-return-policy.html">Refund &amp; Return Policy</a>
+        <a href="#" data-i18n="footerTerms">Terms &amp; Conditions</a><span>|</span>
+        <a href="#" data-i18n="footerPrivacy">Privacy Policy</a><span>|</span>
+        <a href="refund-return-policy.html" data-i18n="refundPolicy">Refund &amp; Return Policy</a>
       </div>
     </div>
   </footer>
@@ -732,6 +732,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 <script src="i18n.js"></script>
 <script src="shared-ui.js"></script>
 <script>
+if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
+const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
 /* ============================================================
    CATEGORY PAGE CONTROLLER
    Everything below is category-agnostic — the page renders itself
@@ -757,8 +759,8 @@ const promoParam = params.get('promo');
 
 /* "all" is a virtual category: every product, with the main categories as its tabs */
 const ALL_CATEGORY = {
-  name: 'All Products',
-  description: 'The complete collection — every piece we carry, from paintings and lighting to accessories and furniture.',
+  name: t('allProductsCatName'),
+  description: t('allProductsCatDesc'),
   hero: 'collectionnnn/pinksummer.jpeg',
   subcategories: Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => ({ slug:k, name:CATEGORIES[k].name, isCategory:true }))
 };
@@ -798,25 +800,31 @@ document.getElementById('catTitle').textContent = subSlug
 document.getElementById('catDesc').textContent = category.description;
 if ((params.get('q') || '').trim()){
   document.getElementById('catTitle').textContent = '“' + params.get('q').trim() + '”';
-  document.getElementById('catDesc').textContent = 'Showing everything matching your search.';
-  document.querySelector('.cat-eyebrow').textContent = 'SEARCH RESULTS';
+  document.getElementById('catDesc').textContent = t('catShowingSearch');
+  document.querySelector('.cat-eyebrow').textContent = t('catSearchResults');
 } else if (params.get('collection')){
+  const COLLECTION_NAMES = {
+    'New Arrivals':  t('collectionNewArrivals'),
+    'Sale':          t('collectionSale'),
+    'Summer':        t('collectionSummer'),
+    'Hand-Painted':  t('collectionHandPainted')
+  };
   const COLLECTION_COPY = {
-    'New Arrivals':  'Fresh pieces to elevate your home, added to the collection most recently.',
-    'Sale':          'Beautiful pieces at special prices, for a limited time.',
-    'Summer':        'Light, fresh and perfect for the season.',
-    'Hand-Painted':  'Artisanal pieces with unique character, painted by hand.'
+    'New Arrivals':  t('collectionNewArrivalsDesc'),
+    'Sale':          t('collectionSaleDesc'),
+    'Summer':        t('collectionSummerDesc'),
+    'Hand-Painted':  t('collectionHandPaintedDesc')
   };
   const c = params.get('collection');
-  document.getElementById('catTitle').textContent = c;
+  document.getElementById('catTitle').textContent = COLLECTION_NAMES[c] || c;
   document.getElementById('catDesc').textContent = COLLECTION_COPY[c] || category.description;
-  document.querySelector('.cat-eyebrow').textContent = 'CURATED COLLECTION';
+  document.querySelector('.cat-eyebrow').textContent = t('catCuratedCollection');
 } else if (promoParam){
   // real label/percent only known once a matching product's
   // activePromotion has loaded — patched in below, once PRODUCTS_READY
-  document.getElementById('catTitle').textContent = 'Limited Time Offer';
-  document.getElementById('catDesc').textContent = 'Selected pieces at a special price, for a limited time.';
-  document.querySelector('.cat-eyebrow').textContent = 'LIMITED TIME OFFER';
+  document.getElementById('catTitle').textContent = t('catLimitedOfferTitle');
+  document.getElementById('catDesc').textContent = t('catLimitedOfferDesc');
+  document.querySelector('.cat-eyebrow').textContent = t('catLimitedOfferEyebrow');
 }
 document.getElementById('catHeroImg').style.backgroundImage = `url('${category.hero}')`;
 
@@ -862,7 +870,7 @@ function renderSubnav(){
       ? `<a href="category.html?cat=${s.slug}">${s.name}</a>`
       : `<a href="category.html?cat=${catSlug}&sub=${s.slug}" class="${s.slug === subSlug ? 'active' : ''}">${s.name}</a>`
   ).join('');
-  if (isRoom) document.querySelector('.cat-eyebrow').textContent = 'SHOP BY ROOM';
+  if (isRoom) document.querySelector('.cat-eyebrow').textContent = t('catShopByRoom');
 }
 renderSubnav();
 
@@ -991,12 +999,12 @@ function buildFilterMarkup(){
     ? Object.keys(CATEGORIES).filter(k => !CATEGORIES[k].virtual).map(k => CATEGORIES[k].name)
     : (category.subcategories.length ? category.subcategories.map(s => s.name) : [category.name]);
 
-  groups.push({ key:'category', label:'CATEGORY', options:catOptions });
-  groups.push({ key:'color', label:'COLOR', options:optionsFor('color'), swatch:true });
-  groups.push({ key:'material', label:'MATERIAL', options:optionsFor('material') });
-  groups.push({ key:'size', label:'SIZE', options:optionsFor('size') });
-  groups.push({ key:'availability', label:'AVAILABILITY', options:optionsFor('availability') });
-  groups.push({ key:'collection', label:'COLLECTION', options:optionsFor('collection') });
+  groups.push({ key:'category', label:t('filterCategory'), options:catOptions });
+  groups.push({ key:'color', label:t('filterColor'), options:optionsFor('color'), swatch:true });
+  groups.push({ key:'material', label:t('filterMaterial'), options:optionsFor('material') });
+  groups.push({ key:'size', label:t('filterSize'), options:optionsFor('size') });
+  groups.push({ key:'availability', label:t('filterAvailability'), options:optionsFor('availability') });
+  groups.push({ key:'collection', label:t('filterCollection'), options:optionsFor('collection') });
 
   const prices = scopedProducts().map(p => p.salePrice || p.price).filter(n => n != null);
   const min = prices.length ? Math.min(...prices) : 0;
@@ -1020,13 +1028,13 @@ function buildFilterMarkup(){
       <div class="filter-body">
         ${visible.map(row).join('')}
         <div class="more-wrap" style="display:none">${hidden.map(row).join('')}</div>
-        ${hidden.length ? `<button class="filter-more">+ More</button>` : ''}
+        ${hidden.length ? `<button class="filter-more">${t('moreLabel')}</button>` : ''}
       </div>
     </div>`;
   }).join('');
 
   html += `<div class="filter-group">
-    <button class="filter-head">PRICE<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
+    <button class="filter-head">${t('filterPrice')}<svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg></button>
     <div class="filter-body">
       <input type="range" class="price-slider" min="${min}" max="${max}" value="${state.maxPrice ?? max}" step="50">
       <div class="price-row"><span>EGP ${min.toLocaleString()}</span><span class="price-max">EGP ${(state.maxPrice ?? max).toLocaleString()}</span></div>
@@ -1045,7 +1053,7 @@ function wireFilterPanel(root){
       const wrap = btn.previousElementSibling;
       const open = wrap.style.display !== 'none';
       wrap.style.display = open ? 'none' : 'block';
-      btn.textContent = open ? '+ More' : '– Less';
+      btn.textContent = open ? t('moreLabel') : t('lessLabel');
     });
   });
   root.querySelectorAll('input[type="checkbox"]').forEach(box=>{
@@ -1099,17 +1107,17 @@ function money(n){ return 'EGP ' + n.toLocaleString(); }
 
 function cardMarkup(p, i){
   const oos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p) : false;
-  const tag = oos ? `<span class="card-tag soldout">SOLD OUT</span>`
-            : p.salePrice ? `<span class="card-tag sale">SALE</span>`
-            : (p.isNew ? `<span class="card-tag">NEW</span>` : '');
+  const tag = oos ? `<span class="card-tag soldout">${t('soldOut')}</span>`
+            : p.salePrice ? `<span class="card-tag sale">${t('saleTag')}</span>`
+            : (p.isNew ? `<span class="card-tag">${t('newTag')}</span>` : '');
   // price is optional — products awaiting pricing show a neutral placeholder
   const pct = p.salePrice ? Math.round((1 - p.salePrice / p.price) * 100) : 0;
   const price = p.salePrice
     ? `${money(p.salePrice)} <span class="was">${money(p.price)}</span> <span class="pct">-${pct}%</span>`
     : (p.price != null ? money(p.price) : `<span class="tbc">EGP &mdash;</span>`);
   const addBtn = oos
-    ? `<button class="card-add is-oos" disabled>SOLD OUT</button>`
-    : `<button class="card-add" data-add="${p.id}">ADD TO BAG</button>`;
+    ? `<button class="card-add is-oos" disabled>${t('soldOut')}</button>`
+    : `<button class="card-add" data-add="${p.id}">${t('addToBag')}</button>`;
   return `<a class="product-card" href="product.html?slug=${p.slug}" style="animation-delay:${i*0.035}s">
     <div class="card-media">
       ${tag}
@@ -1193,8 +1201,8 @@ function render(){
       }
       if (window.TPR) window.TPR.addToCart(product);
       btn.classList.add('added');
-      btn.textContent = 'ADDED';
-      setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = 'ADD TO BAG'; }, 1400);
+      btn.textContent = t('added');
+      setTimeout(()=>{ btn.classList.remove('added'); btn.textContent = t('addToBag'); }, 1400);
     });
   });
 
