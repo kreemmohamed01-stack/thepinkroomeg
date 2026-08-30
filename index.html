@@ -2920,8 +2920,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   // ---- Hero text — dashboard-editable (Content page), refreshed in
   //      place once the real settings arrive; the hardcoded text above
   //      is what's already showing, so this only touches the DOM if it
-  //      actually changed ----
-  if (typeof SITE_STRUCTURE_READY !== 'undefined') {
+  //      actually changed. Skipped in Arabic mode: HOMEPAGE_CONTENT is
+  //      English text the store owner typed in the dashboard, with no
+  //      Arabic translation of its own — overwriting the (already
+  //      correct) Arabic dictionary strings with it would silently
+  //      revert the hero back to English every time this resolves. ----
+  if (typeof SITE_STRUCTURE_READY !== 'undefined' && !(window.TPR_I18N && window.TPR_I18N.getLang() === 'ar')) {
     SITE_STRUCTURE_READY.then(()=>{
       if (typeof HOMEPAGE_CONTENT === 'undefined') return;
       const titleEl = document.getElementById('heroTitle');
