@@ -217,7 +217,16 @@
       stepInformation: 'INFORMATION', stepInformationSub: 'Shipping & Contact',
       stepShipping: 'SHIPPING', stepShippingSub: 'Delivery Address',
       stepPayment: 'PAYMENT', stepPaymentSub: 'Payment Method',
-      stepReview: 'REVIEW', stepReviewSub: 'Order Review', comingSoon: 'COMING SOON', selectedBadge: 'SELECTED'
+      stepReview: 'REVIEW', stepReviewSub: 'Order Review', comingSoon: 'COMING SOON', selectedBadge: 'SELECTED',
+
+      // Wishlist page (wishlist.html)
+      wishCrumbHome: 'Home', wishCrumbCurrent: 'Wishlist', wishSavedWithLove: 'SAVED WITH LOVE',
+      wishTitleText: 'Your Wishlist',
+      wishSub: 'Your personal edit of the pieces you loved most — saved here, ready whenever you are.',
+      wishSavedPiece: 'SAVED PIECE', wishSavedPieces: 'SAVED PIECES',
+      yourSelection: 'Your Selection', clearWishlist: 'CLEAR WISHLIST',
+      wishEmptyTitle: 'YOUR WISHLIST IS EMPTY', wishEmptyDesc: 'Save the pieces you love and they’ll appear here.',
+      exploreCollection: 'EXPLORE THE COLLECTION'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -410,7 +419,16 @@
       stepInformation: 'البيانات', stepInformationSub: 'الشحن والتواصل',
       stepShipping: 'الشحن', stepShippingSub: 'عنوان التوصيل',
       stepPayment: 'الدفع', stepPaymentSub: 'طريقة الدفع',
-      stepReview: 'المراجعة', stepReviewSub: 'مراجعة الطلب', comingSoon: 'قريباً', selectedBadge: 'تم الاختيار'
+      stepReview: 'المراجعة', stepReviewSub: 'مراجعة الطلب', comingSoon: 'قريباً', selectedBadge: 'تم الاختيار',
+
+      // Wishlist page (wishlist.html)
+      wishCrumbHome: 'الرئيسية', wishCrumbCurrent: 'المفضلة', wishSavedWithLove: 'محفوظة بحب',
+      wishTitleText: 'مفضلتك',
+      wishSub: 'مجموعتك الشخصية من القطع التي أحببتها أكثر — محفوظة هنا، جاهزة وقتما تشائين.',
+      wishSavedPiece: 'قطعة محفوظة', wishSavedPieces: 'قطع محفوظة',
+      yourSelection: 'اختياراتك', clearWishlist: 'مسح المفضلة',
+      wishEmptyTitle: 'مفضلتك فارغة', wishEmptyDesc: 'احفظي القطع التي تحبينها وستظهر هنا.',
+      exploreCollection: 'اكتشفي المجموعة'
     }
   };
 
