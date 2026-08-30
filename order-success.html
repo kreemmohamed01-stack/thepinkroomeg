@@ -156,12 +156,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <header class="co-topbar">
     <a class="co-back" href="index.html">
       <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      <span>BACK TO HOME</span>
+      <span data-i18n="backToHome">BACK TO HOME</span>
     </a>
     <a class="co-logo" href="index.html" aria-label="The Pink Room"><img src="logo-beige.png" alt="The Pink Room"></a>
     <div class="co-secure">
       <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
-      <span>SECURE CHECKOUT</span>
+      <span data-i18n="secureCheckout">SECURE CHECKOUT</span>
     </div>
   </header>
 
@@ -169,9 +169,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <div class="suc-glow suc-glow-a"></div>
     <div class="suc-glow suc-glow-b"></div>
     <div class="suc-check"><div class="suc-check-ring"></div><svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg></div>
-    <p class="suc-eyebrow">ORDER CONFIRMED</p>
-    <h1 class="suc-title">Thank You For Your Order</h1>
-    <p class="suc-sub">Your order has been successfully placed. Thank you for choosing The Pink Room.</p>
+    <p class="suc-eyebrow" data-i18n="orderConfirmed">ORDER CONFIRMED</p>
+    <h1 class="suc-title" data-i18n="thankYouForOrder">Thank You For Your Order</h1>
+    <p class="suc-sub" data-i18n="orderPlacedThanks">Your order has been successfully placed. Thank you for choosing The Pink Room.</p>
   </section>
 
   <div class="suc-wrap" id="sucWrap"></div>
@@ -179,8 +179,11 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <div class="suc-toast" id="sucToast"></div>
 
 <script src="analytics.js"></script>
+<script src="i18n.js"></script>
 <script src="checkout.js"></script>
 <script>
+if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
+const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
 const CO = window.TPRCheckout;
 const $ = id => document.getElementById(id);
 const params = new URLSearchParams(location.search);
@@ -212,65 +215,65 @@ if (order){
 if (!order){
   document.title = 'Order Not Found | The Pink Room';
   sucWrap.innerHTML = `<div class="suc-empty">
-    <h2>We couldn&rsquo;t find that order.</h2>
-    <p>It may have already been viewed, or the link has expired. Your bag is ready whenever you are.</p>
-    <a href="category.html?cat=all">EXPLORE THE COLLECTION</a>
+    <h2>${t('orderNotFoundTitle')}</h2>
+    <p>${t('orderNotFoundDesc')}</p>
+    <a href="category.html?cat=all">${t('exploreCollection')}</a>
   </div>`;
   document.querySelector('.suc-hero').style.display = 'none';
 } else {
   const c = order.customer, a = order.shippingAddress, p = order.pricing;
   const orderDate = new Date(order.createdAt).toLocaleDateString('en-US', { day:'numeric', month:'long', year:'numeric' });
 
-  document.querySelector('.suc-eyebrow').textContent = 'ORDER CONFIRMED';
+  document.querySelector('.suc-eyebrow').textContent = t('orderConfirmed');
 
   sucWrap.innerHTML = `
     <div class="suc-card">
       <div class="suc-order-head">
         <div>
-          <p>ORDER NUMBER</p>
+          <p>${t('orderNumber')}</p>
           <h2 class="num">#${order.id}</h2>
         </div>
         <div class="suc-eta">
-          <b>Estimated Delivery</b>
+          <b>${t('estimatedDeliveryLabel')}</b>
           <span>${order.delivery.days} &middot; ${order.delivery.label}</span>
         </div>
       </div>
 
       <div class="suc-meta">
-        <div class="suc-meta-item"><p>CUSTOMER</p><div>${c.name}<br>${c.phone}</div></div>
-        <div class="suc-meta-item"><p>DELIVERY ADDRESS</p><div>${[a.street,a.apt].filter(Boolean).join(', ')}<br>${[a.city,a.governorate].filter(Boolean).join(', ')}</div></div>
-        <div class="suc-meta-item"><p>PAYMENT METHOD</p><div>${order.paymentMethod.label}</div></div>
-        <div class="suc-meta-item"><p>PAYMENT STATUS</p><div><span class="suc-status"><i></i>${order.paymentStatus.toUpperCase()}</span><br><span style="font-size:11px;color:var(--ink-soft)">${orderDate}</span></div></div>
+        <div class="suc-meta-item"><p>${t('customerLabel')}</p><div>${c.name}<br>${c.phone}</div></div>
+        <div class="suc-meta-item"><p>${t('deliveryAddressLabel')}</p><div>${[a.street,a.apt].filter(Boolean).join(', ')}<br>${[a.city,a.governorate].filter(Boolean).join(', ')}</div></div>
+        <div class="suc-meta-item"><p>${t('paymentMethodLabel')}</p><div>${order.paymentMethod.label}</div></div>
+        <div class="suc-meta-item"><p>${t('paymentStatusLabel')}</p><div><span class="suc-status"><i></i>${order.paymentStatus.toUpperCase()}</span><br><span style="font-size:11px;color:var(--ink-soft)">${orderDate}</span></div></div>
       </div>
 
       <div class="suc-items">
-        <p class="suc-items-title">ORDER ITEMS</p>
+        <p class="suc-items-title">${t('orderItemsLabel')}</p>
         ${order.items.map(i => `
           <div class="suc-item">
             <div class="suc-item-img"><img src="${i.img}" alt="${i.name}"></div>
-            <div class="suc-item-info"><b>${i.name}</b><span>${i.variant || ''} &middot; Qty ${i.qty}</span></div>
+            <div class="suc-item-info"><b>${i.name}</b><span>${i.variant || ''} &middot; ${t('qtyLabel')} ${i.qty}</span></div>
             <div class="suc-item-price">${CO.money(i.price * i.qty)}</div>
           </div>`).join('')}
       </div>
 
       <div class="suc-totals">
-        <div class="suc-totals-row"><span>Subtotal</span><span>${CO.money(p.subtotal)}</span></div>
-        ${p.discount ? `<div class="suc-totals-row discount"><span>Discount</span><span>&minus;${CO.money(p.discount)}</span></div>` : ''}
-        <div class="suc-totals-row"><span>Shipping</span><span>${CO.money(p.shipping)}</span></div>
-        <div class="suc-totals-row grand"><span>Total</span><span>${CO.money(p.total)}</span></div>
+        <div class="suc-totals-row"><span>${t('subtotalLabel')}</span><span>${CO.money(p.subtotal)}</span></div>
+        ${p.discount ? `<div class="suc-totals-row discount"><span>${t('discountLabel')}</span><span>&minus;${CO.money(p.discount)}</span></div>` : ''}
+        <div class="suc-totals-row"><span>${t('shippingLabel')}</span><span>${CO.money(p.shipping)}</span></div>
+        <div class="suc-totals-row grand"><span>${t('totalLabel')}</span><span>${CO.money(p.total)}</span></div>
       </div>
 
       <div class="suc-actions">
         <button class="suc-btn suc-btn-ghost" id="btnTrack">
           <svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg>
-          TRACK MY ORDER
+          ${t('trackMyOrder')}
         </button>
         <button class="suc-btn suc-btn-outline" id="btnDownload">
           <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 21h14"/></svg>
-          DOWNLOAD RECEIPT
+          ${t('downloadReceipt')}
         </button>
         <a class="suc-btn suc-btn-primary" href="category.html?cat=all">
-          CONTINUE SHOPPING
+          ${t('continueShoppingBtn')}
           <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
         </a>
       </div>
@@ -300,7 +303,7 @@ if (!order){
   }
 
   $('btnTrack').addEventListener('click', ()=>{
-    toast('Order tracking is coming soon — we’ll email you as your order moves.');
+    toast(t('trackingComingSoon'));
   });
   $('btnDownload').addEventListener('click', (e)=>{
     e.currentTarget.classList.add('loading');

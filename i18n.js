@@ -226,7 +226,22 @@
       wishSavedPiece: 'SAVED PIECE', wishSavedPieces: 'SAVED PIECES',
       yourSelection: 'Your Selection', clearWishlist: 'CLEAR WISHLIST',
       wishEmptyTitle: 'YOUR WISHLIST IS EMPTY', wishEmptyDesc: 'Save the pieces you love and they’ll appear here.',
-      exploreCollection: 'EXPLORE THE COLLECTION'
+      exploreCollection: 'EXPLORE THE COLLECTION',
+
+      // Order success page (order-success.html) — order data itself
+      // (payment method/status labels) stays in English for the same
+      // reason as checkout.html: it's a saved record, not just display.
+      backToHome: 'BACK TO HOME', orderConfirmed: 'ORDER CONFIRMED',
+      thankYouForOrder: 'Thank You For Your Order',
+      orderPlacedThanks: 'Your order has been successfully placed. Thank you for choosing The Pink Room.',
+      orderNotFoundTitle: 'We couldn’t find that order.',
+      orderNotFoundDesc: 'It may have already been viewed, or the link has expired. Your bag is ready whenever you are.',
+      orderNumber: 'ORDER NUMBER', estimatedDeliveryLabel: 'Estimated Delivery',
+      customerLabel: 'CUSTOMER', deliveryAddressLabel: 'DELIVERY ADDRESS',
+      paymentMethodLabel: 'PAYMENT METHOD', paymentStatusLabel: 'PAYMENT STATUS',
+      orderItemsLabel: 'ORDER ITEMS', qtyLabel: 'Qty',
+      trackMyOrder: 'TRACK MY ORDER', downloadReceipt: 'DOWNLOAD RECEIPT', continueShoppingBtn: 'CONTINUE SHOPPING',
+      trackingComingSoon: 'Order tracking is coming soon — we’ll email you as your order moves.'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -428,7 +443,20 @@
       wishSavedPiece: 'قطعة محفوظة', wishSavedPieces: 'قطع محفوظة',
       yourSelection: 'اختياراتك', clearWishlist: 'مسح المفضلة',
       wishEmptyTitle: 'مفضلتك فارغة', wishEmptyDesc: 'احفظي القطع التي تحبينها وستظهر هنا.',
-      exploreCollection: 'اكتشفي المجموعة'
+      exploreCollection: 'اكتشفي المجموعة',
+
+      // Order success page (order-success.html)
+      backToHome: 'الرجوع للرئيسية', orderConfirmed: 'تم تأكيد الطلب',
+      thankYouForOrder: 'شكراً لطلبك',
+      orderPlacedThanks: 'تم تقديم طلبك بنجاح. شكراً لاختيارك ذا بينك روم.',
+      orderNotFoundTitle: 'لم نتمكن من إيجاد هذا الطلب.',
+      orderNotFoundDesc: 'ربما تم عرضه بالفعل، أو انتهت صلاحية الرابط. حقيبتك جاهزة وقتما تشائين.',
+      orderNumber: 'رقم الطلب', estimatedDeliveryLabel: 'موعد التوصيل المتوقع',
+      customerLabel: 'العميلة', deliveryAddressLabel: 'عنوان التوصيل',
+      paymentMethodLabel: 'طريقة الدفع', paymentStatusLabel: 'حالة الدفع',
+      orderItemsLabel: 'منتجات الطلب', qtyLabel: 'الكمية',
+      trackMyOrder: 'تتبعي طلبك', downloadReceipt: 'تحميل الفاتورة', continueShoppingBtn: 'أكملي التسوق',
+      trackingComingSoon: 'خدمة تتبع الطلبات قريباً — هنبعتلك إيميل بمجرد تحرك طلبك.'
     }
   };
 
