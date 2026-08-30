@@ -123,16 +123,16 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <header class="rcpt-toolbar">
     <a href="javascript:history.length>1?history.back():location.href='index.html'">
       <svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
-      BACK
+      <span data-i18n="rcptBack">BACK</span>
     </a>
     <div class="rcpt-toolbar-actions">
       <button class="rcpt-btn rcpt-btn-outline" id="btnPrint">
         <svg viewBox="0 0 24 24"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
-        PRINT RECEIPT
+        <span data-i18n="rcptPrintReceipt">PRINT RECEIPT</span>
       </button>
       <button class="rcpt-btn rcpt-btn-gold" id="btnDownload">
         <svg viewBox="0 0 24 24"><path d="M12 3v12"/><polyline points="7 10 12 15 17 10"/><path d="M5 21h14"/></svg>
-        DOWNLOAD PDF
+        <span data-i18n="rcptDownloadPdf">DOWNLOAD PDF</span>
       </button>
     </div>
   </header>
@@ -142,9 +142,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   </div>
 
 <script src="analytics.js"></script>
+<script src="i18n.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script src="checkout.js"></script>
 <script>
+if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
+const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
 const CO = window.TPRCheckout;
 const params = new URLSearchParams(location.search);
 const action = params.get('action');
@@ -155,36 +158,36 @@ function buildReceipt(order){
   return `
     <div class="rcpt-brand-row">
       <div class="rcpt-brand">
-        <h1>THE PINK ROOM</h1>
-        <span>HOME DECOR</span>
+        <h1>${t('rcptBrandName')}</h1>
+        <span>${t('rcptHomeDecor')}</span>
       </div>
       <div class="rcpt-doc-type">
-        <b>ORDER RECEIPT</b>
-        <div><b>Order Number:</b> #${order.id}</div>
-        <div><b>Order Date:</b> ${orderDate}</div>
+        <b>${t('rcptOrderReceipt')}</b>
+        <div><b>${t('rcptOrderNumber')}</b> #${order.id}</div>
+        <div><b>${t('rcptOrderDate')}</b> ${orderDate}</div>
       </div>
     </div>
 
     <div class="rcpt-info-grid">
       <div class="rcpt-info-block">
-        <h4>CUSTOMER INFORMATION</h4>
+        <h4>${t('rcptCustomerInfo')}</h4>
         <p><b>${c.name || ''}</b><br>${c.email || ''}<br>${c.phone || ''}</p>
       </div>
       <div class="rcpt-info-block">
-        <h4>SHIPPING INFORMATION</h4>
-        <p>${[a.street, a.apt].filter(Boolean).join(', ')}<br>${[a.city, a.governorate].filter(Boolean).join(', ')}, Egypt<br>
+        <h4>${t('rcptShippingInfo')}</h4>
+        <p>${[a.street, a.apt].filter(Boolean).join(', ')}<br>${[a.city, a.governorate].filter(Boolean).join(', ')}, ${t('egypt')}<br>
         ${order.shippingMethod.label} (${order.shippingMethod.sub})<br>
-        Est. delivery: ${order.delivery.label}</p>
+        ${t('rcptEstDelivery')} ${order.delivery.label}</p>
       </div>
       <div class="rcpt-info-block">
-        <h4>PAYMENT</h4>
-        <p><b>Method:</b> ${order.paymentMethod.label}<br><b>Status:</b> ${order.paymentStatus.charAt(0).toUpperCase()+order.paymentStatus.slice(1)}</p>
+        <h4>${t('rcptPayment')}</h4>
+        <p><b>${t('rcptMethod')}</b> ${order.paymentMethod.label}<br><b>${t('rcptStatus')}</b> ${order.paymentStatus.charAt(0).toUpperCase()+order.paymentStatus.slice(1)}</p>
       </div>
     </div>
 
     <div class="rcpt-items">
       <table>
-        <thead><tr><th>Product</th><th>Qty</th><th>Unit Price</th><th>Total</th></tr></thead>
+        <thead><tr><th>${t('rcptProduct')}</th><th>${t('rcptQty')}</th><th>${t('rcptUnitPrice')}</th><th>${t('rcptTotal')}</th></tr></thead>
         <tbody>
           ${order.items.map(i => `<tr>
             <td><b>${i.name}</b>${i.variant ? '<br><span style="font-size:10px">'+i.variant+'</span>' : ''}</td>
@@ -198,16 +201,16 @@ function buildReceipt(order){
 
     <div class="rcpt-summary">
       <table>
-        <tr><td>Subtotal</td><td>${CO.money(p.subtotal)}</td></tr>
-        ${p.discount ? `<tr><td>Discount ${order.promo ? '(' + order.promo.code + ')' : ''}</td><td>&minus;${CO.money(p.discount)}</td></tr>` : ''}
-        <tr><td>Shipping</td><td>${CO.money(p.shipping)}</td></tr>
-        ${p.tax ? `<tr><td>Tax</td><td>${CO.money(p.tax)}</td></tr>` : `<tr><td style="font-style:italic">VAT</td><td style="font-style:italic">Included</td></tr>`}
-        <tr class="grand"><td>Grand Total</td><td>${CO.money(p.total)}</td></tr>
+        <tr><td>${t('subtotalLabel')}</td><td>${CO.money(p.subtotal)}</td></tr>
+        ${p.discount ? `<tr><td>${t('rcptDiscount')} ${order.promo ? '(' + order.promo.code + ')' : ''}</td><td>&minus;${CO.money(p.discount)}</td></tr>` : ''}
+        <tr><td>${t('shippingLabel')}</td><td>${CO.money(p.shipping)}</td></tr>
+        ${p.tax ? `<tr><td>${t('rcptTax')}</td><td>${CO.money(p.tax)}</td></tr>` : `<tr><td style="font-style:italic">${t('rcptVat')}</td><td style="font-style:italic">${t('rcptIncluded')}</td></tr>`}
+        <tr class="grand"><td>${t('rcptGrandTotal')}</td><td>${CO.money(p.total)}</td></tr>
       </table>
     </div>
 
     <div class="rcpt-footer">
-      <p>Thank you for shopping with The Pink Room.</p>
+      <p>${t('rcptThankYou')}</p>
       <span>THEPINKROOMEG@GMAIL.COM &middot; WHATSAPP +20 120 780 3666</span>
     </div>
   `;
@@ -220,9 +223,9 @@ const order = await CO.getOrderAnywhere(params.get('order'));
 
 if (!order){
   document.getElementById('rcptWrap').innerHTML = `<div class="rcpt-notfound">
-    <h2 style="font-family:'Playfair Display',serif;font-weight:400;font-size:24px;margin-bottom:10px">Receipt not found</h2>
-    <p style="font-size:13px;opacity:.8">This order could not be located.</p>
-    <a href="index.html">RETURN HOME</a>
+    <h2 style="font-family:'Playfair Display',serif;font-weight:400;font-size:24px;margin-bottom:10px">${t('rcptNotFoundTitle')}</h2>
+    <p style="font-size:13px;opacity:.8">${t('rcptNotFoundDesc')}</p>
+    <a href="index.html">${t('rcptReturnHome')}</a>
   </div>`;
 } else {
   document.title = 'Receipt #' + order.id + ' | The Pink Room';

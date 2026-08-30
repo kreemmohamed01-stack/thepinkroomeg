@@ -241,7 +241,20 @@
       paymentMethodLabel: 'PAYMENT METHOD', paymentStatusLabel: 'PAYMENT STATUS',
       orderItemsLabel: 'ORDER ITEMS', qtyLabel: 'Qty',
       trackMyOrder: 'TRACK MY ORDER', downloadReceipt: 'DOWNLOAD RECEIPT', continueShoppingBtn: 'CONTINUE SHOPPING',
-      trackingComingSoon: 'Order tracking is coming soon — we’ll email you as your order moves.'
+      trackingComingSoon: 'Order tracking is coming soon — we’ll email you as your order moves.',
+
+      // Receipt page (receipt.html) — shippingMethod.label / paymentMethod.label /
+      // paymentStatus keep coming straight from the stored order (same reasoning
+      // as checkout.html / order-success.html).
+      rcptBack: 'BACK', rcptPrintReceipt: 'PRINT RECEIPT', rcptDownloadPdf: 'DOWNLOAD PDF',
+      rcptBrandName: 'THE PINK ROOM', rcptHomeDecor: 'HOME DECOR', rcptOrderReceipt: 'ORDER RECEIPT',
+      rcptOrderNumber: 'Order Number:', rcptOrderDate: 'Order Date:',
+      rcptCustomerInfo: 'CUSTOMER INFORMATION', rcptShippingInfo: 'SHIPPING INFORMATION', rcptPayment: 'PAYMENT',
+      rcptEstDelivery: 'Est. delivery:', rcptMethod: 'Method:', rcptStatus: 'Status:',
+      rcptProduct: 'Product', rcptQty: 'Qty', rcptUnitPrice: 'Unit Price', rcptTotal: 'Total',
+      rcptDiscount: 'Discount', rcptTax: 'Tax', rcptVat: 'VAT', rcptIncluded: 'Included', rcptGrandTotal: 'Grand Total',
+      rcptThankYou: 'Thank you for shopping with The Pink Room.',
+      rcptNotFoundTitle: 'Receipt not found', rcptNotFoundDesc: 'This order could not be located.', rcptReturnHome: 'RETURN HOME'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -456,7 +469,18 @@
       paymentMethodLabel: 'طريقة الدفع', paymentStatusLabel: 'حالة الدفع',
       orderItemsLabel: 'منتجات الطلب', qtyLabel: 'الكمية',
       trackMyOrder: 'تتبعي طلبك', downloadReceipt: 'تحميل الفاتورة', continueShoppingBtn: 'أكملي التسوق',
-      trackingComingSoon: 'خدمة تتبع الطلبات قريباً — هنبعتلك إيميل بمجرد تحرك طلبك.'
+      trackingComingSoon: 'خدمة تتبع الطلبات قريباً — هنبعتلك إيميل بمجرد تحرك طلبك.',
+
+      // Receipt page (receipt.html)
+      rcptBack: 'رجوع', rcptPrintReceipt: 'طباعة الفاتورة', rcptDownloadPdf: 'تحميل PDF',
+      rcptBrandName: 'ذا بينك روم', rcptHomeDecor: 'ديكور منزلي', rcptOrderReceipt: 'فاتورة الطلب',
+      rcptOrderNumber: 'رقم الطلب:', rcptOrderDate: 'تاريخ الطلب:',
+      rcptCustomerInfo: 'بيانات العميلة', rcptShippingInfo: 'بيانات الشحن', rcptPayment: 'الدفع',
+      rcptEstDelivery: 'موعد التوصيل المتوقع:', rcptMethod: 'الطريقة:', rcptStatus: 'الحالة:',
+      rcptProduct: 'المنتج', rcptQty: 'الكمية', rcptUnitPrice: 'سعر الوحدة', rcptTotal: 'الإجمالي',
+      rcptDiscount: 'الخصم', rcptTax: 'الضريبة', rcptVat: 'الضريبة', rcptIncluded: 'شاملة', rcptGrandTotal: 'الإجمالي الكلي',
+      rcptThankYou: 'شكراً للتسوق مع ذا بينك روم.',
+      rcptNotFoundTitle: 'الفاتورة غير موجودة', rcptNotFoundDesc: 'لم نتمكن من إيجاد هذا الطلب.', rcptReturnHome: 'العودة للرئيسية'
     }
   };
 
