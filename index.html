@@ -2380,7 +2380,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <div class="side">
       <button class="hamburger-btn mobile-icon" id="hamburgerBtn" aria-label="Menu">
         <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        <span>MENU</span>
+        <span data-i18n="menuLabel">MENU</span>
       </button>
       <button class="mobile-icon" id="searchTrigger" aria-label="Open search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2427,7 +2427,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
         <p class="offer-eyebrow" data-i18n="offerEyebrow">LIMITED TIME OFFER</p>
         <div class="offer-rule"><span>&#10022;</span></div>
         <h2 class="offer-pct"><span id="offerPct">15%</span> OFF</h2>
-        <p class="offer-sub" id="offerLabel">On Selected Products</p>
+        <p class="offer-sub" id="offerLabel" data-i18n="onSelectedProducts">On Selected Products</p>
         <div class="offer-rule"><span>&#10022;</span></div>
         <p class="offer-desc" data-i18n="offerDesc">Elevate your space with pieces you&rsquo;ll love for less.</p>
         <a href="category.html?cat=sale-offers" class="offer-btn" id="offerBtn"><span data-i18n="offerBtn">SHOP THE OFFER</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
@@ -2831,7 +2831,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     return `<a class="ts-card" href="product.html?slug=${encodeURIComponent(p.slug)}">
       <div class="ts-card-inner">
         <div class="ts-card-img">
-          ${onSale ? '<span class="ts-tag">SALE</span>' : ''}
+          ${onSale ? `<span class="ts-tag">${window.TPR_I18N ? window.TPR_I18N.t('saleTag') : 'SALE'}</span>` : ''}
           <img src="${thumb}" alt="${p.name.replace(/"/g,'&quot;')}" style="${p.imageFocus && p.imageFocus[img] ? `object-position:${p.imageFocus[img]}` : ''}">
           <button class="ts-wish" aria-label="Add to wishlist" data-id="${p.id}"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         </div>
@@ -2949,7 +2949,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       const labelEl = document.getElementById('offerLabel');
       const btnEl = document.getElementById('offerBtn');
       if (pctEl) pctEl.textContent = promo.value + '%';
-      if (labelEl) labelEl.textContent = promo.label || 'On Selected Products';
+      if (labelEl) labelEl.textContent = promo.label || (window.TPR_I18N ? window.TPR_I18N.t('onSelectedProducts') : 'On Selected Products');
       // send the button to only this campaign's own products, not the
       // whole Sale category (see category.html's ?promo= handling)
       if (btnEl && promo.id != null) btnEl.href = 'category.html?promo=' + encodeURIComponent(promo.id);
@@ -3030,9 +3030,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
         body: JSON.stringify({ email })
       });
       const d = await r.json();
-      if (!d.ok) throw new Error(d.error || "Couldn't subscribe right now.");
+      if (!d.ok) throw new Error(d.error || (window.TPR_I18N ? window.TPR_I18N.t('newsletterFailGeneric') : "Couldn't subscribe right now."));
       msg.style.color = '#8ba888';
-      msg.textContent = "You're in — welcome to The Room.";
+      msg.textContent = window.TPR_I18N ? window.TPR_I18N.t('newsletterSuccess') : "You're in — welcome to The Room.";
       emailEl.value = '';
     } catch(err){
       msg.style.color = '#d98a7e';

@@ -254,7 +254,13 @@
       rcptProduct: 'Product', rcptQty: 'Qty', rcptUnitPrice: 'Unit Price', rcptTotal: 'Total',
       rcptDiscount: 'Discount', rcptTax: 'Tax', rcptVat: 'VAT', rcptIncluded: 'Included', rcptGrandTotal: 'Grand Total',
       rcptThankYou: 'Thank you for shopping with The Pink Room.',
-      rcptNotFoundTitle: 'Receipt not found', rcptNotFoundDesc: 'This order could not be located.', rcptReturnHome: 'RETURN HOME'
+      rcptNotFoundTitle: 'Receipt not found', rcptNotFoundDesc: 'This order could not be located.', rcptReturnHome: 'RETURN HOME',
+
+      // Misc small chrome bits found on a final sweep
+      homeAccessories: 'HOME ACCESSORIES', menuLabel: 'MENU',
+      onSelectedProducts: 'On Selected Products',
+      newsletterSuccess: 'You’re in — welcome to The Room.',
+      newsletterFailGeneric: 'Couldn’t subscribe right now.'
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
@@ -480,7 +486,13 @@
       rcptProduct: 'المنتج', rcptQty: 'الكمية', rcptUnitPrice: 'سعر الوحدة', rcptTotal: 'الإجمالي',
       rcptDiscount: 'الخصم', rcptTax: 'الضريبة', rcptVat: 'الضريبة', rcptIncluded: 'شاملة', rcptGrandTotal: 'الإجمالي الكلي',
       rcptThankYou: 'شكراً للتسوق مع ذا بينك روم.',
-      rcptNotFoundTitle: 'الفاتورة غير موجودة', rcptNotFoundDesc: 'لم نتمكن من إيجاد هذا الطلب.', rcptReturnHome: 'العودة للرئيسية'
+      rcptNotFoundTitle: 'الفاتورة غير موجودة', rcptNotFoundDesc: 'لم نتمكن من إيجاد هذا الطلب.', rcptReturnHome: 'العودة للرئيسية',
+
+      // Misc small chrome bits found on a final sweep
+      homeAccessories: 'إكسسوارات المنزل', menuLabel: 'القائمة',
+      onSelectedProducts: 'على منتجات مختارة',
+      newsletterSuccess: 'تم الانضمام — أهلاً بكِ في ذا روم.',
+      newsletterFailGeneric: 'تعذر الاشتراك الآن.'
     }
   };
 
