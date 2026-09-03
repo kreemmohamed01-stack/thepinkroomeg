@@ -411,8 +411,14 @@
         && (i.size || null) === (sizeName || null));
       if (existing) existing.qty++;
       else {
+        // the bag thumbnail follows the same precedence the product
+        // gallery uses: the color's own photo, else the size's, else the
+        // product's first picture
         const colorImg = colorName && Array.isArray(product.colors)
           ? (product.colors.find(c => c.name === colorName) || {}).images
+          : null;
+        const sizeImg = sizeName && Array.isArray(product.sizeOptions)
+          ? (product.sizeOptions.find(s => s.name === sizeName) || {}).images
           : null;
         const variantBits = [colorName, sizeName].filter(Boolean);
         cart.push({
@@ -422,7 +428,7 @@
           color: colorName || null,
           size: sizeName || null,
           price: product.salePrice || product.price,
-          img: (colorImg && colorImg[0]) || (product.images && product.images[0]) || product.img,
+          img: (colorImg && colorImg[0]) || (sizeImg && sizeImg[0]) || (product.images && product.images[0]) || product.img,
           qty: 1
         });
       }

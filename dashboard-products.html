@@ -187,8 +187,10 @@ let drawerImageFocus = {};
    images references the product's own photos (drawerImages) by URL, so a
    customer can be shown just that color's pictures on the product page. */
 let drawerColors = [];
-/* Size options for the open drawer — each { name }. Free text, so a size
-   can be a word ("Small") or a measurement ("120 × 80 cm", "40"). */
+/* Size options for the open drawer — each { name, images: [url,...] }.
+   Free text, so a size can be a word ("Small") or a measurement
+   ("120 × 80 cm", "40"), and like colors it can point at its own photos
+   from the product's images so the gallery swaps when a size is picked. */
 let drawerSizes = [];
 /* Extra categories currently ticked in the open drawer:
    { categorySlug: subcategorySlug | '' }. '' means the whole category
@@ -224,7 +226,7 @@ async function openProductDrawer(id){
     drawerImages = (d.product.images || []).slice();
     (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
     drawerColors = (d.product.colors || []).map(c => ({ name: c.name, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
-    drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '' }));
+    drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '', images: (s.images || []).slice() }));
     drawerImageFocus = Object.assign({}, d.product.imageFocus || {});
     renderProductForm(d.product);
   } catch(e){
@@ -395,7 +397,7 @@ function renderProductForm(p){
   });
   renderSizeList();
   $('sizeAddBtn').addEventListener('click', ()=>{
-    drawerSizes.push({ name: '' });
+    drawerSizes.push({ name: '', images: [] });
     renderSizeList();
   });
   populateSubcategories(p && p.category, p && p.subcategory);
@@ -458,12 +460,16 @@ function renderImageList(){
     btn.addEventListener('click', (e)=>{
       e.stopPropagation();
       const [removed] = drawerImages.splice(Number(btn.dataset.i), 1);
-      // a color pointing at a photo that just got removed drops that
-      // reference — it simply shows one fewer picture on the product page
-      if (removed) drawerColors.forEach(c => { c.images = c.images.filter(u => u !== removed); });
-      if (removed) delete drawerImageFocus[removed];
+      // a color or size pointing at a photo that just got removed drops
+      // that reference — it simply shows one fewer picture on the product page
+      if (removed) {
+        drawerColors.forEach(c => { c.images = c.images.filter(u => u !== removed); });
+        drawerSizes.forEach(s => { s.images = s.images.filter(u => u !== removed); });
+        delete drawerImageFocus[removed];
+      }
       renderImageList();
       renderColorList();
+      renderSizeList();
     });
   });
   wrap.querySelectorAll('.db-img-frame').forEach(btn=>{
@@ -540,16 +546,34 @@ function renderSizeList(){
   const wrap = $('sizeList');
   if (!wrap) return;
   wrap.innerHTML = drawerSizes.map((s, i) => `
-    <div class="db-size-row" data-i="${i}">
-      <input type="text" class="fSizeName" placeholder="e.g. Small, Large, 120 × 80 cm" value="${escAttr(s.name)}">
-      <button type="button" class="db-color-remove" data-i="${i}" aria-label="Remove size">&times;</button>
+    <div class="db-color-row" data-i="${i}">
+      <div class="db-size-row-top">
+        <input type="text" class="fSizeName" placeholder="Size (e.g. Small, Large, 120 × 80 cm)" value="${escAttr(s.name)}">
+        <button type="button" class="db-size-remove" data-i="${i}" aria-label="Remove size">&times;</button>
+      </div>
+      <div class="db-color-imgs">
+        ${drawerImages.length ? drawerImages.map(url => `<label class="db-color-img-pick ${s.images.includes(url) ? 'on' : ''}">
+          <input type="checkbox" value="${escAttr(url)}" ${s.images.includes(url) ? 'checked' : ''}>
+          <img src="${escAttr(url)}">
+        </label>`).join('') : '<p style="font-size:11px;color:var(--ink-soft)">Add photos above first, then pick which ones show for this size.</p>'}
+      </div>
     </div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No size options — the product page shows just the Size Label above.</p>';
 
   wrap.querySelectorAll('.fSizeName').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerSizes[i].name = inp.value; }));
-  wrap.querySelectorAll('.db-color-remove').forEach(btn => btn.addEventListener('click', ()=>{
+  wrap.querySelectorAll('.db-size-remove').forEach(btn => btn.addEventListener('click', ()=>{
     drawerSizes.splice(Number(btn.dataset.i), 1);
     renderSizeList();
   }));
+  wrap.querySelectorAll('.db-color-img-pick input').forEach(cb => {
+    cb.addEventListener('change', ()=>{
+      const row = cb.closest('.db-color-row');
+      const s = drawerSizes[Number(row.dataset.i)];
+      const url = cb.value;
+      const pick = cb.closest('.db-color-img-pick');
+      if (cb.checked) { if (!s.images.includes(url)) s.images.push(url); pick.classList.add('on'); }
+      else { s.images = s.images.filter(u => u !== url); pick.classList.remove('on'); }
+    });
+  });
 }
 
 function renderColorList(){
@@ -634,6 +658,7 @@ async function addImageFile(file){
     drawerImages.push(d.url);
     renderImageList();
     renderColorList();
+    renderSizeList();
   } catch(e){
     msg.textContent = e.message; msg.className = 'db-save-msg show bad';
   } finally {
@@ -686,7 +711,7 @@ async function saveProduct(existingId){
     colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), images: c.images.slice(), stockQuantity: c.stockQuantity })),
     size: $('fSize').value || null,
     sizeLabel: $('fSizeLabel').value.trim() || null,
-    sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim() })),
+    sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), images: s.images.slice() })),
     material: $('fMaterial').value.trim() || null,
     color: $('fColor').value.trim() || null,
     availability: $('fAvailability').value,

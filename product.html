@@ -616,11 +616,22 @@ function updateSeoTags(p){
 /* Color-specific photos if that color has any picked, else every photo
    (so a color added without picking photos still shows something). No
    colors on the product at all ⇒ just the product's own image list. */
-function imagesForColor(p, colorName){
+/* Which photos the gallery shows for the current selection. Color wins
+   when it has its own set — it's the choice tied to stock and the bigger
+   visual difference — and the size's set is used when the color has none
+   (or the product has no colors at all). Either falling through leaves
+   the full image list, so nothing changes for products without options. */
+function imagesForColor(p, colorName, sizeName){
   const all = p.images || [];
-  if (!colorName || !Array.isArray(p.colors)) return all;
-  const c = p.colors.find(x => x.name === colorName);
-  return (c && c.images && c.images.length) ? c.images : all;
+  if (colorName && Array.isArray(p.colors)){
+    const c = p.colors.find(x => x.name === colorName);
+    if (c && c.images && c.images.length) return c.images;
+  }
+  if (sizeName && Array.isArray(p.sizeOptions)){
+    const s = p.sizeOptions.find(x => x.name === sizeName);
+    if (s && s.images && s.images.length) return s.images;
+  }
+  return all;
 }
 
 /* Stock status for the product as a whole, or for one color when the
@@ -657,7 +668,7 @@ function buildPage(p){
     size: hasSizes ? p.sizeOptions[0].name : null
   };
 
-  const imgs = imagesForColor(p, pdpState.color);
+  const imgs = imagesForColor(p, pdpState.color, pdpState.size);
   // by convention each pair is [lifestyle, dimensions] — odd indices are the dimensions plate
   // (covers both a single 2-image product and multi-finish products with several pairs)
   const isDim = i => i % 2 === 1;
@@ -847,7 +858,7 @@ function buildPage(p){
   const galleryApi = wireGallery(imgs, isDim, p.name);
   wireActions(p, pdpState);
   if (hasColors) wireColorSwatches(p, pdpState, galleryApi);
-  if (hasSizes) wireSizeSwatches(pdpState);
+  if (hasSizes) wireSizeSwatches(p, pdpState, galleryApi);
   wireTabs();
   loadReviews(p);
   translateDescriptionIfArabic();
@@ -910,7 +921,7 @@ function wireColorSwatches(p, pdpState, galleryApi){
     const label = document.getElementById('pdpColorLabel');
     if (label) label.textContent = ' — ' + pdpState.color;
 
-    galleryApi.setImages(imagesForColor(p, pdpState.color));
+    galleryApi.setImages(imagesForColor(p, pdpState.color, pdpState.size));
 
     const stock = stockInfoFor(p, pdpState.color);
     const msg = document.getElementById('pdpStockMsg');
@@ -928,10 +939,11 @@ function wireColorSwatches(p, pdpState, galleryApi){
   });
 }
 
-/* Size options are a plain label choice — no per-size stock or photos —
-   so picking one only moves the highlight and updates the header label.
+/* Sizes carry no stock of their own, so picking one moves the highlight,
+   updates the header label, and re-points the gallery at that size's
+   photos when it has any (imagesForColor decides — color still wins).
    The chosen size rides along to the cart via pdpState.size. */
-function wireSizeSwatches(pdpState){
+function wireSizeSwatches(p, pdpState, galleryApi){
   const wrap = document.getElementById('pdpSizes');
   if (!wrap) return;
   wrap.addEventListener('click', e => {
@@ -941,6 +953,7 @@ function wireSizeSwatches(pdpState){
     wrap.querySelectorAll('.pdp-swatch').forEach(b => b.classList.toggle('active', b === btn));
     const label = document.getElementById('pdpSizeLabel');
     if (label) label.textContent = ' — ' + pdpState.size;
+    galleryApi.setImages(imagesForColor(p, pdpState.color, pdpState.size));
   });
 }
 

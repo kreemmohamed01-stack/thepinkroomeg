@@ -42,8 +42,9 @@ function rowToProduct(row){
     // { name, images: [indices into `images` above], stockQuantity }.
     // Empty array = no color choice for this product (the common case).
     colors: extra.colors || [],
-    // size options a customer picks between — each { name }, a free-text
-    // label (word or measurement). Empty = no size choice.
+    // size options a customer picks between — each { name, images }, a
+    // free-text label (word or measurement) with an optional subset of
+    // the product's photos. Empty = no size choice.
     sizeOptions: extra.sizeOptions || [],
     // per-image crop focus for the square card thumbnail — { url: "50% 30%" },
     // used as CSS object-position so the card can show the part of the photo
@@ -128,9 +129,12 @@ function validateProduct(p){
 
   /* Size options a customer picks between — free-text labels set per
      product in the dashboard, so they can be words ("Small", "Large") or
-     plain measurements ("120 × 80 cm", "40"). Deduped case-insensitively
-     and capped so a bad payload can't bloat the row. Empty = no size
-     choice, and the single `sizeLabel` line renders as it always has. */
+     plain measurements ("120 × 80 cm", "40"). Each can also point at its
+     own subset of the product's photos (matched by URL, exactly like
+     colors above) so the gallery swaps when a size is picked; an empty
+     images list just means that size shows all of them. Deduped
+     case-insensitively and capped so a bad payload can't bloat the row.
+     Empty = no size choice, and `sizeLabel` renders as it always has. */
   const seenSizeNames = new Set();
   const sizeOptions = (Array.isArray(p.sizeOptions) ? p.sizeOptions : [])
     .map(s => {
@@ -139,7 +143,9 @@ function validateProduct(p){
       const key = name.toLowerCase();
       if (seenSizeNames.has(key)) return null;
       seenSizeNames.add(key);
-      return { name };
+      const images = (s && Array.isArray(s.images) ? s.images : [])
+        .filter(u => typeof u === 'string' && validImages.has(u));
+      return { name, images };
     })
     .filter(Boolean)
     .slice(0, 30);
