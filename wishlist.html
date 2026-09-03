@@ -612,9 +612,10 @@ function render(){
       e.preventDefault(); e.stopPropagation();
       const product = PRODUCTS.find(p => String(p.id) === btn.dataset.add);
       if (!product) return;
-      // a product with color options needs a color picked first — send
-      // the shopper to its page instead of silently doing nothing
-      if (Array.isArray(product.colors) && product.colors.length){
+      // a product with color or size options needs a choice picked first —
+      // send the shopper to its page instead of silently doing nothing
+      if ((Array.isArray(product.colors) && product.colors.length)
+       || (Array.isArray(product.sizeOptions) && product.sizeOptions.length)){
         location.href = 'product.html?slug=' + product.slug;
         return;
       }

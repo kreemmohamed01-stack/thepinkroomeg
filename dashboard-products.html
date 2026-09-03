@@ -187,6 +187,9 @@ let drawerImageFocus = {};
    images references the product's own photos (drawerImages) by URL, so a
    customer can be shown just that color's pictures on the product page. */
 let drawerColors = [];
+/* Size options for the open drawer — each { name }. Free text, so a size
+   can be a word ("Small") or a measurement ("120 × 80 cm", "40"). */
+let drawerSizes = [];
 /* Extra categories currently ticked in the open drawer:
    { categorySlug: subcategorySlug | '' }. '' means the whole category
    (no subcategory). Kept outside the form markup so the ticks survive
@@ -202,6 +205,7 @@ async function openProductDrawer(id){
   drawerImages = [];
   drawerExtraCats = {};
   drawerColors = [];
+  drawerSizes = [];
   drawerImageFocus = {};
   loadPromotions(); // refresh in the background so the dropdown reflects the latest campaigns
 
@@ -220,6 +224,7 @@ async function openProductDrawer(id){
     drawerImages = (d.product.images || []).slice();
     (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
     drawerColors = (d.product.colors || []).map(c => ({ name: c.name, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
+    drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '' }));
     drawerImageFocus = Object.assign({}, d.product.imageFocus || {});
     renderProductForm(d.product);
   } catch(e){
@@ -345,6 +350,13 @@ function renderProductForm(p){
 
     <div class="db-field"><label>Size Label &mdash; e.g. "100 cm W &times; 130 cm H"</label><input type="text" id="fSizeLabel" value="${escAttr(p && p.sizeLabel || '')}"></div>
 
+    <div class="db-field">
+      <label>Size Options (optional)</label>
+      <div class="db-sizes" id="sizeList"></div>
+      <button type="button" class="db-color-add" id="sizeAddBtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD SIZE</button>
+      <p class="db-img-hint">Add as many sizes as you like &mdash; anything you type is shown as a button on the product page. Words (Small, Medium, Large) or numbers and measurements (40, 120 &times; 80 cm) both work. Leave empty to show only the Size Label above.</p>
+    </div>
+
     <div class="db-2col">
       <div class="db-field"><label>Material</label><input type="text" id="fMaterial" value="${escAttr(p && p.material || '')}"></div>
       <div class="db-field"><label>Color</label><input type="text" id="fColor" value="${escAttr(p && p.color || '')}"></div>
@@ -380,6 +392,11 @@ function renderProductForm(p){
   $('colorAddBtn').addEventListener('click', ()=>{
     drawerColors.push({ name: '', images: [], stockQuantity: 0 });
     renderColorList();
+  });
+  renderSizeList();
+  $('sizeAddBtn').addEventListener('click', ()=>{
+    drawerSizes.push({ name: '' });
+    renderSizeList();
   });
   populateSubcategories(p && p.category, p && p.subcategory);
   renderExtraCategories();
@@ -519,6 +536,22 @@ function openCropPicker(url){
   overlay.addEventListener('click', (e)=> { if (e.target === overlay) overlay.remove(); });
 }
 
+function renderSizeList(){
+  const wrap = $('sizeList');
+  if (!wrap) return;
+  wrap.innerHTML = drawerSizes.map((s, i) => `
+    <div class="db-size-row" data-i="${i}">
+      <input type="text" class="fSizeName" placeholder="e.g. Small, Large, 120 × 80 cm" value="${escAttr(s.name)}">
+      <button type="button" class="db-color-remove" data-i="${i}" aria-label="Remove size">&times;</button>
+    </div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No size options — the product page shows just the Size Label above.</p>';
+
+  wrap.querySelectorAll('.fSizeName').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerSizes[i].name = inp.value; }));
+  wrap.querySelectorAll('.db-color-remove').forEach(btn => btn.addEventListener('click', ()=>{
+    drawerSizes.splice(Number(btn.dataset.i), 1);
+    renderSizeList();
+  }));
+}
+
 function renderColorList(){
   const wrap = $('colorList');
   if (!wrap) return;
@@ -653,6 +686,7 @@ async function saveProduct(existingId){
     colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), images: c.images.slice(), stockQuantity: c.stockQuantity })),
     size: $('fSize').value || null,
     sizeLabel: $('fSizeLabel').value.trim() || null,
+    sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim() })),
     material: $('fMaterial').value.trim() || null,
     color: $('fColor').value.trim() || null,
     availability: $('fAvailability').value,

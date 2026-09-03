@@ -79,6 +79,7 @@
     <header class="tpr-nav">
       <div class="tpr-side">
         <button class="tpr-icon" id="tprMenuBtn" aria-label="Menu">${ICONS.menu}</button>
+        <button class="tpr-lang" id="tprLangBtn" aria-label="Switch language"><span id="tprLangLabel">ENG</span></button>
         <nav class="tpr-desknav">
           <a href="category.html?cat=all">${t('shopAll')}</a>
           <a href="category.html?cat=paintings">${t('paintings')}</a>
@@ -88,7 +89,6 @@
       </div>
       <a class="tpr-logo" href="index.html" aria-label="The Pink Room">${LOGO_MARK}</a>
       <div class="tpr-side">
-        <button class="tpr-icon tpr-icon-sm" id="tprLangBtn" aria-label="Switch language">${ICONS.globe}</button>
         <button class="tpr-icon" id="tprSearchBtn" aria-label="Search">${ICONS.search}</button>
         <a class="tpr-icon" href="wishlist.html" aria-label="Wishlist">${ICONS.heart}<span class="tpr-badge" id="tprWishBadge">0</span></a>
         <button class="tpr-icon" id="tprCartBtn" aria-label="Cart">${ICONS.bag}<span class="tpr-badge" id="tprCartBadge">0</span></button>
@@ -259,9 +259,21 @@
   on('tprMenuBtn',   'click', ()=> open(menu));
   on('tprCartBtn',   'click', ()=> { renderCart(); open(cartEl); });
   on('tprSearchBtn', 'click', ()=> { open(searchEl); setTimeout(()=> $('tprSearchInput').focus(), 350); });
+  /* Language pill — shows the language you'd switch TO, so it reads as an
+     action ("ENG" while the site is Arabic, "ع" while it's English). */
+  function syncLangLabel(){
+    const el = $('tprLangLabel');
+    if (!el || !window.TPR_I18N) return;
+    const isAr = window.TPR_I18N.getLang() === 'ar';
+    el.textContent = isAr ? 'ENG' : 'ع';
+    const btn = $('tprLangBtn');
+    if (btn) btn.setAttribute('aria-label', isAr ? 'Switch to English' : 'التبديل إلى العربية');
+  }
+  syncLangLabel();
   on('tprLangBtn', 'click', ()=>{
     const current = window.TPR_I18N.getLang();
     window.TPR_I18N.setLang(current === 'ar' ? 'en' : 'ar');
+    syncLangLabel();
   });
   on('tprMenuClose',   'click', closeAll);
   on('tprCartClose',   'click', closeAll);
@@ -384,24 +396,31 @@
        (product.html) forces a color pick before this can be called. Two
        different colors of the same product are kept as separate cart
        lines (matched by id + color), same as any other store. */
-    addToCart(product, colorName){
+    addToCart(product, colorName, sizeName){
       // safety net — the UI should already stop a sold-out item / an
       // unpicked color from reaching this point, this just makes sure
       // nothing can add one to the bag even if it somehow does
       if (isOutOfStock(product, colorName)) return;
       if (Array.isArray(product.colors) && product.colors.length && !colorName) return;
+      if (Array.isArray(product.sizeOptions) && product.sizeOptions.length && !sizeName) return;
 
-      const existing = cart.find(i => String(i.id) === String(product.id) && (i.color || null) === (colorName || null));
+      // color AND size together identify a cart line, so a Large Beige and
+      // a Small Beige of the same product stay two separate lines
+      const existing = cart.find(i => String(i.id) === String(product.id)
+        && (i.color || null) === (colorName || null)
+        && (i.size || null) === (sizeName || null));
       if (existing) existing.qty++;
       else {
         const colorImg = colorName && Array.isArray(product.colors)
           ? (product.colors.find(c => c.name === colorName) || {}).images
           : null;
+        const variantBits = [colorName, sizeName].filter(Boolean);
         cart.push({
           id: product.id,
           name: product.name,
-          variant: colorName || product.subcategoryName || product.categoryName || '',
+          variant: variantBits.length ? variantBits.join(' · ') : (product.subcategoryName || product.categoryName || ''),
           color: colorName || null,
+          size: sizeName || null,
           price: product.salePrice || product.price,
           img: (colorImg && colorImg[0]) || (product.images && product.images[0]) || product.img,
           qty: 1

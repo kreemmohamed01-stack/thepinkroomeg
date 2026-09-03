@@ -42,6 +42,9 @@ function rowToProduct(row){
     // { name, images: [indices into `images` above], stockQuantity }.
     // Empty array = no color choice for this product (the common case).
     colors: extra.colors || [],
+    // size options a customer picks between — each { name }, a free-text
+    // label (word or measurement). Empty = no size choice.
+    sizeOptions: extra.sizeOptions || [],
     // per-image crop focus for the square card thumbnail — { url: "50% 30%" },
     // used as CSS object-position so the card can show the part of the photo
     // the admin picked instead of always centering it. Missing entry = center.
@@ -123,6 +126,24 @@ function validateProduct(p){
 
   const colorStockTotal = colors.reduce((sum, c) => sum + c.stockQuantity, 0);
 
+  /* Size options a customer picks between — free-text labels set per
+     product in the dashboard, so they can be words ("Small", "Large") or
+     plain measurements ("120 × 80 cm", "40"). Deduped case-insensitively
+     and capped so a bad payload can't bloat the row. Empty = no size
+     choice, and the single `sizeLabel` line renders as it always has. */
+  const seenSizeNames = new Set();
+  const sizeOptions = (Array.isArray(p.sizeOptions) ? p.sizeOptions : [])
+    .map(s => {
+      const name = String((s && s.name != null ? s.name : s) || '').trim();
+      if (!name || name.length > 60) return null;
+      const key = name.toLowerCase();
+      if (seenSizeNames.has(key)) return null;
+      seenSizeNames.add(key);
+      return { name };
+    })
+    .filter(Boolean)
+    .slice(0, 30);
+
   /* Per-image crop focus point, e.g. { "https://…/a.jpg": "50% 20%" } —
      dropped for any url no longer among this product's images, and any
      value that isn't a plain "X% Y%" string (guards against junk being
@@ -169,6 +190,7 @@ function validateProduct(p){
         rooms: Array.isArray(p.rooms) ? p.rooms : [],
         extraCategories,
         colors,
+        sizeOptions,
         imageFocus,
         _provisional: Array.isArray(p._provisional) ? p._provisional : []
       }

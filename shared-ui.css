@@ -27,6 +27,17 @@
 .tpr-icon:hover{transform:scale(1.15) translateY(-2px);filter:drop-shadow(0 0 6px var(--shine));}
 .tpr-icon:hover svg{stroke:var(--gold);}
 .tpr-icon-sm svg{width:15px;height:15px;}
+/* language pill — sits beside the menu icon so it never crowds the logo */
+.tpr-lang{
+  display:flex;align-items:center;justify-content:center;
+  flex:0 0 auto;min-width:34px;height:24px;padding:0 8px;
+  border:1px solid var(--line,rgba(216,205,187,.9));border-radius:999px;
+  background:rgba(255,255,255,.5);
+  font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;
+  letter-spacing:1px;line-height:1;color:var(--ink);
+  transition:background .3s ease, border-color .3s ease, color .3s ease;
+}
+.tpr-lang:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,124,.14);}
 .tpr-badge{
   position:absolute;top:-6px;right:-8px;
   min-width:15px;height:15px;padding:0 3px;border-radius:50%;
@@ -421,8 +432,9 @@
 }
 @media (max-width:760px){
   .tpr-nav{padding:11px 18px;}
-  .tpr-nav .tpr-side{gap:14px;}
-  .tpr-logo{width:212px;max-width:50vw;}
+  .tpr-nav .tpr-side{gap:12px;}
+  .tpr-logo{width:212px;max-width:46vw;}
+  .tpr-lang{min-width:30px;height:22px;padding:0 6px;font-size:9.5px;letter-spacing:.6px;}
   .tpr-drawer{width:94%;padding:20px 18px 0;padding-top:max(20px, env(safe-area-inset-top));}
   .tpr-drawer-title{font-size:21px;}
   .tpr-rule{margin:16px 0;}

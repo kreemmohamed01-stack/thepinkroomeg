@@ -647,9 +647,15 @@ function buildPage(p){
   const sizeText = p.sizeLabel || '';
 
   const hasColors = Array.isArray(p.colors) && p.colors.length > 0;
+  // per-product size choices set in the dashboard — free-text labels, so
+  // they can be words (Small/Large) or measurements (120 × 80 cm)
+  const hasSizes = Array.isArray(p.sizeOptions) && p.sizeOptions.length > 0;
   // default to the first color that's actually in stock, so a shopper
   // isn't greeted by a sold-out selection when another color is available
-  const pdpState = { color: hasColors ? ((p.colors.find(c => c.stockQuantity > 0) || p.colors[0]).name) : null };
+  const pdpState = {
+    color: hasColors ? ((p.colors.find(c => c.stockQuantity > 0) || p.colors[0]).name) : null,
+    size: hasSizes ? p.sizeOptions[0].name : null
+  };
 
   const imgs = imagesForColor(p, pdpState.color);
   // by convention each pair is [lifestyle, dimensions] — odd indices are the dimensions plate
@@ -722,10 +728,16 @@ function buildPage(p){
 
       <div class="pdp-rule"></div>
 
-      ${sizeText ? `<div class="pdp-field">
+      ${hasSizes ? `<div class="pdp-field">
+        <span class="pdp-label">${t('pdpSize')}<span class="val" id="pdpSizeLabel"> &mdash; ${escHtml(pdpState.size)}</span></span>
+        <div class="pdp-swatches" id="pdpSizes">
+          ${p.sizeOptions.map(s => `<button type="button" class="pdp-swatch ${s.name === pdpState.size ? 'active' : ''}" data-size="${escHtml(s.name)}">${escHtml(s.name)}</button>`).join('')}
+        </div>
+        ${sizeText ? `<div class="pdp-size-box" style="margin-top:10px">${sizeText}</div>` : ''}
+      </div>` : (sizeText ? `<div class="pdp-field">
         <span class="pdp-label">${t('pdpSize')}</span>
         <div class="pdp-size-box">${sizeText}</div>
-      </div>` : ''}
+      </div>` : '')}
 
       ${hasColors ? `<div class="pdp-field">
         <span class="pdp-label">${t('pdpColor')}<span class="val" id="pdpColorLabel"> &mdash; ${escHtml(pdpState.color)}</span></span>
@@ -835,6 +847,7 @@ function buildPage(p){
   const galleryApi = wireGallery(imgs, isDim, p.name);
   wireActions(p, pdpState);
   if (hasColors) wireColorSwatches(p, pdpState, galleryApi);
+  if (hasSizes) wireSizeSwatches(pdpState);
   wireTabs();
   loadReviews(p);
   translateDescriptionIfArabic();
@@ -912,6 +925,22 @@ function wireColorSwatches(p, pdpState, galleryApi){
       bag.disabled = stock.oos;
       bag.querySelector('span').textContent = stock.oos ? t('pdpSoldOutBtn') : t('pdpAddToBag');
     }
+  });
+}
+
+/* Size options are a plain label choice — no per-size stock or photos —
+   so picking one only moves the highlight and updates the header label.
+   The chosen size rides along to the cart via pdpState.size. */
+function wireSizeSwatches(pdpState){
+  const wrap = document.getElementById('pdpSizes');
+  if (!wrap) return;
+  wrap.addEventListener('click', e => {
+    const btn = e.target.closest('.pdp-swatch');
+    if (!btn) return;
+    pdpState.size = btn.dataset.size;
+    wrap.querySelectorAll('.pdp-swatch').forEach(b => b.classList.toggle('active', b === btn));
+    const label = document.getElementById('pdpSizeLabel');
+    if (label) label.textContent = ' — ' + pdpState.size;
   });
 }
 
@@ -1105,7 +1134,7 @@ function wireActions(p, pdpState){
   const bag = document.getElementById('btnBag');
   bag.addEventListener('click', ()=>{
     if (bag.disabled) return;
-    if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p, pdpState.color);
+    if (window.TPR) for (let i=0;i<qty;i++) window.TPR.addToCart(p, pdpState.color, pdpState.size);
     bag.classList.add('added');
     bag.querySelector('span').textContent = t('pdpAddedToBag');
     setTimeout(()=>{ bag.classList.remove('added'); bag.querySelector('span').textContent = t('pdpAddToBag'); }, 1600);

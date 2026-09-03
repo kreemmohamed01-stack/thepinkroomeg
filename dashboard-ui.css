@@ -306,6 +306,13 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 .db-color-img-pick img{width:100%;height:100%;object-fit:cover;display:block;}
 .db-color-img-pick input{position:absolute;top:2px;left:2px;width:13px;height:13px;accent-color:var(--gold);}
 .db-color-img-pick.on{opacity:1;border-color:var(--gold);}
+/* size options — same look as the color rows, minus the photo picker */
+.db-sizes{display:flex;flex-direction:column;gap:8px;margin-bottom:8px;}
+.db-size-row{display:grid;grid-template-columns:1fr 28px;gap:8px;align-items:center;}
+.db-size-row input[type="text"]{
+  border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:12.5px;font-family:inherit;
+}
+.db-size-row input:focus{outline:none;border-color:var(--gold);}
 .db-color-add{
   display:flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;color:var(--gold);
   border:1px dashed var(--gold);border-radius:3px;padding:9px 14px;justify-content:center;
