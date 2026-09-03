@@ -248,6 +248,36 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   }
   .mobile-icon svg{transition:stroke .35s ease;}
   .mobile-icon-sm svg{width:13px;height:13px;}
+
+  /* MENU and the language pill stack vertically, so the pill sits under
+     the menu button instead of competing with it for horizontal room */
+  /* the stack is only as tall as the MENU button in the flex row — the pill
+     is absolutely positioned beneath it, so adding it can't re-center the
+     logo or the icons on the other side of the bar */
+  .menu-stack{position:relative;display:flex;align-items:center;flex:0 0 auto;}
+  /* gold-rimmed glass pill — reads as a deliberate control on the hero
+     video rather than one more outline icon in the row */
+  /* centered under the icon-only hamburger on mobile; left-aligned on
+     desktop where the button widens to include the MENU label */
+  .hero-lang{
+    position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
+    display:flex;align-items:center;justify-content:center;
+    min-width:44px;height:23px;padding:0 11px;
+    border:1px solid rgba(201,169,124,.55);border-radius:999px;
+    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
+    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:600;
+    letter-spacing:1.6px;line-height:1;color:#f8f4ee;
+    box-shadow:0 2px 10px rgba(20,17,12,.18);
+    transition:border-color .35s ease, color .35s ease, background .35s ease,
+               transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
+  }
+  .hero-lang:hover, .hero-lang.touched{
+    border-color:var(--gold);color:var(--gold);
+    background:linear-gradient(180deg, rgba(201,169,124,.26), rgba(201,169,124,.1));
+    transform:translateX(-50%) translateY(-2px) scale(1.06);
+    box-shadow:0 4px 16px rgba(201,169,124,.32);
+  }
   .mobile-icon:hover, .mobile-icon.touched{
     transform:scale(1.22) translateY(-2px);
     filter: drop-shadow(0 0 6px var(--shine));
@@ -264,6 +294,10 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     .topbar-mobile svg{width:18px;height:18px;}
     .logo-wrap{width:420px;max-width:32vw;}
     .hamburger-btn span{display:inline;}
+    /* MENU gains its text label here, so the pill lines up with the icon
+       on the left edge instead of floating under the middle of the word */
+    .hero-lang{left:0;transform:none;min-width:48px;height:25px;font-size:10px;}
+    .hero-lang:hover, .hero-lang.touched{transform:translateY(-2px) scale(1.06);}
   }
 
   /* ---------- VIDEO HERO ---------- */
@@ -2379,13 +2413,15 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   <!-- ===== TOPBAR (same on every screen size) ===== -->
   <header class="topbar-mobile">
     <div class="side">
-      <button class="hamburger-btn mobile-icon" id="hamburgerBtn" aria-label="Menu">
-        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
-        <span data-i18n="menuLabel">MENU</span>
-      </button>
-      <button class="mobile-icon mobile-icon-sm" id="heroLangTrigger" aria-label="Switch language">
-        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="3" y1="12" x2="21" y2="12"/><path d="M12 3c2.5 2.5 3.8 5.7 3.8 9s-1.3 6.5-3.8 9c-2.5-2.5-3.8-5.7-3.8-9s1.3-6.5 3.8-9Z"/></svg>
-      </button>
+      <div class="menu-stack">
+        <button class="hamburger-btn mobile-icon" id="hamburgerBtn" aria-label="Menu">
+          <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          <span data-i18n="menuLabel">MENU</span>
+        </button>
+        <button class="hero-lang" id="heroLangTrigger" aria-label="Switch language">
+          <span id="heroLangLabel">ENG</span>
+        </button>
+      </div>
       <button class="mobile-icon" id="searchTrigger" aria-label="Open search">
         <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       </button>
@@ -3089,11 +3125,19 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   document.getElementById('hamburgerBtn').addEventListener('click', ()=> window.TPR.openMenu());
   document.getElementById('searchTrigger').addEventListener('click', ()=> window.TPR.openSearch());
   document.getElementById('cartTrigger').addEventListener('click', ()=> window.TPR.openCart());
-  document.getElementById('heroLangTrigger').addEventListener('click', ()=>{
-    if (!window.TPR_I18N) return;
-    const current = window.TPR_I18N.getLang();
-    window.TPR_I18N.setLang(current === 'ar' ? 'en' : 'ar');
-  });
+  // the pill shows the language you'd switch TO, so it reads as an action —
+  // same convention as the shared navbar on the inner pages
+  (function(){
+    const btn = document.getElementById('heroLangTrigger');
+    const label = document.getElementById('heroLangLabel');
+    if (!btn || !window.TPR_I18N) return;
+    const isAr = window.TPR_I18N.getLang() === 'ar';
+    if (label) label.textContent = isAr ? 'ENG' : 'ع';
+    btn.setAttribute('aria-label', isAr ? 'Switch to English' : 'التبديل إلى العربية');
+    btn.addEventListener('click', ()=>{
+      window.TPR_I18N.setLang(window.TPR_I18N.getLang() === 'ar' ? 'en' : 'ar');
+    });
+  })();
 </script>
 </body>
 </html>
