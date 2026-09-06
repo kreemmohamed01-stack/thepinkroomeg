@@ -1,0 +1,19 @@
+# Files that must never ship to production — they cost deploy size and,
+# if anything ever links them, bandwidth. Nothing on the site references these.
+
+# Original un-compressed hero source (13 MB). The served heroes are
+# sec 7/hero-1080.mp4 and sec 7/hero-720.mp4.
+sec 7/Creating_luxury_showroom_video_1080p_202608082220.mp4
+
+# Pre-optimisation originals, kept locally as a safety net.
+_originals-backup
+
+# Upscaled masters that were never referenced by any page.
+Sale/*-upscaled-2x.png
+
+# Dev-only assets and docs.
+db
+missing-photos.html
+BACKEND-SETUP.md
+node_modules
+*.md

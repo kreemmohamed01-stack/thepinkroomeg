@@ -40,10 +40,17 @@
 
   send('pageview');
 
+  /* Heartbeat interval. Each beat is a serverless invocation plus a DB write,
+     so this is the single biggest driver of function usage on the site — at
+     25s a ten-minute visit cost 24 calls. 60s keeps "active right now"
+     accurate (the dashboard treats a session as live for a few minutes after
+     its last beat) while costing well under half as much. */
+  const HEARTBEAT_MS = 60000;
+
   let heartbeatTimer;
   function startHeartbeat(){
     stopHeartbeat();
-    heartbeatTimer = setInterval(()=> send('heartbeat'), 25000);
+    heartbeatTimer = setInterval(()=> send('heartbeat'), HEARTBEAT_MS);
   }
   function stopHeartbeat(){ if (heartbeatTimer) clearInterval(heartbeatTimer); }
   startHeartbeat();
