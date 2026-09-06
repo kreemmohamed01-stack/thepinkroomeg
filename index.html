@@ -2493,8 +2493,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (slow || still) return;               // poster only — no video bytes fetched
 
-    /* Three tiers rather than two: phones get a 175KB encode instead of the
-       295KB tablet one, and at that screen size the difference isn't visible. */
+    /* Three tiers, deliberately weighted towards the small screens where
+       almost all of the traffic is: phones and tablets get a high-quality
+       encode (CRF 22/24 straight from the master, so the artwork and fabric
+       detail stay crisp), while desktop — a small share of visits, and the
+       one screen where the hero sits furthest behind its overlay — takes the
+       heavily compressed file that protects the monthly transfer budget. */
     var w = window.innerWidth;
     var src = w <= 640 ? v.getAttribute('data-src-phone')
             : w <= 960 ? v.getAttribute('data-src-mobile')
@@ -3178,9 +3182,9 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     entries.forEach(entry=>{
       if (!entry.isIntersecting) return;
       if (!journalVideo.src){
-        // Same clip as the hero, so match the hero's tier: on a phone this is
-        // a 175KB file instead of 762KB, and it is already in the browser
-        // cache from the hero, making it free.
+        // Same clip as the hero, so match the hero's tier rather than always
+        // taking the desktop file. Whichever tier this picks is already in the
+        // browser cache from the hero above, so it costs nothing to show.
         const w = window.innerWidth;
         journalVideo.src = w <= 640 ? 'sec 7/hero-480.mp4'
                          : w <= 960 ? 'sec 7/hero-720.mp4'
