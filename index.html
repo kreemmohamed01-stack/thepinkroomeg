@@ -2466,6 +2466,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
            poster="sec 7/hero-poster.jpg"
            data-src-phone="sec 7/hero-480.mp4" data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
+           data-src-phone-av1="sec 7/hero-480.av1.mp4" data-src-mobile-av1="sec 7/hero-720.av1.mp4" data-src-desktop-av1="sec 7/hero-1080.av1.mp4"
            disablepictureinpicture disableremoteplayback
            controlslist="nodownload noplaybackrate noremoteplayback nofullscreen">
     </video>
@@ -2493,16 +2494,23 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (slow || still) return;               // poster only — no video bytes fetched
 
-    /* Three tiers, deliberately weighted towards the small screens where
-       almost all of the traffic is: phones and tablets get a high-quality
-       encode (CRF 22/24 straight from the master, so the artwork and fabric
-       detail stay crisp), while desktop — a small share of visits, and the
-       one screen where the hero sits furthest behind its overlay — takes the
-       heavily compressed file that protects the monthly transfer budget. */
+    /* Pick a size tier, then a codec.
+
+       Tiers are weighted towards the small screens carrying most of the
+       traffic; desktop takes the hardest compression because it is a small
+       share of visits and the screen where the hero sits furthest behind
+       its dark overlay.
+
+       AV1 carries the same picture in roughly 40% fewer bytes than H.264,
+       so every device that can decode it gets that file and the H.264 pair
+       stays as the fallback for older phones (iPhone before the 15, older
+       Android). canPlayType is the browser's own answer, so a device that
+       cannot decode AV1 never downloads it. */
     var w = window.innerWidth;
-    var src = w <= 640 ? v.getAttribute('data-src-phone')
-            : w <= 960 ? v.getAttribute('data-src-mobile')
-            : v.getAttribute('data-src-desktop');
+    var tier = w <= 640 ? 'phone' : w <= 960 ? 'mobile' : 'desktop';
+    var av1 = v.canPlayType('video/mp4; codecs="av01.0.05M.08"') === 'probably';
+    var src = v.getAttribute('data-src-' + tier + (av1 ? '-av1' : ''));
+    if (!src) src = v.getAttribute('data-src-' + tier);
     if (!src) return;
 
     /* Start the download only once the page has finished loading its
@@ -3182,13 +3190,14 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     entries.forEach(entry=>{
       if (!entry.isIntersecting) return;
       if (!journalVideo.src){
-        // Same clip as the hero, so match the hero's tier rather than always
-        // taking the desktop file. Whichever tier this picks is already in the
-        // browser cache from the hero above, so it costs nothing to show.
+        // Same clip as the hero, so mirror the hero's tier AND codec choice
+        // exactly. Matching both means this is the identical URL the hero
+        // already fetched, so it comes from the browser cache and costs
+        // nothing; picking differently here would download a second copy.
         const w = window.innerWidth;
-        journalVideo.src = w <= 640 ? 'sec 7/hero-480.mp4'
-                         : w <= 960 ? 'sec 7/hero-720.mp4'
-                         : journalVideo.dataset.src;
+        const tier = w <= 640 ? '480' : w <= 960 ? '720' : '1080';
+        const av1 = journalVideo.canPlayType('video/mp4; codecs="av01.0.05M.08"') === 'probably';
+        journalVideo.src = 'sec 7/hero-' + tier + (av1 ? '.av1' : '') + '.mp4';
         journalVideo.play().catch(()=>{});
       }
       journalVideoObserver.disconnect();
