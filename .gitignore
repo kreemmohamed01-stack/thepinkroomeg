@@ -1,3 +1,6 @@
 .vercel
 .env*
 node_modules
+
+# Local pre-optimisation originals (not deployed, not versioned)
+_originals-backup

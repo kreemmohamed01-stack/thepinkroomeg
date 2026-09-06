@@ -475,6 +475,14 @@ const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
    PRODUCT PAGE — one template, driven entirely by ?slug=
    Fields the client hasn't supplied yet are simply not rendered.
    ============================================================ */
+
+/* Gallery thumbnails are ~70px on screen, so requesting the full-size image
+   for each one wastes most of what it downloads. tprThumb narrows Cloudinary
+   URLs to the width actually needed; anything else passes through untouched. */
+function thumbSrc(src, w){
+  return (window.tprThumb ? window.tprThumb(src, w) : src);
+}
+
 const ICON = {
   chev:  '<svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>',
   prev:  '<svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>',
@@ -703,16 +711,16 @@ function buildPage(p){
         <button class="gal-zoom" id="galZoom" aria-label="Zoom">${ICON.zoom}</button>
         ${imgs.length > 1 ? `<button class="gal-arrow prev" id="galPrev" aria-label="Previous image">${ICON.prev}</button>
         <button class="gal-arrow next" id="galNext" aria-label="Next image">${ICON.next}</button>` : ''}
-        <img id="galImg" src="${imgs[0]}" alt="${p.name}">
+        <img id="galImg" src="${thumbSrc(imgs[0],1200)}" alt="${p.name}" fetchpriority="high" decoding="async">
       </div>
 
       <div class="gal-swipe" id="galSwipe">
-        ${imgs.map((src,i)=>`<div><img src="${src}" alt="${p.name} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}"></div>`).join('')}
+        ${imgs.map((src,i)=>`<div><img src="${src}" alt="${p.name} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}" ${i===0?'fetchpriority="high"':'loading="lazy"'} decoding="async"></div>`).join('')}
       </div>
 
       <div class="gal-thumbs" id="galThumbs">
         ${imgs.map((src,i)=>`<button class="gal-thumb ${i===0?'active':''} ${isDim(i)?'contain':''}" data-i="${i}">
-          <img src="${src}" alt="View ${i+1}">
+          <img src="${thumbSrc(src,160)}" alt="View ${i+1}" loading="lazy" decoding="async">
         </button>`).join('')}
       </div>
 
@@ -1068,8 +1076,8 @@ function wireGallery(initialImgs, isDim, altName){
   const prev = document.getElementById('galPrev'), next = document.getElementById('galNext');
 
   function renderThumbsAndSwipe(){
-    thumbsWrap.innerHTML = imgs.map((src,i)=>`<button class="gal-thumb ${isDim(i)?'contain':''}" data-i="${i}"><img src="${src}" alt="View ${i+1}"></button>`).join('');
-    if (swipe) swipe.innerHTML = imgs.map((src,i)=>`<div><img src="${src}" alt="${altName} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}"></div>`).join('');
+    thumbsWrap.innerHTML = imgs.map((src,i)=>`<button class="gal-thumb ${isDim(i)?'contain':''}" data-i="${i}"><img src="${thumbSrc(src,160)}" alt="View ${i+1}" loading="lazy" decoding="async"></button>`).join('');
+    if (swipe) swipe.innerHTML = imgs.map((src,i)=>`<div><img src="${src}" alt="${altName} ${isDim(i)?'dimensions':''}" class="${isDim(i)?'contain':''}" ${i===0?'':'loading="lazy"'} decoding="async"></div>`).join('');
     thumbsWrap.querySelectorAll('.gal-thumb').forEach(t => t.addEventListener('click', ()=> show(+t.dataset.i)));
     const showArrows = imgs.length > 1;
     if (prev) prev.style.display = showArrows ? '' : 'none';
@@ -1080,7 +1088,7 @@ function wireGallery(initialImgs, isDim, altName){
     idx = (i + imgs.length) % imgs.length;
     img.style.opacity = '0';
     setTimeout(()=>{
-      img.src = imgs[idx];
+      img.src = thumbSrc(imgs[idx], 1200);
       img.classList.toggle('contain', isDim(idx));
       img.style.opacity = '1';
     }, 160);

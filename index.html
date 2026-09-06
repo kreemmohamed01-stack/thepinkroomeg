@@ -261,23 +261,39 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
      desktop where the button widens to include the MENU label */
   .hero-lang{
     position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);
-    display:flex;align-items:center;justify-content:center;
-    min-width:44px;height:23px;padding:0 11px;
-    border:1px solid rgba(201,169,124,.55);border-radius:999px;
-    background:linear-gradient(180deg, rgba(255,255,255,.14), rgba(255,255,255,.04));
-    backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);
+    display:flex;align-items:center;justify-content:center;gap:5px;
+    min-width:52px;height:25px;padding:0 10px 0 8px;
+    border:1px solid rgba(201,169,124,.45);border-radius:999px;
+    background:linear-gradient(145deg, rgba(255,255,255,.18), rgba(255,255,255,.05));
+    backdrop-filter:blur(10px) saturate(140%);-webkit-backdrop-filter:blur(10px) saturate(140%);
     font-family:'Poppins',sans-serif;font-size:9.5px;font-weight:600;
-    letter-spacing:1.6px;line-height:1;color:#f8f4ee;
-    box-shadow:0 2px 10px rgba(20,17,12,.18);
+    letter-spacing:1.4px;line-height:1;color:#f8f4ee;
+    box-shadow:0 2px 12px rgba(20,17,12,.22), inset 0 1px 0 rgba(255,255,255,.22);
+    overflow:hidden;
     transition:border-color .35s ease, color .35s ease, background .35s ease,
                transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
   }
+  /* soft gold sheen that sweeps across on hover — same language as the logo shine */
+  .hero-lang::after{
+    content:'';position:absolute;top:0;bottom:0;left:-120%;width:55%;
+    background:linear-gradient(100deg, transparent, rgba(201,169,124,.45), transparent);
+    transform:skewX(-18deg);pointer-events:none;transition:left .55s ease;
+  }
+  .hero-lang:hover::after, .hero-lang.touched::after{left:150%;}
+  .hero-lang svg{
+    width:11px;height:11px;flex:0 0 auto;
+    stroke:currentColor;fill:none;stroke-width:1.5;
+    animation:none;opacity:.9;
+    transition:transform .5s cubic-bezier(.34,1.56,.64,1);
+  }
+  .hero-lang span{position:relative;z-index:1;}
   .hero-lang:hover, .hero-lang.touched{
     border-color:var(--gold);color:var(--gold);
-    background:linear-gradient(180deg, rgba(201,169,124,.26), rgba(201,169,124,.1));
+    background:linear-gradient(145deg, rgba(201,169,124,.3), rgba(201,169,124,.1));
     transform:translateX(-50%) translateY(-2px) scale(1.06);
-    box-shadow:0 4px 16px rgba(201,169,124,.32);
+    box-shadow:0 6px 18px rgba(201,169,124,.34), inset 0 1px 0 rgba(255,255,255,.28);
   }
+  .hero-lang:hover svg, .hero-lang.touched svg{transform:rotate(180deg);opacity:1;}
   .mobile-icon:hover, .mobile-icon.touched{
     transform:scale(1.22) translateY(-2px);
     filter: drop-shadow(0 0 6px var(--shine));
@@ -296,7 +312,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     .hamburger-btn span{display:inline;}
     /* MENU gains its text label here, so the pill lines up with the icon
        on the left edge instead of floating under the middle of the word */
-    .hero-lang{left:0;transform:none;min-width:48px;height:25px;font-size:10px;}
+    .hero-lang{left:0;transform:none;min-width:58px;height:27px;font-size:10px;}
+    .hero-lang svg{width:12px;height:12px;}
     .hero-lang:hover, .hero-lang.touched{transform:translateY(-2px) scale(1.06);}
   }
 
@@ -2419,6 +2436,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
           <span data-i18n="menuLabel">MENU</span>
         </button>
         <button class="hero-lang" id="heroLangTrigger" aria-label="Switch language">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3.2" y1="9" x2="20.8" y2="9"/><line x1="3.2" y1="15" x2="20.8" y2="15"/></svg>
           <span id="heroLangLabel">ENG</span>
         </button>
       </div>
@@ -2442,12 +2460,14 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
 
   <!-- ===== HERO ===== -->
   <section class="video-hero">
-    <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="auto" fetchpriority="high"
+    <!-- Sources are attached by script (see hero video loader below) so that
+         visitors on Save-Data or a slow connection keep the poster image and
+         never pay for the video download. -->
+    <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
            poster="sec 7/hero-poster.jpg"
+           data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
            disablepictureinpicture disableremoteplayback
            controlslist="nodownload noplaybackrate noremoteplayback nofullscreen">
-      <source src="sec 7/hero-720.mp4" type="video/mp4" media="(max-width: 960px)">
-      <source src="sec 7/hero-1080.mp4" type="video/mp4">
     </video>
     <div class="video-hero-overlay"></div>
     <div class="video-hero-content">
@@ -2458,6 +2478,46 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       </span>
     </div>
   </section>
+
+  <script>
+  /* Hero video loader — runs immediately so playback still starts as early as
+     it used to on a normal connection. The video is the single heaviest asset
+     on the site, so it is skipped entirely for visitors who would not benefit:
+     Save-Data users, 2g/3g connections, and reduced-motion preferences all
+     keep the poster image, which is already painted as the CSS background. */
+  (function(){
+    var v = document.getElementById('heroVideo');
+    if (!v) return;
+    var c = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    var slow = c && (c.saveData === true || /^(slow-)?2g$/.test(c.effectiveType || '') || c.effectiveType === '3g');
+    var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (slow || still) return;               // poster only — no video bytes fetched
+
+    var src = window.matchMedia('(max-width: 960px)').matches
+      ? v.getAttribute('data-src-mobile')
+      : v.getAttribute('data-src-desktop');
+    if (!src) return;
+    v.src = src;
+    v.load();
+    var p = v.play();
+    if (p && p.catch) p.catch(function(){});  // autoplay blocked: poster stays
+
+    /* Don't keep decoding (or buffering) the loop while the hero is scrolled
+       out of view or the tab is hidden — saves battery and re-fetches. */
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function(entries){
+        entries.forEach(function(e){
+          if (e.isIntersecting) { var q = v.play(); if (q && q.catch) q.catch(function(){}); }
+          else v.pause();
+        });
+      }, { threshold: 0.01 }).observe(v);
+    }
+    document.addEventListener('visibilitychange', function(){
+      if (document.hidden) v.pause();
+      else if (v.getBoundingClientRect().bottom > 0) { var q = v.play(); if (q && q.catch) q.catch(function(){}); }
+    });
+  })();
+  </script>
 
   <!-- ===== SALE OFFER (only shown when a Sale Campaign is active — see catalog.js/ACTIVE_PROMOTIONS) ===== -->
   <section class="offer-section" id="offerSection" style="display:none">
@@ -2740,7 +2800,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     <div class="footer-grid">
       <div class="footer-col footer-brand">
         <div class="footer-logo footer-glow">
-          <img src="logo-footer-new.png" alt="The Pink Room">
+          <img src="logo-footer-new.png" alt="The Pink Room" loading="lazy" decoding="async" width="400" height="400">
         </div>
         <div class="footer-about-box footer-glow">
           <p class="footer-about" data-i18n="footerAbout">The Pink Room is an Egyptian home accessories brand founded in 2020 by Dalia Hassan and Ashraf El Sanjak, bringing together over 20 years of experience across multinational companies, event styling, and trading ventures. Built on the belief that chic doesn&rsquo;t have to be expensive, The Pink Room offers stylish, carefully selected pieces that bring character and elegance to every space at accessible prices.</p>
@@ -2872,7 +2932,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       <div class="ts-card-inner">
         <div class="ts-card-img">
           ${onSale ? `<span class="ts-tag">${window.TPR_I18N ? window.TPR_I18N.t('saleTag') : 'SALE'}</span>` : ''}
-          <img src="${thumb}" alt="${p.name.replace(/"/g,'&quot;')}" style="${p.imageFocus && p.imageFocus[img] ? `object-position:${p.imageFocus[img]}` : ''}">
+          <img src="${thumb}" alt="${p.name.replace(/"/g,'&quot;')}" loading="lazy" decoding="async" style="${p.imageFocus && p.imageFocus[img] ? `object-position:${p.imageFocus[img]}` : ''}">
           <button class="ts-wish" aria-label="Add to wishlist" data-id="${p.id}"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>
         </div>
         <div class="ts-card-info">

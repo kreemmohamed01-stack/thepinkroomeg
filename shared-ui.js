@@ -79,7 +79,7 @@
     <header class="tpr-nav">
       <div class="tpr-side">
         <button class="tpr-icon" id="tprMenuBtn" aria-label="Menu">${ICONS.menu}</button>
-        <button class="tpr-lang" id="tprLangBtn" aria-label="Switch language"><span id="tprLangLabel">ENG</span></button>
+        <button class="tpr-lang" id="tprLangBtn" aria-label="Switch language"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><line x1="3.2" y1="9" x2="20.8" y2="9"/><line x1="3.2" y1="15" x2="20.8" y2="15"/></svg><span id="tprLangLabel">ENG</span></button>
         <nav class="tpr-desknav">
           <a href="category.html?cat=all">${t('shopAll')}</a>
           <a href="category.html?cat=paintings">${t('paintings')}</a>

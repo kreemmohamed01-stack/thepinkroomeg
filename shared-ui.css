@@ -29,15 +29,37 @@
 .tpr-icon-sm svg{width:15px;height:15px;}
 /* language pill — sits beside the menu icon so it never crowds the logo */
 .tpr-lang{
-  display:flex;align-items:center;justify-content:center;
-  flex:0 0 auto;min-width:34px;height:24px;padding:0 8px;
-  border:1px solid var(--line,rgba(216,205,187,.9));border-radius:999px;
-  background:rgba(255,255,255,.5);
-  font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;
-  letter-spacing:1px;line-height:1;color:var(--ink);
-  transition:background .3s ease, border-color .3s ease, color .3s ease;
+  position:relative;overflow:hidden;
+  display:flex;align-items:center;justify-content:center;gap:5px;
+  flex:0 0 auto;min-width:56px;height:26px;padding:0 10px 0 8px;
+  border:1px solid rgba(201,169,124,.5);border-radius:999px;
+  background:linear-gradient(145deg, rgba(255,255,255,.75), rgba(255,255,255,.35));
+  font-family:'Poppins',sans-serif;font-size:10px;font-weight:600;
+  letter-spacing:1.2px;line-height:1;color:var(--ink);
+  box-shadow:0 1px 6px rgba(20,17,12,.06), inset 0 1px 0 rgba(255,255,255,.7);
+  transition:background .35s ease, border-color .35s ease, color .35s ease,
+             transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .35s ease;
 }
-.tpr-lang:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,169,124,.14);}
+/* gold sheen sweep, matching the hero pill on the homepage */
+.tpr-lang::after{
+  content:'';position:absolute;top:0;bottom:0;left:-120%;width:55%;
+  background:linear-gradient(100deg, transparent, rgba(201,169,124,.4), transparent);
+  transform:skewX(-18deg);pointer-events:none;transition:left .55s ease;
+}
+.tpr-lang:hover::after{left:150%;}
+.tpr-lang svg{
+  width:12px;height:12px;flex:0 0 auto;
+  stroke:currentColor;fill:none;stroke-width:1.5;opacity:.85;
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
+}
+.tpr-lang span{position:relative;z-index:1;}
+.tpr-lang:hover{
+  border-color:var(--gold);color:var(--gold);
+  background:linear-gradient(145deg, rgba(201,169,124,.22), rgba(201,169,124,.08));
+  transform:translateY(-2px);
+  box-shadow:0 5px 16px rgba(201,169,124,.28), inset 0 1px 0 rgba(255,255,255,.6);
+}
+.tpr-lang:hover svg{transform:rotate(180deg);opacity:1;}
 .tpr-badge{
   position:absolute;top:-6px;right:-8px;
   min-width:15px;height:15px;padding:0 3px;border-radius:50%;
@@ -434,7 +456,8 @@
   .tpr-nav{padding:11px 18px;}
   .tpr-nav .tpr-side{gap:12px;}
   .tpr-logo{width:212px;max-width:46vw;}
-  .tpr-lang{min-width:30px;height:22px;padding:0 6px;font-size:9.5px;letter-spacing:.6px;}
+  .tpr-lang{min-width:48px;height:23px;padding:0 8px 0 6px;gap:4px;font-size:9.5px;letter-spacing:.8px;}
+  .tpr-lang svg{width:11px;height:11px;}
   .tpr-drawer{width:94%;padding:20px 18px 0;padding-top:max(20px, env(safe-area-inset-top));}
   .tpr-drawer-title{font-size:21px;}
   .tpr-rule{margin:16px 0;}

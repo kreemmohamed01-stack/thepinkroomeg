@@ -4,60 +4,223 @@
   "headers": [
     {
       "source": "/:path*.png",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.jpg",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.jpeg",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.webp",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.svg",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.ico",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
     },
     {
       "source": "/:path*.woff2",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.mp4",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.gif",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.avif",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/:path*.css",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=86400, stale-while-revalidate=604800"
+        }
+      ]
+    },
+    {
+      "source": "/api/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-store, max-age=0"
+        }
+      ]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate, s-maxage=3600, stale-while-revalidate=86400"
+        }
+      ]
     }
   ],
   "rewrites": [
-    { "source": "/paintings", "destination": "/category.html?cat=paintings" },
-    { "source": "/accessories", "destination": "/category.html?cat=accessories" },
-    { "source": "/lighting", "destination": "/category.html?cat=lighting" },
-    { "source": "/furniture", "destination": "/category.html?cat=furniture" },
-    { "source": "/wall-art", "destination": "/category.html?cat=wall-art" },
-    { "source": "/plants", "destination": "/category.html?cat=plants" },
-    { "source": "/sale-offers", "destination": "/category.html?cat=sale-offers" },
-
-    { "source": "/wall-art/:slug", "destination": "/product.html?slug=:slug" },
-    { "source": "/paintings/:sub", "destination": "/category.html?cat=paintings&sub=:sub" },
-    { "source": "/accessories/:sub", "destination": "/category.html?cat=accessories&sub=:sub" },
-    { "source": "/lighting/:sub", "destination": "/category.html?cat=lighting&sub=:sub" },
-    { "source": "/furniture/:sub", "destination": "/category.html?cat=furniture&sub=:sub" },
-
-    { "source": "/products/:slug", "destination": "/product.html?slug=:slug" },
-    { "source": "/rooms/:room", "destination": "/category.html?room=:room" },
-
-    { "source": "/wishlist", "destination": "/wishlist.html" },
-    { "source": "/checkout", "destination": "/checkout.html?step=information" },
-    { "source": "/checkout/information", "destination": "/checkout.html?step=information" },
-    { "source": "/checkout/shipping", "destination": "/checkout.html?step=shipping" },
-    { "source": "/checkout/payment", "destination": "/checkout.html?step=payment" },
-    { "source": "/checkout/review", "destination": "/checkout.html?step=review" },
-    { "source": "/checkout/success", "destination": "/order-success.html" },
-    { "source": "/checkout/receipt", "destination": "/receipt.html" },
-
-    { "source": "/sitemap.xml", "destination": "/api/products?action=sitemap" }
+    {
+      "source": "/paintings",
+      "destination": "/category.html?cat=paintings"
+    },
+    {
+      "source": "/accessories",
+      "destination": "/category.html?cat=accessories"
+    },
+    {
+      "source": "/lighting",
+      "destination": "/category.html?cat=lighting"
+    },
+    {
+      "source": "/furniture",
+      "destination": "/category.html?cat=furniture"
+    },
+    {
+      "source": "/wall-art",
+      "destination": "/category.html?cat=wall-art"
+    },
+    {
+      "source": "/plants",
+      "destination": "/category.html?cat=plants"
+    },
+    {
+      "source": "/sale-offers",
+      "destination": "/category.html?cat=sale-offers"
+    },
+    {
+      "source": "/wall-art/:slug",
+      "destination": "/product.html?slug=:slug"
+    },
+    {
+      "source": "/paintings/:sub",
+      "destination": "/category.html?cat=paintings&sub=:sub"
+    },
+    {
+      "source": "/accessories/:sub",
+      "destination": "/category.html?cat=accessories&sub=:sub"
+    },
+    {
+      "source": "/lighting/:sub",
+      "destination": "/category.html?cat=lighting&sub=:sub"
+    },
+    {
+      "source": "/furniture/:sub",
+      "destination": "/category.html?cat=furniture&sub=:sub"
+    },
+    {
+      "source": "/products/:slug",
+      "destination": "/product.html?slug=:slug"
+    },
+    {
+      "source": "/rooms/:room",
+      "destination": "/category.html?room=:room"
+    },
+    {
+      "source": "/wishlist",
+      "destination": "/wishlist.html"
+    },
+    {
+      "source": "/checkout",
+      "destination": "/checkout.html?step=information"
+    },
+    {
+      "source": "/checkout/information",
+      "destination": "/checkout.html?step=information"
+    },
+    {
+      "source": "/checkout/shipping",
+      "destination": "/checkout.html?step=shipping"
+    },
+    {
+      "source": "/checkout/payment",
+      "destination": "/checkout.html?step=payment"
+    },
+    {
+      "source": "/checkout/review",
+      "destination": "/checkout.html?step=review"
+    },
+    {
+      "source": "/checkout/success",
+      "destination": "/order-success.html"
+    },
+    {
+      "source": "/checkout/receipt",
+      "destination": "/receipt.html"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/products?action=sitemap"
+    }
   ]
 }
