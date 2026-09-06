@@ -2465,7 +2465,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
          never pay for the video download. -->
     <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
            poster="sec 7/hero-poster.jpg"
-           data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
+           data-src-phone="sec 7/hero-480.mp4" data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
            disablepictureinpicture disableremoteplayback
            controlslist="nodownload noplaybackrate noremoteplayback nofullscreen">
     </video>
@@ -2493,28 +2493,47 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     var still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     if (slow || still) return;               // poster only — no video bytes fetched
 
-    var src = window.matchMedia('(max-width: 960px)').matches
-      ? v.getAttribute('data-src-mobile')
-      : v.getAttribute('data-src-desktop');
+    /* Three tiers rather than two: phones get a 175KB encode instead of the
+       295KB tablet one, and at that screen size the difference isn't visible. */
+    var w = window.innerWidth;
+    var src = w <= 640 ? v.getAttribute('data-src-phone')
+            : w <= 960 ? v.getAttribute('data-src-mobile')
+            : v.getAttribute('data-src-desktop');
     if (!src) return;
-    v.src = src;
-    v.load();
-    var p = v.play();
-    if (p && p.catch) p.catch(function(){});  // autoplay blocked: poster stays
+
+    /* Start the download only once the page has finished loading its
+       critical content. The poster is already visible, so nothing appears
+       to be missing while we wait, and the video never competes for
+       bandwidth with the text, CSS and product images. */
+    function start(){
+      v.src = src;
+      v.load();
+      var p = v.play();
+      if (p && p.catch) p.catch(function(){});  // autoplay blocked: poster stays
+    }
+    if (document.readyState === 'complete') start();
+    else window.addEventListener('load', start, { once: true });
 
     /* Don't keep decoding (or buffering) the loop while the hero is scrolled
-       out of view or the tab is hidden — saves battery and re-fetches. */
+       out of view or the tab is hidden — saves battery and re-fetches.
+       Both handlers check v.src first: until start() has run there is no
+       source, and calling play() would begin the download we just deferred. */
+    function resume(){
+      if (!v.src) return;
+      var q = v.play();
+      if (q && q.catch) q.catch(function(){});
+    }
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function(entries){
         entries.forEach(function(e){
-          if (e.isIntersecting) { var q = v.play(); if (q && q.catch) q.catch(function(){}); }
-          else v.pause();
+          if (e.isIntersecting) resume();
+          else if (v.src) v.pause();
         });
       }, { threshold: 0.01 }).observe(v);
     }
     document.addEventListener('visibilitychange', function(){
-      if (document.hidden) v.pause();
-      else if (v.getBoundingClientRect().bottom > 0) { var q = v.play(); if (q && q.catch) q.catch(function(){}); }
+      if (document.hidden) { if (v.src) v.pause(); }
+      else if (v.getBoundingClientRect().bottom > 0) resume();
     });
   })();
   </script>
@@ -3159,7 +3178,13 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     entries.forEach(entry=>{
       if (!entry.isIntersecting) return;
       if (!journalVideo.src){
-        journalVideo.src = journalVideo.dataset.src;
+        // Same clip as the hero, so match the hero's tier: on a phone this is
+        // a 175KB file instead of 762KB, and it is already in the browser
+        // cache from the hero, making it free.
+        const w = window.innerWidth;
+        journalVideo.src = w <= 640 ? 'sec 7/hero-480.mp4'
+                         : w <= 960 ? 'sec 7/hero-720.mp4'
+                         : journalVideo.dataset.src;
         journalVideo.play().catch(()=>{});
       }
       journalVideoObserver.disconnect();
