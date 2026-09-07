@@ -38,6 +38,20 @@ Allow: /
 User-agent: TelegramBot
 Allow: /
 
+# Meta's own crawlers — the store runs paid ads, so domain verification,
+# catalogue metadata and ad landing-page checks all have to get through.
+User-agent: Meta-ExternalAgent
+Allow: /
+
+User-agent: Meta-ExternalFetcher
+Allow: /
+
+User-agent: facebookcatalog
+Allow: /
+
+User-agent: AdsBot-Google
+Allow: /
+
 # ---------- AI training / scraping crawlers ----------
 # These crawl aggressively and drive no traffic back to the store.
 User-agent: GPTBot
@@ -74,9 +88,6 @@ User-agent: Bytespider
 Disallow: /
 
 User-agent: Amazonbot
-Disallow: /
-
-User-agent: Meta-ExternalAgent
 Disallow: /
 
 User-agent: Diffbot

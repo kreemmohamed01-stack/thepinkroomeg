@@ -27,7 +27,7 @@ export const config = {
 const BLOCKED = new RegExp([
   // AI training / answer engines
   'gptbot', 'oai-searchbot', 'chatgpt-user', 'ccbot', 'claudebot', 'claude-web',
-  'anthropic-ai', 'perplexitybot', 'bytespider', 'amazonbot', 'meta-externalagent',
+  'anthropic-ai', 'perplexitybot', 'bytespider', 'amazonbot',
   'diffbot', 'omgilibot', 'imagesiftbot', 'timpibot', 'cohere-ai', 'youbot',
   'applebot-extended', 'google-extended',
   // SEO / competitive-analysis crawlers
@@ -41,7 +41,13 @@ const BLOCKED = new RegExp([
 /* Never block these, even if a substring above would otherwise match —
    Applebot vs Applebot-Extended, and Google's crawler vs Google-Extended,
    differ only by suffix, and losing the real one would cost real traffic. */
-const ALWAYS_ALLOW = /googlebot|bingbot|duckduckbot|yandexbot|applebot(?!-extended)|facebookexternalhit|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|discordbot|pinterest|redditbot/i;
+/* Meta's crawlers are allowed in full — this store runs paid ads, so
+   anything Meta sends to verify the domain, read product metadata for the
+   catalogue, or check an ad's landing page has to reach the site. Blocking
+   one of these breaks ad delivery, which costs far more than the traffic
+   saves. Everything matching here is allowed even if a pattern below would
+   otherwise catch it (Applebot vs Applebot-Extended). */
+const ALWAYS_ALLOW = /googlebot|bingbot|duckduckbot|yandexbot|applebot(?!-extended)|facebookexternalhit|facebookcatalog|facebookbot|meta-externalagent|meta-externalfetcher|adsbot|whatsapp|twitterbot|linkedinbot|telegrambot|slackbot|discordbot|pinterest|redditbot/i;
 
 export default function middleware(request) {
   const ua = request.headers.get('user-agent') || '';
