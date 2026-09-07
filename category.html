@@ -1149,7 +1149,7 @@ function cardMarkup(p, i){
       <button class="card-wish ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" aria-label="Add to wishlist" data-id="${p.id}">
         <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg>
       </button>
-      <img src="${window.tprThumb ? window.tprThumb(p.images[0], 500) : p.images[0]}" alt="${p.name}" loading="lazy" style="${p.imageFocus && p.imageFocus[p.images[0]] ? `object-position:${p.imageFocus[p.images[0]]}` : ''}">
+      <img src="${window.tprThumb ? window.tprThumb(p.images[0], 500) : p.images[0]}" alt="${p.name}" loading="lazy" decoding="async" style="${p.imageFocus && p.imageFocus[p.images[0]] ? `object-position:${p.imageFocus[p.images[0]]}` : ''}">
       ${addBtn}
     </div>
     <h3 class="card-name">${p.name}</h3>
