@@ -11,6 +11,11 @@ _originals-backup
 # Upscaled masters that were never referenced by any page.
 Sale/*-upscaled-2x.png
 
+# Local secrets. Vercel reads env vars from project settings, never from a
+# file in the bundle, so shipping one would only risk exposing it.
+.env
+.env.*
+
 # Dev-only assets and docs.
 db
 missing-photos.html
