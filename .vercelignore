@@ -8,9 +8,6 @@ sec 7/Creating_luxury_showroom_video_1080p_202608082220.mp4
 # Pre-optimisation originals, kept locally as a safety net.
 _originals-backup
 
-# Upscaled masters that were never referenced by any page.
-Sale/*-upscaled-2x.png
-
 # Local secrets. Vercel reads env vars from project settings, never from a
 # file in the bundle, so shipping one would only risk exposing it.
 .env
