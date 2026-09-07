@@ -1,19 +1,51 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
-<meta charset="UTF-8">
+<meta charset="UTF-8"><script>
+/* Language direction, set before the browser paints anything. i18n.js does
+   this too, but it is a 48KB file loaded at the end of the body, so waiting
+   for it meant an Arabic visitor saw the page laid out left-to-right first
+   and the hero heading could not settle until it arrived. Reading the same
+   localStorage key here costs nothing and lets the first paint be correct. */
+(function(){try{var l=localStorage.getItem('tpr_lang')==='ar'?'ar':'en';
+var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();
+</script>
+
 <!-- Meta Pixel Code -->
 <script>
+/* fbq() is defined synchronously here, so any fbq(...) call anywhere on the
+   page queues normally and nothing needs to know about the delay. Only the
+   ~550KB fbevents.js download is deferred, until after first paint — it was
+   costing about a second of main-thread time before the hero could render,
+   and Meta replays the queue in order once it loads, so the PageView still
+   lands with everything it had before. */
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-n.queue=[];t=b.createElement(e);t.async=!0;
-t.src=v;s=b.getElementsByTagName(e)[0];
-s.parentNode.insertBefore(t,s)}(window, document,'script',
-'https://connect.facebook.net/en_US/fbevents.js');
+n.queue=[]}(window, document,'script');
 fbq('init', '1792484121921078');
 fbq('track', 'PageView');
+(function(){
+  var loaded = false;
+  function loadPixel(){
+    if (loaded) return;
+    loaded = true;
+    var t = document.createElement('script');
+    t.async = true;
+    t.src = 'https://connect.facebook.net/en_US/fbevents.js';
+    document.head.appendChild(t);
+  }
+  /* Whichever comes first: the browser going idle after paint, or the
+     visitor doing anything at all. The timeout is the backstop so a tab
+     that never goes idle still loads it. */
+  if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 2500 });
+  else setTimeout(loadPixel, 1800);
+  ['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){
+    addEventListener(ev, loadPixel, { once: true, passive: true });
+  });
+  addEventListener('pagehide', loadPixel, { once: true });
+})();
 </script>
 <noscript><img height="1" width="1" style="display:none"
 src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"

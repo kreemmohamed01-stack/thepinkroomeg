@@ -25,7 +25,17 @@
   }
   const sessionId = getSessionId();
 
-  function send(type, extra){
+  /* Tracking must never compete with rendering for the network or the main
+     thread: nothing on the page waits on these calls, and a visitor who
+     leaves before the beacon lands was never going to be a useful data
+     point anyway. So events fired before first paint are queued and flushed
+     once the browser is idle. The script itself still loads normally, so
+     window.TPRAnalytics is defined for the inline page scripts that call
+     trackEvent() during parse (category and product views). */
+  var flushed = false;
+  var pending = [];
+
+  function post(type, extra){
     try {
       fetch('/api/track', {
         method: 'POST',
@@ -38,7 +48,25 @@
     } catch(e){}
   }
 
+  function flush(){
+    if (flushed) return;
+    flushed = true;
+    var q = pending; pending = [];
+    q.forEach(function(a){ post(a[0], a[1]); });
+  }
+
+  function send(type, extra){
+    if (flushed) return post(type, extra);
+    pending.push([type, extra]);
+  }
+
   send('pageview');
+
+  // Idle is the normal path; the timeout and pagehide are backstops so a busy
+  // tab, or one closed immediately, still reports what it queued.
+  if ('requestIdleCallback' in window) requestIdleCallback(flush, { timeout: 3000 });
+  else setTimeout(flush, 1500);
+  addEventListener('pagehide', flush, { once: true });
 
   /* Heartbeat interval. Each beat is a serverless invocation plus a DB write,
      so this is the single biggest driver of function usage on the site — at

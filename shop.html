@@ -2,6 +2,15 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<script>
+/* Language direction, set before the browser paints anything. i18n.js does
+   this too, but it is a 48KB file loaded at the end of the body, so waiting
+   for it meant an Arabic visitor saw the page laid out left-to-right first
+   and the hero heading could not settle until it arrived. Reading the same
+   localStorage key here costs nothing and lets the first paint be correct. */
+(function(){try{var l=localStorage.getItem('tpr_lang')==='ar'?'ar':'en';
+var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();
+</script>
 <title>Shop | The Pink Room</title>
 <meta name="robots" content="noindex">
 <script>
