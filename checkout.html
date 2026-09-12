@@ -264,17 +264,18 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
      small mark in a big box — cap them to a sensible height and let the
      wide InstaPay wordmark be the one that actually fills it */
   .co-option-icon .pm-ico.line{width:auto;height:44px;}
-  /* InstaPay only: its wordmark is the one real brand logo in the list and
-     was reading small, so its tile alone is bigger. The extra margin-inline
-     keeps the enlarged mark clear of the radio on its left and the method
-     name on its right — it grows without ever touching a neighbour. */
-  .co-option[data-pay="instapay"] .co-option-icon{
+  /* Payment marks only (shipping keeps the small tile): every method is
+     drawn on the same 111x24 frame, so one tile size renders all of them
+     at exactly the same width and height — no method looks smaller than
+     another. The side margin keeps the enlarged marks clear of the radio
+     on their left and the method name on their right. */
+  .co-option[data-pay] .co-option-icon{
     width:236px;height:86px;padding:6px 14px;margin:2px 6px 2px 2px;
   }
   @media (max-width:620px){
     .co-option-icon{width:112px;height:52px;}
     .co-option-icon .pm-ico.line{height:34px;}
-    .co-option[data-pay="instapay"] .co-option-icon{
+    .co-option[data-pay] .co-option-icon{
       width:152px;height:60px;padding:4px 10px;margin:2px 2px 2px 0;
     }
   }
@@ -995,13 +996,52 @@ const CARD_BRANDS = `<div class="brand-row">${chip('visa')}${chip('mastercard')}
    Line-art methods all share one stroke weight/box; brand methods use their
    real logo. Same 44×30 frame for every one. */
 const PAY_ICON = {
-  /* an open hand receiving a parcel — the "pay when it arrives" idea,
-     matching the reference's cash-on-delivery mark rather than the
-     banknote the generic line set used */
-  cash_on_delivery: `<svg class="pm-ico line" viewBox="0 0 28 28"><rect x="8" y="3.5" width="12" height="9" rx="1"/><path d="M14 3.5v9M8 7.5h12"/><path d="M2.5 18c1.8-1.4 3.6-1.4 5.2 0l1.8 1.4h4.3c1.1 0 1.1-1.7 0-1.7h-3"/><path d="M13.8 19.4h3.6l6.3-3.6c1.1-.6 2.1.9 1 1.8l-6.6 4.9c-.8.6-1.4.8-2.4.8H8.5"/></svg>`,
-  card: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5" width="35" height="18" rx="2.5"/><path d="M2.5 10.6h35"/><rect x="6.5" y="15" width="6.5" height="4.4" rx="1.1"/></svg>`,
-  bank_transfer: `<svg class="pm-ico line" viewBox="0 0 40 28"><path d="M20 4.6 4.6 11.6h30.8L20 4.6Z"/><path d="M8.4 12.8v8.2M15 12.8v8.2M25 12.8v8.2M31.6 12.8v8.2"/><path d="M4.2 23.4h31.6"/></svg>`,
-  paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`,
+  /* Cash on delivery: the banknote that pays for the parcel it arrives
+     with. Drawn in colour rather than as a line glyph so it carries the
+     same weight as the real brand logos next to it. */
+  cash_on_delivery: `<svg class="pm-ico" viewBox="0 0 111 24" role="img" aria-label="Cash on Delivery">
+    <rect x="1" y="2.5" width="46" height="19" rx="2.4" fill="#4FA97B"/>
+    <rect x="3.8" y="5.2" width="40.4" height="13.6" rx="1.4" fill="none" stroke="#fff" stroke-opacity=".5" stroke-width="1"/>
+    <circle cx="24" cy="12" r="4.9" fill="#fff" fill-opacity=".92"/>
+    <text x="24" y="15.4" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="8.6" font-weight="700" fill="#2F7E57">£</text>
+    <path d="M51 10h9V6.8l6.6 5.2L60 17.2V14h-9z" fill="#C79AA5"/>
+    <rect x="70.6" y="4.4" width="38.8" height="4.9" rx="1.2" fill="#C9834E"/>
+    <rect x="72.4" y="9.3" width="35.2" height="13.3" rx="1.2" fill="#E0A972"/>
+    <rect x="86.4" y="4.4" width="7.2" height="18.2" fill="#B06F42"/>
+  </svg>`,
+  /* Credit / debit card: the actual network logos it would be charged on,
+     Visa in its blue wordmark and the Mastercard interlocking circles,
+     instead of a generic card outline. */
+  card: `<svg class="pm-ico" viewBox="0 0 111 24" role="img" aria-label="Visa and Mastercard">
+    <text x="3" y="18.6" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="21" font-weight="900" font-style="italic" letter-spacing="-.6" fill="#1434CB">VISA</text>
+    <circle cx="77.5" cy="12" r="12" fill="#EB001B"/>
+    <circle cx="93" cy="12" r="12" fill="#F79E1B"/>
+    <path d="M85.25 2.84a12 12 0 0 0 0 18.32 12 12 0 0 0 0-18.32Z" fill="#FF5F00"/>
+  </svg>`,
+  /* Bank transfer: the columned bank building the money leaves, and the
+     card account it lands on. */
+  bank_transfer: `<svg class="pm-ico" viewBox="0 0 111 24" role="img" aria-label="Bank Transfer">
+    <path d="M16 1.4 2 8.6h28L16 1.4Z" fill="#2D4A73"/>
+    <rect x="3" y="9.4" width="26" height="1.8" rx=".9" fill="#2D4A73"/>
+    <rect x="3.6" y="12" width="3.4" height="7.6" fill="#2D4A73"/>
+    <rect x="10.7" y="12" width="3.4" height="7.6" fill="#2D4A73"/>
+    <rect x="17.9" y="12" width="3.4" height="7.6" fill="#2D4A73"/>
+    <rect x="25" y="12" width="3.4" height="7.6" fill="#2D4A73"/>
+    <rect x="2" y="20.4" width="28" height="2.6" rx="1.1" fill="#2D4A73"/>
+    <path d="M40 10h9V6.8l6.6 5.2L49 17.2V14h-9z" fill="#C79AA5"/>
+    <rect x="66" y="1.2" width="42" height="21.6" rx="3" fill="#3F5F8C"/>
+    <rect x="66" y="6" width="42" height="4.6" fill="#24405F"/>
+    <rect x="69.4" y="14" width="12" height="4.4" rx="1.1" fill="#fff" fill-opacity=".8"/>
+    <rect x="95" y="14.6" width="9.4" height="3.4" rx="1.7" fill="#fff" fill-opacity=".45"/>
+  </svg>`,
+  /* Paymob: its lowercase navy wordmark with the rounded badge mark.
+     Drawn inline like the rest, so it is a close likeness rather than the
+     hosted original — swap in the official asset when we have it. */
+  paymob: `<svg class="pm-ico" viewBox="0 0 111 24" role="img" aria-label="Paymob">
+    <rect x="0" y="0" width="24" height="24" rx="7" fill="#12275A"/>
+    <text x="12" y="17.6" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="15.5" font-weight="700" fill="#fff">P</text>
+    <text x="30" y="18.4" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="700" letter-spacing="-.6" fill="#12275A">paymob</text>
+  </svg>`,
   /* InstaPay's horizontal wordmark: "INSTA" in the brand violet, the
      double-chevron in its orange/red, "PAY" in violet again — the lockup
      used on the network's own payment badges, rather than the square app
