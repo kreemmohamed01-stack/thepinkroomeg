@@ -275,62 +275,84 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .co-secure-note svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0;}
 
   /* ---------- InstaPay panel ----------
-     Same dashed-drawer treatment as .co-card-fields (border/margin match
-     exactly so the payment list never jumps width switching methods), but
-     built as one flowing block rather than a 2-col grid since a transfer
-     number + upload dropzone don't pair the way card fields do. */
+     Deliberately richer than the plain dashed drawer the other methods
+     use (.co-card-fields): InstaPay is the one method here that asks the
+     customer to do something (transfer, screenshot, upload) rather than
+     just fill fields, so the panel is built to read as a small branded
+     moment — a violet/magenta glass card on a soft tinted backdrop,
+     using the exact gradient from the app-icon mark above throughout,
+     rather than a generic bordered box. */
   .co-instapay-fields{
-    display:none;padding:18px 18px 20px;margin:-4px 0 12px;
-    border:1px dashed var(--line);border-top:none;border-radius:0 0 3px 3px;
-    background:linear-gradient(180deg, rgba(154,42,176,.03), transparent 60%);
+    display:none;padding:20px;margin:-4px 0 14px;
+    border:1px solid rgba(147,51,184,.16);border-top:none;border-radius:0 0 8px 8px;
+    background:
+      radial-gradient(120% 140% at 0% 0%, rgba(147,51,184,.07), transparent 55%),
+      linear-gradient(180deg, #fdfaff, #fff 40%);
   }
   .co-instapay-fields.show{display:block;}
   .ip-number-card{
-    display:flex;align-items:center;gap:14px;
-    background:#fff;border:1px solid var(--line);border-radius:6px;
-    padding:14px 16px;margin-bottom:16px;
+    position:relative;overflow:hidden;
+    display:flex;align-items:center;gap:16px;
+    background:linear-gradient(120deg, #4C1D8F, #9333B8 55%, #D6449E);
+    border-radius:10px;
+    padding:16px 18px;margin-bottom:18px;
+    box-shadow:0 10px 26px -10px rgba(93,33,166,.55), inset 0 1px 0 rgba(255,255,255,.18);
+  }
+  /* a soft diagonal sheen across the card, echoing the shine treatment
+     used on the site's own gold accents elsewhere — reads as "polished"
+     rather than a flat colour fill */
+  .ip-number-card::after{
+    content:'';position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 72%, rgba(255,255,255,.1) 100%);
   }
   .ip-number-mark{
-    width:38px;height:38px;border-radius:50%;flex-shrink:0;
-    background:linear-gradient(135deg, #6C2EB5, #9A2AB0 55%, #D6247E);
+    width:42px;height:42px;border-radius:12px;flex-shrink:0;position:relative;z-index:1;
+    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
     display:flex;align-items:center;justify-content:center;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
   }
-  .ip-number-mark svg{width:19px;height:19px;}
-  .ip-number-body{flex:1 1 auto;min-width:0;}
-  .ip-number-label{font-size:10px;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:3px;}
+  .ip-number-mark svg{width:22px;height:22px;}
+  .ip-number-body{flex:1 1 auto;min-width:0;position:relative;z-index:1;}
+  .ip-number-label{font-size:10px;letter-spacing:1.6px;color:rgba(255,255,255,.75);margin-bottom:4px;font-weight:600;}
   .ip-number-value{
-    font-family:'Poppins',sans-serif;font-size:17px;font-weight:600;letter-spacing:.5px;color:var(--ink);
+    font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;letter-spacing:.6px;color:#fff;
     display:flex;align-items:center;gap:10px;flex-wrap:wrap;
   }
   .ip-copy-btn{
     display:flex;align-items:center;gap:5px;flex-shrink:0;
     font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.8px;
-    color:#9A2AB0;background:rgba(154,42,176,.08);border:1px solid rgba(154,42,176,.25);
+    color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);
     padding:6px 12px;border-radius:20px;cursor:pointer;transition:background .2s ease, transform .15s ease;
   }
-  .ip-copy-btn:hover{background:rgba(154,42,176,.14);}
+  .ip-copy-btn:hover{background:rgba(255,255,255,.26);}
   .ip-copy-btn:active{transform:scale(.96);}
   .ip-copy-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
-  .ip-copy-btn.copied{color:#2E9E5B;background:rgba(46,158,91,.1);border-color:rgba(46,158,91,.3);}
+  .ip-copy-btn.copied{color:#fff;background:rgba(46,158,91,.65);border-color:rgba(46,158,91,.8);}
 
-  .ip-upload-label{font-size:11px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .ip-upload-label{font-size:11px;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:9px;display:block;font-weight:600;}
   .ip-dropzone{
     position:relative;
-    border:1.5px dashed rgba(154,42,176,.35);border-radius:6px;
-    background:#fff;padding:22px 16px;text-align:center;cursor:pointer;
-    transition:border-color .2s ease, background .2s ease;
+    border:1.5px dashed rgba(147,51,184,.4);border-radius:8px;
+    background:linear-gradient(180deg, #fff, #fbf6ff);
+    padding:24px 16px;text-align:center;cursor:pointer;
+    transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
   }
-  .ip-dropzone:hover, .ip-dropzone.drag{border-color:#9A2AB0;background:rgba(154,42,176,.04);}
+  .ip-dropzone:hover, .ip-dropzone.drag{
+    border-color:#9333B8;background:linear-gradient(180deg, #fff, #f6ebfb);
+    box-shadow:0 4px 16px -8px rgba(147,51,184,.35);
+  }
   .ip-dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .ip-dropzone-icon{width:30px;height:30px;margin:0 auto 10px;stroke:#9A2AB0;fill:none;stroke-width:1.3;opacity:.8;}
-  .ip-dropzone-text{font-size:12.5px;color:var(--ink);margin-bottom:3px;}
+  .ip-dropzone-icon{width:30px;height:30px;margin:0 auto 10px;stroke:#9333B8;fill:none;stroke-width:1.3;opacity:.85;}
+  .ip-dropzone-text{font-size:12.5px;color:var(--ink);margin-bottom:3px;font-weight:500;}
   .ip-dropzone-hint{font-size:10.5px;color:var(--ink-soft);}
   .ip-preview{
     display:none;align-items:center;gap:12px;
-    background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;
+    background:linear-gradient(180deg, #fff, #fbf6ff);
+    border:1px solid rgba(147,51,184,.22);border-radius:8px;padding:10px 12px;
+    box-shadow:0 2px 10px -6px rgba(147,51,184,.3);
   }
   .ip-preview.show{display:flex;}
-  .ip-preview img{width:52px;height:52px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;}
+  .ip-preview img{width:52px;height:52px;object-fit:cover;border-radius:5px;border:1px solid rgba(147,51,184,.25);flex-shrink:0;}
   .ip-preview-info{flex:1 1 auto;min-width:0;}
   .ip-preview-name{font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ip-preview-status{font-size:11px;margin-top:2px;display:flex;align-items:center;gap:5px;}
@@ -340,7 +362,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .ip-preview-status svg{width:12px;height:12px;flex-shrink:0;}
   .ip-preview-spin{
     width:11px;height:11px;border-radius:50%;
-    border:1.6px solid rgba(107,84,51,.25);border-top-color:var(--ink-soft);
+    border:1.6px solid rgba(147,51,184,.2);border-top-color:#9333B8;
     animation:ipSpin .7s linear infinite;flex-shrink:0;
   }
   @keyframes ipSpin{to{transform:rotate(360deg);}}
@@ -349,7 +371,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     color:var(--ink-soft);transition:background .2s ease, color .2s ease;
   }
-  .ip-preview-remove:hover{background:var(--beige-soft);color:var(--err);}
+  .ip-preview-remove:hover{background:rgba(214,68,158,.12);color:#D6449E;}
   .ip-preview-remove svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
 
   /* saved-address display card (step 2) */
@@ -864,17 +886,21 @@ const PAY_ICON = {
   card: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5" width="35" height="18" rx="2.5"/><path d="M2.5 10.6h35"/><rect x="6.5" y="15" width="6.5" height="4.4" rx="1.1"/></svg>`,
   bank_transfer: `<svg class="pm-ico line" viewBox="0 0 40 28"><path d="M20 4.6 4.6 11.6h30.8L20 4.6Z"/><path d="M8.4 12.8v8.2M15 12.8v8.2M25 12.8v8.2M31.6 12.8v8.2"/><path d="M4.2 23.4h31.6"/></svg>`,
   paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`,
-  /* InstaPay's real mark — the purple-to-magenta gradient roundel with the
-     two crossing arrows, same shape/colours as the app icon and the CBE
-     instant-payment network branding. Full colour, no stroke, matching how
-     visa/mastercard/mada are treated above rather than the hand-drawn line
-     icons the generic methods use. */
+  /* InstaPay's real app-icon mark: a rounded-square tile on the brand's
+     violet-to-magenta gradient, the crossing-arrows glyph (the network's
+     instant-transfer symbol) sitting inside a soft rounded diamond, with
+     the wordmark underneath — same layout as the official app icon.
+     Full colour, no stroke, matching how visa/mastercard/mada are
+     treated above rather than the hand-drawn line icons the generic
+     methods use. */
   instapay: `<svg class="pm-ico" viewBox="0 0 40 28" role="img" aria-label="InstaPay">
     <defs><linearGradient id="ipGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#6C2EB5"/><stop offset="55%" stop-color="#9A2AB0"/><stop offset="100%" stop-color="#D6247E"/>
+      <stop offset="0%" stop-color="#5B21A6"/><stop offset="50%" stop-color="#9333B8"/><stop offset="100%" stop-color="#D6449E"/>
     </linearGradient></defs>
-    <circle cx="20" cy="14" r="13" fill="url(#ipGrad)"/>
-    <path d="M13.2 17.6 19.6 9.8c.5-.6 1.4-.1 1.2.6l-1.4 4.6h6.4c.7 0 1.1.9.6 1.4l-6.4 7.4c-.5.6-1.4.1-1.2-.6l1.5-5.2h-6.5c-.7 0-1.1-.8-.6-1.4Z" fill="#fff"/>
+    <rect x="4" y="1" width="32" height="26" rx="7" fill="url(#ipGrad)"/>
+    <rect x="14.8" y="6" width="10.4" height="10.4" rx="3.2" fill="#fff" fill-opacity=".2" transform="rotate(45 20 11.2)"/>
+    <path d="M17.9 12.1 20.17 7.8c.4-.65 1.35-.1 1.1.6l-1.15 4.3h4.6c.65 0 1 .82.5 1.3l-4.85 5.4c-.4.65-1.35.1-1.1-.6l1.25-4.55H15.9c-.65 0-1-.82-.5-1.3Z" fill="#fff"/>
+    <text x="20" y="25.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="4.6" font-weight="700" letter-spacing=".3" fill="#fff">INSTAPAY</text>
   </svg>`
 };
 
@@ -893,7 +919,7 @@ function payOptionMarkup(p, opts){
   </div>`;
 }
 function renderPayPreview1(){
-  const list = ['cash_on_delivery','card'].map(id => CO.PaymentProviders[id]);
+  const list = ['cash_on_delivery','card','instapay'].map(id => CO.PaymentProviders[id]);
   payPreview1.innerHTML = list.map(p => payOptionMarkup(p, {})).join('');
   payPreview1.querySelectorAll('[data-pay]').forEach(el=>{
     el.addEventListener('click', ()=>{
@@ -901,6 +927,12 @@ function renderPayPreview1(){
       persist(); renderPayPreview1(); renderPayOptions3(); renderSummary();
     });
   });
+  // this preview has no card-number fields, but InstaPay's receipt upload
+  // has to be reachable from wherever the customer picks it — including
+  // here, on step 1 — otherwise picking it on this screen would let them
+  // continue with no way to attach a receipt until they happen to reach
+  // the full payment step
+  renderInstapayFields(payPreview1);
 }
 function renderPayOptions3(){
   const list = Object.values(CO.PaymentProviders);
@@ -910,11 +942,18 @@ function renderPayOptions3(){
     if (!provider.enabled) return;
     el.addEventListener('click', ()=>{
       state.paymentMethod = { id: el.dataset.pay };
-      persist(); renderPayOptions3(); renderPayPreview1(); renderSummary(); renderCardFields(); renderInstapayFields();
+      persist(); renderPayOptions3(); renderSummary();
+      // Rebuild the preview (step 1) before this screen's own panel, since
+      // only one InstaPay receipt panel can exist in the DOM at a time
+      // (see renderInstapayFields) — whichever mounts last is the one that
+      // stays, and a click here always means this screen (step-payment,
+      // the one actually visible right now) has to be the one left holding it.
+      renderPayPreview1();
+      renderInstapayFields(payOptions3);
     });
   });
   renderCardFields();
-  renderInstapayFields();
+  renderInstapayFields(payOptions3);
 }
 function renderCardFields(){
   let box = document.getElementById('cardFieldsBox');
@@ -941,19 +980,27 @@ function renderCardFields(){
    most painful to make them wait on. */
 let instapayUploading = false;
 
-function renderInstapayFields(){
+function renderInstapayFields(container){
+  container = container || payOptions3;
+  // Only one InstaPay panel ever exists in the DOM at a time, even though
+  // it can be mounted from two different screens (the step-1 preview and
+  // the full payment step) — all its inner ids (ipDropzone, ipFileInput,
+  // etc.) are looked up with plain getElementById, so two copies alive at
+  // once would make those calls ambiguous. Always tear down the old one
+  // first, wherever it was mounted, before mounting into the new container.
   let box = document.getElementById('instapayFieldsBox');
   if (box) box.remove();
   if (!state.paymentMethod || state.paymentMethod.id !== 'instapay') return;
+  const ipEl = container.querySelector('[data-pay="instapay"]');
+  if (!ipEl) return;
 
   const provider = CO.PaymentProviders.instapay;
-  const ipEl = payOptions3.querySelector('[data-pay="instapay"]');
   box = document.createElement('div');
   box.className = 'co-instapay-fields show';
   box.id = 'instapayFieldsBox';
   box.innerHTML = `
     <div class="ip-number-card">
-      <div class="ip-number-mark"><svg viewBox="0 0 40 28" role="img" aria-label="InstaPay"><path d="M13.2 17.6 19.6 9.8c.5-.6 1.4-.1 1.2.6l-1.4 4.6h6.4c.7 0 1.1.9.6 1.4l-6.4 7.4c-.5.6-1.4.1-1.2-.6l1.5-5.2h-6.5c-.7 0-1.1-.8-.6-1.4Z" fill="#fff"/></svg></div>
+      <div class="ip-number-mark"><svg viewBox="0 0 24 24" role="img" aria-label="InstaPay"><rect x="6.8" y="6.8" width="10.4" height="10.4" rx="3.2" fill="#fff" fill-opacity=".2" transform="rotate(45 12 12)"/><path d="M9.9 12.9 12.17 8.6c.4-.65 1.35-.1 1.1.6l-1.15 4.3h4.6c.65 0 1 .82.5 1.3l-4.85 5.4c-.4.65-1.35.1-1.1-.6l1.25-4.55H7.9c-.65 0-1-.82-.5-1.3Z" fill="#fff"/></svg></div>
       <div class="ip-number-body">
         <div class="ip-number-label">${t('instapayNumberLabel')}</div>
         <div class="ip-number-value"><span>${provider.instapayNumber}</span>
