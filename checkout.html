@@ -834,6 +834,19 @@ state.promo = state.promo || null;
 
 function persist(){ CO.saveCheckoutState(state); }
 
+/* An attached receipt used to be kept in this saved state as a full
+   resolution base64 data URL — megabytes of it. Every keystroke
+   re-serialised that whole string into localStorage and every page load
+   re-parsed it and decoded it back into an <img>, which is what made
+   checkout crawl to the point of looking frozen for anyone who had ever
+   attached a screenshot. Only the uploaded URL is ever needed, so drop
+   the blob on sight and write the small state straight back — that heals
+   a browser already carrying one, on the next page load. */
+if (state.instapayReceiptPreview){
+  delete state.instapayReceiptPreview;
+  persist();
+}
+
 /* empty cart anywhere in checkout -> nothing to check out */
 if (!cart.length){ location.href = 'category.html?cat=all'; }
 else if (typeof fbq === 'function'){
@@ -1170,6 +1183,12 @@ function renderCardFields(){
    they click "Place Order", which is where a slow connection would be
    most painful to make them wait on. */
 let instapayUploading = false;
+/* The picture shown in the upload box. Deliberately a plain variable and
+   NOT part of `state`: it is a data URL worth megabytes and nothing but
+   this one screen ever looks at it, so it must never reach localStorage
+   (see the note by persist()). On a later page load it is null and the
+   box falls back to the hosted URL the upload returned. */
+let instapayPreviewSrc = null;
 
 function renderInstapayFields(container){
   container = container || payOptions3;
@@ -1254,8 +1273,9 @@ function renderInstapayFields(container){
   });
 
   // if a receipt is already attached (came back to this step), show it
-  if (state.instapayReceiptUrl && state.instapayReceiptPreview){
-    showInstapayPreview(state.instapayReceiptFilename || 'receipt.jpg', state.instapayReceiptPreview, 'ok');
+  if (state.instapayReceiptUrl){
+    showInstapayPreview(state.instapayReceiptFilename || 'receipt.jpg',
+                        instapayPreviewSrc || state.instapayReceiptUrl, 'ok');
   }
 
   const dropzone = document.getElementById('ipDropzone');
@@ -1272,7 +1292,8 @@ function renderInstapayFields(container){
   });
   document.getElementById('ipPreviewRemove').addEventListener('click', (e)=>{
     e.stopPropagation();
-    state.instapayReceiptUrl = null; state.instapayReceiptPreview = null; state.instapayReceiptFilename = null;
+    state.instapayReceiptUrl = null; state.instapayReceiptFilename = null;
+    instapayPreviewSrc = null;
     persist();
     document.getElementById('ipPreview').classList.remove('show');
     dropzone.style.display = '';
@@ -1299,6 +1320,38 @@ function showInstapayPreview(filename, previewSrc, status, message){
   }
 }
 
+/* Phone screenshots are routinely several megabytes, and the upload sends
+   the image inline as base64 — another ~1.37x on top — which is slow on a
+   weak connection and can exceed the request body limit outright. A
+   transfer receipt only has to be readable, so cap its long edge before it
+   goes anywhere. Anything the browser cannot decode falls through to the
+   original bytes rather than failing the upload. */
+function downscaleImage(file, maxEdge){
+  return new Promise(resolve => {
+    const reader = new FileReader();
+    reader.onerror = ()=> resolve(null);
+    reader.onload = ()=>{
+      const src = reader.result;
+      const img = new Image();
+      img.onerror = ()=> resolve(src);
+      img.onload = ()=>{
+        const scale = Math.min(1, maxEdge / Math.max(img.width, img.height));
+        // already small enough, in both dimensions and bytes — keep the
+        // original rather than re-encoding it for nothing
+        if (scale === 1 && src.length < 1200000) return resolve(src);
+        const canvas = document.createElement('canvas');
+        canvas.width  = Math.max(1, Math.round(img.width  * scale));
+        canvas.height = Math.max(1, Math.round(img.height * scale));
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        try { resolve(canvas.toDataURL('image/jpeg', 0.85)); }
+        catch(e){ resolve(src); }
+      };
+      img.src = src;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
 async function handleReceiptFile(file){
   if (!file.type || !file.type.startsWith('image/')){
     showError(t('instapayNotImage')); return;
@@ -1307,31 +1360,29 @@ async function handleReceiptFile(file){
     showError(t('instapayTooLarge')); return;
   }
 
-  const reader = new FileReader();
-  reader.onload = async ()=>{
-    const dataUrl = reader.result;
-    showInstapayPreview(file.name, dataUrl, 'uploading');
-    instapayUploading = true;
-    try {
-      const r = await fetch('/api/orders?action=upload-receipt', {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ dataUrl })
-      });
-      const d = await r.json();
-      if (!d.ok) throw new Error(d.error || 'Upload failed.');
-      state.instapayReceiptUrl = d.url;
-      state.instapayReceiptPreview = dataUrl;
-      state.instapayReceiptFilename = file.name;
-      persist();
-      showInstapayPreview(file.name, dataUrl, 'ok');
-    } catch(e){
-      state.instapayReceiptUrl = null; persist();
-      showInstapayPreview(file.name, dataUrl, 'bad', e.message);
-    } finally {
-      instapayUploading = false;
-    }
-  };
-  reader.readAsDataURL(file);
+  const dataUrl = await downscaleImage(file, 1600);
+  if (!dataUrl){ showError(t('uploadFailedLabel')); return; }
+
+  showInstapayPreview(file.name, dataUrl, 'uploading');
+  instapayUploading = true;
+  try {
+    const r = await fetch('/api/orders?action=upload-receipt', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ dataUrl })
+    });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Upload failed.');
+    state.instapayReceiptUrl = d.url;
+    state.instapayReceiptFilename = file.name;
+    instapayPreviewSrc = dataUrl;   // in memory only — never persisted
+    persist();
+    showInstapayPreview(file.name, dataUrl, 'ok');
+  } catch(e){
+    state.instapayReceiptUrl = null; persist();
+    showInstapayPreview(file.name, dataUrl, 'bad', e.message);
+  } finally {
+    instapayUploading = false;
+  }
 }
 
 /* ---------- promo code ---------- */
