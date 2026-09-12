@@ -305,37 +305,22 @@ if (!order){
     </div>
   `;
 
-  // Meta Pixel Purchase — fires only here, only for a real order that just
-  // rendered as confirmed (never on plain page load/visit).
+  // No client-side Purchase pixel fires on this page anymore.
   //
-  // Guarded by localStorage, not sessionStorage: this same order-success
-  // URL is exactly what the confirmation email and WhatsApp message link
-  // to, so it gets reopened — a new browser tab (or a new tab session
-  // entirely) every time, which sessionStorage does not survive. That was
-  // firing an extra client-side Purchase on every reopen, on top of the
-  // one from the day of the order, which is the inflated count the media
-  // buyer was seeing.
+  // It used to, guarded first by sessionStorage then by localStorage, but
+  // this exact URL is what the confirmation email and WhatsApp message
+  // link to — so a bot fetching a link preview, a customer reopening it
+  // on a second device, or anyone else loading it without that one
+  // browser's storage intact, fired a fresh "purchase" with no order
+  // behind it. That is what inflated the media buyer's Ads Manager count
+  // (45, then 94) with zero matching rows in the real orders table.
   //
-  // eventID is the order id, matching the server-side Conversions API call
-  // in api/_lib/capi.js (fired exactly once, at the moment the order is
-  // created — see createOrder() in api/orders.js) so Meta de-dupes the two
-  // into one conversion when both arrive; this flag is what stops this
-  // page from re-sending its half of that pair on every future visit.
-  if (typeof fbq === 'function'){
-    const firedKey = 'tpr_purchase_fired_' + order.id;
-    let alreadyFired = false;
-    try { alreadyFired = localStorage.getItem(firedKey) === '1'; } catch(e){}
-    if (!alreadyFired){
-      fbq('track', 'Purchase', {
-        content_ids: order.items.map(i => String(i.id)),
-        content_type: 'product',
-        num_items: order.items.reduce((s,i)=> s + i.qty, 0),
-        value: p.total,
-        currency: 'EGP'
-      }, { eventID: String(order.id) });
-      try { localStorage.setItem(firedKey, '1'); } catch(e){}
-    }
-  }
+  // The server-side call is the only one left, and it cannot repeat: it
+  // fires exactly once, inside createOrder()'s database insert (see
+  // sendPurchaseCAPI() in api/_lib/capi.js), and a duplicate order id is
+  // rejected by Postgres' primary key before that code can run a second
+  // time. One order in the database is now guaranteed to be exactly one
+  // Purchase event, from any device, any number of page loads.
 
   $('btnTrack').addEventListener('click', ()=>{
     toast(t('trackingComingSoon'));
