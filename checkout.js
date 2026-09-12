@@ -77,12 +77,12 @@
   const PaymentProviders = {
     cash_on_delivery: {
       id:'cash_on_delivery', label:'Cash on Delivery', enabled:true,
-      description:'Pay with cash upon delivery.',
+      description:'Pay when you receive your order',
       async process(){ return { status:'pending', note:'Payment due on delivery.' }; }
     },
     card: {
       id:'card', label:'Credit / Debit Card', enabled:true,
-      description:'Secure payment with your card.',
+      description:'Pay securely with your card',
       /* NOTE: card number / expiry / CVV are read from the form for display
          purposes only and are NEVER written to checkout state, the order
          object, or localStorage. A real integration would tokenize them
@@ -96,7 +96,7 @@
     },
     instapay: {
       id:'instapay', label:'InstaPay', enabled:true,
-      description:'Transfer to our InstaPay number and attach your receipt.',
+      description:'Instant payment, 24/7',
       // the number customers send to — shown on the payment step and
       // reused in the WhatsApp/email notification, so it only lives here
       instapayNumber:'01222201630',
@@ -106,6 +106,7 @@
          defense in case placeOrder() is ever called some other way. */
       async process(state){
         if (!state || !state.instapayReceiptUrl) throw new Error('Please attach a screenshot of your InstaPay transfer.');
+        if (!state.instapaySender || !String(state.instapaySender).trim()) throw new Error('Please enter the number you transferred from.');
         return { status:'pending', note:'Order will be confirmed once your InstaPay transfer is verified.' };
       }
     },
@@ -249,7 +250,8 @@
     // InstaPay needs the transfer screenshot uploaded (and successfully
     // stored) before Review — otherwise placeOrder() would have no
     // receipt to attach to the order at all
-    if (state.paymentMethod.id === 'instapay' && !state.instapayReceiptUrl) return 'payment';
+    if (state.paymentMethod.id === 'instapay' &&
+        (!state.instapayReceiptUrl || !isFilled(state.instapaySender))) return 'payment';
     return 'review';
   }
   function stepIndex(step){ return Math.max(0, STEPS.indexOf(step)); }
@@ -288,7 +290,7 @@
       shippingMethod: { id: shippingMethod.id, label: shippingMethod.label, sub: shippingMethod.sub, price: shippingMethod.price },
       billingAddress: state.billingAddress && !state.billingAddress.sameAsShipping ? state.billingAddress : { sameAsShipping:true },
       paymentMethod: provider.id === 'instapay'
-        ? { id: provider.id, label: provider.label, receiptUrl: state.instapayReceiptUrl }
+        ? { id: provider.id, label: provider.label, receiptUrl: state.instapayReceiptUrl, senderNumber: state.instapaySender || '' }
         : { id: provider.id, label: provider.label },
       notes: state.notes || '',
       items: cart.map(i => ({ id:i.id, name:i.name, variant:i.variant||'', color:i.color||null, size:i.size||null, price:i.price, img:i.img, qty:i.qty })),

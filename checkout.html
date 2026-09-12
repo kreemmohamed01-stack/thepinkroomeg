@@ -222,34 +222,68 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .co-check input{width:16px;height:16px;accent-color:var(--gold);cursor:pointer;}
 
   /* option "cards" — used for shipping / payment radios */
+  /* ---------- payment method cards ----------
+     Each method is a soft-rose card that expands in place when picked —
+     the extra fields (card number, InstaPay details) open inside the same
+     card rather than in a separate drawer below it, so the selected
+     method always reads as one continuous block. */
   .co-option{
-    display:flex;align-items:center;gap:14px;
-    border:1px solid var(--line);border-radius:3px;padding:15px 16px;margin-bottom:12px;
-    cursor:pointer;transition:border-color .25s ease, background .25s ease;
+    position:relative;
+    display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border:1.5px solid #f0e2e4;border-radius:14px;
+    padding:18px 20px;margin-bottom:14px;
+    background:#fff;
+    cursor:pointer;transition:border-color .25s ease, background .25s ease, box-shadow .25s ease;
   }
-  .co-option:hover{border-color:var(--gold);}
-  .co-option.selected{border-color:var(--gold);background:rgba(201,169,124,.06);}
+  .co-option:hover{border-color:#e3c3c9;box-shadow:0 4px 14px -8px rgba(168,90,110,.35);}
+  .co-option.selected{
+    border-color:#d9a3b0;background:linear-gradient(180deg,#fdf2f4,#fcf7f8);
+    box-shadow:0 6px 20px -12px rgba(168,90,110,.45);
+  }
   .co-option.disabled{opacity:.5;cursor:not-allowed;}
   .co-option-radio{
-    width:18px;height:18px;border-radius:50%;border:1.5px solid var(--line);flex-shrink:0;
+    width:20px;height:20px;border-radius:50%;border:1.8px solid #e0cdd1;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;transition:border-color .25s ease;
   }
-  .co-option.selected .co-option-radio{border-color:var(--gold);}
-  .co-option-radio i{width:9px;height:9px;border-radius:50%;background:var(--gold);opacity:0;transform:scale(.4);transition:opacity .2s ease, transform .2s ease;}
+  .co-option.selected .co-option-radio{border-color:#b76e82;}
+  .co-option-radio i{width:10px;height:10px;border-radius:50%;background:#b76e82;opacity:0;transform:scale(.4);transition:opacity .2s ease, transform .2s ease;}
   .co-option.selected .co-option-radio i{opacity:1;transform:scale(1);}
-  /* one uniform icon frame for every payment method, so a hand-drawn line
-     icon and a full-colour brand mark still read as the same family */
+  /* every mark sits in a white tile of the same size, so a wordmark logo
+     and a line icon still read as the same family down the list */
   .co-option-icon{
-    width:44px;height:30px;flex-shrink:0;
+    width:62px;height:44px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
+    background:#fff;border:1px solid #f2e6e8;border-radius:10px;padding:6px;
   }
   .co-option-icon .pm-ico{width:100%;height:100%;}
-  /* line-art methods (cash, card, bank) share one stroke weight + colour */
+  /* line-art methods (cash, bank) share one stroke weight + colour */
   .co-option-icon .pm-ico.line{
-    stroke:var(--ink);fill:none;stroke-width:1.2;
+    stroke:#b76e82;fill:none;stroke-width:1.5;
     stroke-linecap:round;stroke-linejoin:round;
   }
-  .co-option.selected .co-option-icon .pm-ico.line{stroke:#6b5433;}
+  .co-option.selected .co-option-icon{background:#fff;border-color:#eecfd6;}
+
+  .co-option-body{flex:1 1 auto;min-width:0;}
+  .co-option-body b{display:block;font-family:'Playfair Display',serif;font-size:17px;font-weight:500;color:var(--ink);margin-bottom:3px;}
+  .co-option-body span{font-size:12.5px;color:var(--ink-soft);}
+
+  /* right-hand reassurance note ("Secure & Encrypted", "Available all
+     over Egypt") — the quiet counterpart to the pink Fast & Secure pill */
+  .co-option-note{
+    display:flex;align-items:center;gap:9px;flex-shrink:0;
+    font-size:11.5px;color:var(--ink-soft);line-height:1.45;
+  }
+  .co-option-note svg{width:20px;height:20px;stroke:#b08f96;fill:none;stroke-width:1.4;flex-shrink:0;}
+  .co-option-note b{display:block;font-weight:600;color:var(--ink);font-size:12px;font-family:'Poppins',sans-serif;}
+  .co-option-pill{
+    display:flex;align-items:center;gap:5px;flex-shrink:0;
+    font-size:11.5px;font-weight:600;color:#b03d5c;
+    background:#fbe6ec;border-radius:20px;padding:7px 14px;
+  }
+  .co-option-pill svg{width:13px;height:13px;fill:#b03d5c;stroke:none;}
+  @media (max-width:620px){
+    .co-option-note, .co-option-pill{display:none;}
+  }
 
   /* accepted-network marks — identical chip treatment everywhere they appear */
   .brand-row{display:flex;align-items:center;gap:6px;flex-shrink:0;}
@@ -270,97 +304,77 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     padding:4px 9px;border-radius:2px;white-space:nowrap;
   }
   .co-option-soon{font-size:9px;letter-spacing:1.4px;font-weight:600;color:var(--ink-soft);background:var(--beige-soft);padding:4px 9px;border-radius:2px;white-space:nowrap;}
+  /* opens inside the selected .co-option (full width of it, below the
+     header row) rather than as a separate drawer under the card */
   .co-card-fields{
     display:none;grid-template-columns:1fr 1fr;gap:14px;
-    padding:16px 16px 2px;margin:-4px 0 12px;border:1px dashed var(--line);border-top:none;border-radius:0 0 3px 3px;
+    width:100%;flex-basis:100%;
+    padding-top:18px;margin-top:16px;border-top:1px solid #f0e2e4;
+    cursor:default;
   }
   .co-card-fields.show{display:grid;}
   .co-card-fields .co-field:first-child{grid-column:1 / -1;}
+  .co-card-fields .co-field{margin-bottom:0;}
   .co-secure-note{
     display:flex;align-items:center;gap:8px;font-size:11.5px;color:var(--ink-soft);
-    background:var(--beige-soft);padding:12px 14px;border-radius:2px;margin-top:6px;
+    background:#fdf4f6;padding:12px 14px;border-radius:8px;margin-top:2px;
   }
-  .co-secure-note svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0;}
+  .co-secure-note svg{width:15px;height:15px;stroke:#b76e82;fill:none;stroke-width:1.6;flex-shrink:0;}
 
   /* ---------- InstaPay panel ----------
-     Deliberately richer than the plain dashed drawer the other methods
-     use (.co-card-fields): InstaPay is the one method here that asks the
-     customer to do something (transfer, screenshot, upload) rather than
-     just fill fields, so the panel is built to read as a small branded
-     moment — a violet/magenta glass card on a soft tinted backdrop,
-     using the exact gradient from the app-icon mark above throughout,
-     rather than a generic bordered box. */
+     Opens inside the selected .co-option, in the same soft-rose palette
+     as the card itself — the panel is part of the method, not a separate
+     branded box, so the only InstaPay-specific colour is the logo. */
   .co-instapay-fields{
-    display:none;padding:20px;margin:-4px 0 14px;
-    border:1px solid rgba(147,51,184,.16);border-top:none;border-radius:0 0 8px 8px;
-    background:
-      radial-gradient(120% 140% at 0% 0%, rgba(147,51,184,.07), transparent 55%),
-      linear-gradient(180deg, #fdfaff, #fff 40%);
+    display:none;width:100%;flex-basis:100%;
+    padding-top:18px;margin-top:16px;border-top:1px solid #f0e2e4;
+    cursor:default;
   }
   .co-instapay-fields.show{display:block;}
-  .ip-number-card{
-    position:relative;overflow:hidden;
-    display:flex;align-items:center;gap:16px;
-    background:linear-gradient(120deg, #4C1D8F, #9333B8 55%, #D6449E);
-    border-radius:10px;
-    padding:16px 18px;margin-bottom:18px;
-    box-shadow:0 10px 26px -10px rgba(93,33,166,.55), inset 0 1px 0 rgba(255,255,255,.18);
+  .ip-intro{font-size:13px;color:var(--ink-soft);line-height:1.6;margin-bottom:16px;}
+  .ip-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+  .ip-grid .co-field{margin-bottom:0;}
+  /* the account number shown read-only with a copy button on its right,
+     styled to match the real inputs beside it */
+  .ip-copy-field{
+    display:flex;align-items:center;gap:8px;
+    border:1px solid var(--line);background:#fff;border-radius:10px;
+    padding:12px 12px 12px 14px;
   }
-  /* a soft diagonal sheen across the card, echoing the shine treatment
-     used on the site's own gold accents elsewhere — reads as "polished"
-     rather than a flat colour fill */
-  .ip-number-card::after{
-    content:'';position:absolute;inset:0;pointer-events:none;
-    background:linear-gradient(115deg, rgba(255,255,255,.22) 0%, rgba(255,255,255,0) 28%, rgba(255,255,255,0) 72%, rgba(255,255,255,.1) 100%);
-  }
-  .ip-number-mark{
-    width:42px;height:42px;border-radius:12px;flex-shrink:0;position:relative;z-index:1;
-    background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.28);
-    display:flex;align-items:center;justify-content:center;
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.25);
-  }
-  .ip-number-mark svg{width:22px;height:22px;}
-  .ip-number-body{flex:1 1 auto;min-width:0;position:relative;z-index:1;}
-  .ip-number-label{font-size:10px;letter-spacing:1.6px;color:rgba(255,255,255,.75);margin-bottom:4px;font-weight:600;}
-  .ip-number-value{
-    font-family:'Poppins',sans-serif;font-size:18px;font-weight:600;letter-spacing:.6px;color:#fff;
-    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  .ip-copy-field span{
+    flex:1 1 auto;min-width:0;font-size:14px;color:var(--ink);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
   }
   .ip-copy-btn{
-    display:flex;align-items:center;gap:5px;flex-shrink:0;
-    font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.8px;
-    color:#fff;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);
-    padding:6px 12px;border-radius:20px;cursor:pointer;transition:background .2s ease, transform .15s ease;
+    flex-shrink:0;width:30px;height:30px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:#b76e82;background:transparent;border:none;
+    transition:background .2s ease, color .2s ease, transform .15s ease;
   }
-  .ip-copy-btn:hover{background:rgba(255,255,255,.26);}
-  .ip-copy-btn:active{transform:scale(.96);}
-  .ip-copy-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
-  .ip-copy-btn.copied{color:#fff;background:rgba(46,158,91,.65);border-color:rgba(46,158,91,.8);}
+  .ip-copy-btn:hover{background:#fbe6ec;}
+  .ip-copy-btn:active{transform:scale(.92);}
+  .ip-copy-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.7;}
+  .ip-copy-btn.copied{color:#2E9E5B;background:rgba(46,158,91,.12);}
+  .co-instapay-fields .co-field input{border-radius:10px;padding:12px 14px;}
 
-  .ip-upload-label{font-size:11px;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:9px;display:block;font-weight:600;}
+  .ip-upload-label{font-size:11px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:8px;display:block;}
   .ip-dropzone{
     position:relative;
-    border:1.5px dashed rgba(147,51,184,.4);border-radius:8px;
-    background:linear-gradient(180deg, #fff, #fbf6ff);
-    padding:24px 16px;text-align:center;cursor:pointer;
-    transition:border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    border:1.5px dashed #e3c3c9;border-radius:10px;
+    background:#fffdfd;padding:22px 16px;text-align:center;cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
   }
-  .ip-dropzone:hover, .ip-dropzone.drag{
-    border-color:#9333B8;background:linear-gradient(180deg, #fff, #f6ebfb);
-    box-shadow:0 4px 16px -8px rgba(147,51,184,.35);
-  }
+  .ip-dropzone:hover, .ip-dropzone.drag{border-color:#b76e82;background:#fdf4f6;}
   .ip-dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
-  .ip-dropzone-icon{width:30px;height:30px;margin:0 auto 10px;stroke:#9333B8;fill:none;stroke-width:1.3;opacity:.85;}
-  .ip-dropzone-text{font-size:12.5px;color:var(--ink);margin-bottom:3px;font-weight:500;}
+  .ip-dropzone-icon{width:28px;height:28px;margin:0 auto 9px;stroke:#b76e82;fill:none;stroke-width:1.4;opacity:.9;}
+  .ip-dropzone-text{font-size:12.5px;color:var(--ink);margin-bottom:3px;}
   .ip-dropzone-hint{font-size:10.5px;color:var(--ink-soft);}
   .ip-preview{
     display:none;align-items:center;gap:12px;
-    background:linear-gradient(180deg, #fff, #fbf6ff);
-    border:1px solid rgba(147,51,184,.22);border-radius:8px;padding:10px 12px;
-    box-shadow:0 2px 10px -6px rgba(147,51,184,.3);
+    background:#fff;border:1px solid #f0e2e4;border-radius:10px;padding:10px 12px;
   }
   .ip-preview.show{display:flex;}
-  .ip-preview img{width:52px;height:52px;object-fit:cover;border-radius:5px;border:1px solid rgba(147,51,184,.25);flex-shrink:0;}
+  .ip-preview img{width:52px;height:52px;object-fit:cover;border-radius:8px;border:1px solid #f0e2e4;flex-shrink:0;}
   .ip-preview-info{flex:1 1 auto;min-width:0;}
   .ip-preview-name{font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
   .ip-preview-status{font-size:11px;margin-top:2px;display:flex;align-items:center;gap:5px;}
@@ -370,17 +384,24 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .ip-preview-status svg{width:12px;height:12px;flex-shrink:0;}
   .ip-preview-spin{
     width:11px;height:11px;border-radius:50%;
-    border:1.6px solid rgba(147,51,184,.2);border-top-color:#9333B8;
+    border:1.6px solid #f0e2e4;border-top-color:#b76e82;
     animation:ipSpin .7s linear infinite;flex-shrink:0;
   }
   @keyframes ipSpin{to{transform:rotate(360deg);}}
   .ip-preview-remove{
-    flex-shrink:0;width:24px;height:24px;border-radius:50%;
+    flex-shrink:0;width:26px;height:26px;border-radius:50%;
     display:flex;align-items:center;justify-content:center;cursor:pointer;
     color:var(--ink-soft);transition:background .2s ease, color .2s ease;
   }
-  .ip-preview-remove:hover{background:rgba(214,68,158,.12);color:#D6449E;}
+  .ip-preview-remove:hover{background:#fbe6ec;color:#b03d5c;}
   .ip-preview-remove svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  /* the reference's info line under the fields */
+  .ip-note{
+    display:flex;align-items:center;gap:9px;margin-top:14px;
+    font-size:12px;color:var(--ink-soft);line-height:1.5;
+  }
+  .ip-note svg{width:16px;height:16px;stroke:#b76e82;fill:none;stroke-width:1.5;flex-shrink:0;}
+  @media (max-width:620px){ .ip-grid{grid-template-columns:1fr;} }
 
   /* saved-address display card (step 2) */
   .co-addr-card{
@@ -946,51 +967,88 @@ const CARD_BRANDS = `<div class="brand-row">${chip('visa')}${chip('mastercard')}
    Line-art methods all share one stroke weight/box; brand methods use their
    real logo. Same 44×30 frame for every one. */
 const PAY_ICON = {
-  cash_on_delivery: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5.5" width="35" height="17" rx="2.5"/><circle cx="20" cy="14" r="4.5"/><circle cx="7.6" cy="14" r="1.1"/><circle cx="32.4" cy="14" r="1.1"/></svg>`,
+  /* an open hand receiving a parcel — the "pay when it arrives" idea,
+     matching the reference's cash-on-delivery mark rather than the
+     banknote the generic line set used */
+  cash_on_delivery: `<svg class="pm-ico line" viewBox="0 0 28 28"><rect x="8" y="3.5" width="12" height="9" rx="1"/><path d="M14 3.5v9M8 7.5h12"/><path d="M2.5 18c1.8-1.4 3.6-1.4 5.2 0l1.8 1.4h4.3c1.1 0 1.1-1.7 0-1.7h-3"/><path d="M13.8 19.4h3.6l6.3-3.6c1.1-.6 2.1.9 1 1.8l-6.6 4.9c-.8.6-1.4.8-2.4.8H8.5"/></svg>`,
   card: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5" width="35" height="18" rx="2.5"/><path d="M2.5 10.6h35"/><rect x="6.5" y="15" width="6.5" height="4.4" rx="1.1"/></svg>`,
   bank_transfer: `<svg class="pm-ico line" viewBox="0 0 40 28"><path d="M20 4.6 4.6 11.6h30.8L20 4.6Z"/><path d="M8.4 12.8v8.2M15 12.8v8.2M25 12.8v8.2M31.6 12.8v8.2"/><path d="M4.2 23.4h31.6"/></svg>`,
   paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`,
-  /* InstaPay's real app-icon mark: a rounded-square tile on the brand's
-     violet-to-magenta gradient, the crossing-arrows glyph (the network's
-     instant-transfer symbol) sitting inside a soft rounded diamond, with
-     the wordmark underneath — same layout as the official app icon.
-     Full colour, no stroke, matching how visa/mastercard/mada are
-     treated above rather than the hand-drawn line icons the generic
-     methods use. */
-  instapay: `<svg class="pm-ico" viewBox="0 0 40 28" role="img" aria-label="InstaPay">
-    <defs><linearGradient id="ipGrad" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#5B21A6"/><stop offset="50%" stop-color="#9333B8"/><stop offset="100%" stop-color="#D6449E"/>
-    </linearGradient></defs>
-    <rect x="4" y="1" width="32" height="26" rx="7" fill="url(#ipGrad)"/>
-    <rect x="14.8" y="6" width="10.4" height="10.4" rx="3.2" fill="#fff" fill-opacity=".2" transform="rotate(45 20 11.2)"/>
-    <path d="M17.9 12.1 20.17 7.8c.4-.65 1.35-.1 1.1.6l-1.15 4.3h4.6c.65 0 1 .82.5 1.3l-4.85 5.4c-.4.65-1.35.1-1.1-.6l1.25-4.55H15.9c-.65 0-1-.82-.5-1.3Z" fill="#fff"/>
-    <text x="20" y="25.3" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="4.6" font-weight="700" letter-spacing=".3" fill="#fff">INSTAPAY</text>
+  /* InstaPay's horizontal wordmark: "INSTA" in the brand violet, the
+     double-chevron in its orange/red, "PAY" in violet again — the lockup
+     used on the network's own payment badges, rather than the square app
+     tile. Drawn as text so it stays crisp at any size and needs no
+     hosted asset. */
+  instapay: `<svg class="pm-ico" viewBox="0 0 124 26" role="img" aria-label="InstaPay">
+    <text x="0" y="19" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="17" font-weight="900" font-style="italic" letter-spacing="-.5" fill="#4A2A87">INSTA</text>
+    <path d="M54 7 61 13l-7 6v-4l-4 3.6V7.4l4 3.6Z" fill="#E8552B"/>
+    <path d="M63 7 70 13l-7 6v-4l-4 3.6V7.4l4 3.6Z" fill="#F0834F"/>
+    <text x="73" y="19" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="17" font-weight="900" font-style="italic" letter-spacing="-.5" fill="#4A2A87">PAY</text>
   </svg>`
 };
+
+/* The small reassurance shown on the right of each method — a pink pill
+   for InstaPay's speed claim, a quiet icon+text note for the others.
+   Built per render (not a static map) so the strings follow the language
+   the customer has selected. */
+function payNote(id){
+  if (id === 'card') return `<div class="co-option-note">
+    <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+    <span><b>${t('secureEncrypted')}</b>${t('paymentInfoSafe')}</span></div>`;
+  if (id === 'instapay') return `<div class="co-option-pill">
+    <svg viewBox="0 0 24 24"><path d="M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12l1-8.5Z"/></svg>${t('fastSecure')}</div>`;
+  if (id === 'cash_on_delivery') return `<div class="co-option-note">
+    <svg viewBox="0 0 24 24"><path d="M21 8 12 3 3 8v8l9 5 9-5V8Z"/><path d="m3 8 9 5 9-5M12 13v8"/></svg>
+    <span>${t('availableAllEgypt')}</span></div>`;
+  return '';
+}
 
 function payOptionMarkup(p, opts){
   opts = opts || {};
   const selected = state.paymentMethod && state.paymentMethod.id === p.id;
   const disabled = !p.enabled;
-  const badge = disabled ? `<span class="co-option-soon">${t('comingSoon')}</span>`
-              : (opts.showSelected && selected ? `<span class="co-option-badge">${t('selectedBadge')}</span>` : '');
-  const brands = p.id === 'card' ? CARD_BRANDS : '';
+  const badge = disabled ? `<span class="co-option-soon">${t('comingSoon')}</span>` : '';
   return `<div class="co-option ${selected?'selected':''} ${disabled?'disabled':''}" data-pay="${p.id}">
     <div class="co-option-radio"><i></i></div>
     <div class="co-option-icon">${PAY_ICON[p.id]||''}</div>
     <div class="co-option-body"><b>${p.label}</b><span>${p.description}</span></div>
-    ${brands}${badge}
+    ${disabled ? badge : payNote(p.id)}
   </div>`;
 }
-function renderPayPreview1(){
+/* Payment-option clicks use one delegated listener per container, bound
+   once at startup — NOT re-bound on every render. Re-binding was the
+   cause of a hard page freeze: each render replaced the markup and
+   attached fresh listeners, and because a click handler itself called
+   both renderers, every click multiplied the number of live listeners
+   until the page locked up. With delegation the handlers below are the
+   only two that ever exist, no matter how many times we re-render. */
+function selectPaymentMethod(id, fromContainer){
+  const provider = CO.PaymentProviders[id];
+  if (!provider || !provider.enabled) return;
+  state.paymentMethod = { id };
+  persist();
+  // repaint both lists so the radio/selected state matches in each, then
+  // the extra fields. Only one InstaPay receipt panel can exist in the
+  // DOM at a time (see renderInstapayFields), so the container the click
+  // came from — the screen actually on screen — must mount it last.
+  paintPayPreview1();
+  paintPayOptions3();
+  renderSummary();
+  renderCardFields();
+  renderInstapayFields(fromContainer);
+}
+
+function paintPayPreview1(){
   const list = ['cash_on_delivery','card','instapay'].map(id => CO.PaymentProviders[id]);
   payPreview1.innerHTML = list.map(p => payOptionMarkup(p, {})).join('');
-  payPreview1.querySelectorAll('[data-pay]').forEach(el=>{
-    el.addEventListener('click', ()=>{
-      state.paymentMethod = { id: el.dataset.pay };
-      persist(); renderPayPreview1(); renderPayOptions3(); renderSummary();
-    });
-  });
+}
+function paintPayOptions3(){
+  const list = Object.values(CO.PaymentProviders);
+  payOptions3.innerHTML = list.map(p => payOptionMarkup(p, { showSelected:true })).join('');
+}
+
+function renderPayPreview1(){
+  paintPayPreview1();
   // this preview has no card-number fields, but InstaPay's receipt upload
   // has to be reachable from wherever the customer picks it — including
   // here, on step 1 — otherwise picking it on this screen would let them
@@ -999,31 +1057,29 @@ function renderPayPreview1(){
   renderInstapayFields(payPreview1);
 }
 function renderPayOptions3(){
-  const list = Object.values(CO.PaymentProviders);
-  payOptions3.innerHTML = list.map(p => payOptionMarkup(p, { showSelected:true })).join('');
-  payOptions3.querySelectorAll('[data-pay]').forEach(el=>{
-    const provider = CO.PaymentProviders[el.dataset.pay];
-    if (!provider.enabled) return;
-    el.addEventListener('click', ()=>{
-      state.paymentMethod = { id: el.dataset.pay };
-      persist(); renderPayOptions3(); renderSummary();
-      // Rebuild the preview (step 1) before this screen's own panel, since
-      // only one InstaPay receipt panel can exist in the DOM at a time
-      // (see renderInstapayFields) — whichever mounts last is the one that
-      // stays, and a click here always means this screen (step-payment,
-      // the one actually visible right now) has to be the one left holding it.
-      renderPayPreview1();
-      renderInstapayFields(payOptions3);
-    });
-  });
+  paintPayOptions3();
   renderCardFields();
   renderInstapayFields(payOptions3);
 }
+
+payPreview1.addEventListener('click', (e)=>{
+  const el = e.target.closest('[data-pay]');
+  if (el) selectPaymentMethod(el.dataset.pay, payPreview1);
+});
+payOptions3.addEventListener('click', (e)=>{
+  const el = e.target.closest('[data-pay]');
+  // clicks inside the InstaPay panel (upload, copy button) bubble up to
+  // this container too — they must not be treated as re-picking a method
+  if (el && !e.target.closest('.co-instapay-fields, .co-card-fields')) {
+    selectPaymentMethod(el.dataset.pay, payOptions3);
+  }
+});
 function renderCardFields(){
   let box = document.getElementById('cardFieldsBox');
   if (box) box.remove();
   if (!state.paymentMethod || state.paymentMethod.id !== 'card') return;
   const cardEl = payOptions3.querySelector('[data-pay="card"]');
+  if (!cardEl) return;
   box = document.createElement('div');
   box.className = 'co-card-fields show';
   box.id = 'cardFieldsBox';
@@ -1032,7 +1088,9 @@ function renderCardFields(){
     <div class="co-field"><label>${t('cardholderName')}</label><input type="text" placeholder="Name on card" id="ccName"></div>
     <div class="co-field"><label>${t('expires')}</label><input type="text" placeholder="MM / YY" maxlength="7" id="ccExpiry"></div>
     <div class="co-field" style="grid-column:1/-1"><div class="co-secure-note"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>${t('cardDetailsNote')}</div></div>`;
-  cardEl.insertAdjacentElement('afterend', box);
+  // mounted inside the card itself (not after it) so the selected method
+  // reads as one continuous block, the way the reference design does
+  cardEl.appendChild(box);
 }
 
 /* ---------- InstaPay: number display + receipt upload ----------
@@ -1063,16 +1121,20 @@ function renderInstapayFields(container){
   box.className = 'co-instapay-fields show';
   box.id = 'instapayFieldsBox';
   box.innerHTML = `
-    <div class="ip-number-card">
-      <div class="ip-number-mark"><svg viewBox="0 0 24 24" role="img" aria-label="InstaPay"><rect x="6.8" y="6.8" width="10.4" height="10.4" rx="3.2" fill="#fff" fill-opacity=".2" transform="rotate(45 12 12)"/><path d="M9.9 12.9 12.17 8.6c.4-.65 1.35-.1 1.1.6l-1.15 4.3h4.6c.65 0 1 .82.5 1.3l-4.85 5.4c-.4.65-1.35.1-1.1-.6l1.25-4.55H7.9c-.65 0-1-.82-.5-1.3Z" fill="#fff"/></svg></div>
-      <div class="ip-number-body">
-        <div class="ip-number-label">${t('instapayNumberLabel')}</div>
-        <div class="ip-number-value"><span>${provider.instapayNumber}</span>
-          <button type="button" class="ip-copy-btn" id="ipCopyBtn">
+    <p class="ip-intro">${t('instapayIntro')}</p>
+    <div class="ip-grid">
+      <div class="co-field">
+        <label>${t('instapayNumberLabel')}</label>
+        <div class="ip-copy-field">
+          <span>${provider.instapayNumber}</span>
+          <button type="button" class="ip-copy-btn" id="ipCopyBtn" title="${t('copyLabel')}">
             <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
-            <span id="ipCopyBtnText">${t('copyLabel')}</span>
           </button>
         </div>
+      </div>
+      <div class="co-field" id="f-ipsender">
+        <label>${t('instapaySenderLabel')}</label>
+        <input type="tel" id="ipSenderNumber" placeholder="${t('instapaySenderPh')}" value="${(state.instapaySender||'').replace(/"/g,'&quot;')}">
       </div>
     </div>
     <label class="ip-upload-label">${t('instapayUploadLabel')}</label>
@@ -1091,11 +1153,23 @@ function renderInstapayFields(container){
       <div class="ip-preview-remove" id="ipPreviewRemove" title="${t('removeLabel')}">
         <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
+    </div>
+    <div class="ip-note">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg>
+      <span>${t('instapayNote')}</span>
     </div>`;
-  ipEl.insertAdjacentElement('afterend', box);
+  // mounted inside the card itself so the whole selected method reads as
+  // one block, matching the reference design
+  ipEl.appendChild(box);
 
-  // copy-to-clipboard
+  const senderInput = document.getElementById('ipSenderNumber');
+  senderInput.addEventListener('input', ()=>{ state.instapaySender = senderInput.value; persist(); });
+
+  // copy-to-clipboard — icon-only button, so confirmation is the icon
+  // itself briefly becoming a tick rather than a text label change
   const copyBtn = document.getElementById('ipCopyBtn');
+  const COPY_ICON = copyBtn.innerHTML;
+  const TICK_ICON = '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>';
   copyBtn.addEventListener('click', async ()=>{
     try { await navigator.clipboard.writeText(provider.instapayNumber); }
     catch(e){
@@ -1106,8 +1180,8 @@ function renderInstapayFields(container){
       tmp.select(); document.execCommand('copy'); tmp.remove();
     }
     copyBtn.classList.add('copied');
-    document.getElementById('ipCopyBtnText').textContent = t('copiedLabel');
-    setTimeout(()=>{ copyBtn.classList.remove('copied'); document.getElementById('ipCopyBtnText').textContent = t('copyLabel'); }, 1800);
+    copyBtn.innerHTML = TICK_ICON;
+    setTimeout(()=>{ copyBtn.classList.remove('copied'); copyBtn.innerHTML = COPY_ICON; }, 1800);
   });
 
   // if a receipt is already attached (came back to this step), show it
@@ -1367,6 +1441,12 @@ function goStep(step, opts){
 
   if (step === 'shipping') renderSavedAddress();
   if (step === 'review') renderReview();
+  // Only one InstaPay panel exists at a time (see renderInstapayFields),
+  // so it has to follow the customer: mount it into whichever payment
+  // list belongs to the step now on screen, or it would sit invisible in
+  // the hidden one.
+  if (step === 'information') renderInstapayFields(payPreview1);
+  if (step === 'payment') renderInstapayFields(payOptions3);
 
   const url = new URL(location.href);
   url.searchParams.set('step', step);
@@ -1389,7 +1469,10 @@ document.querySelectorAll('[data-next]').forEach(btn=>{
     if (target === 'shipping' && !validateInformation()) return;
     if (target === 'payment' && !state.shippingMethod){ showError(t('errShippingMethod')); return; }
     if (target === 'review' && (!state.paymentMethod || !CO.PaymentProviders[state.paymentMethod.id].enabled)){ showError(t('errPaymentMethod')); return; }
-    if (target === 'review' && state.paymentMethod && state.paymentMethod.id === 'instapay' && !state.instapayReceiptUrl){ showError(t('errInstapayReceipt')); return; }
+    if (target === 'review' && state.paymentMethod && state.paymentMethod.id === 'instapay'){
+      if (!state.instapayReceiptUrl){ showError(t('errInstapayReceipt')); return; }
+      if (!CO.isFilled(state.instapaySender)){ showError(t('errInstapaySender')); return; }
+    }
     btn.classList.add('loading'); btn.disabled = true;
     setTimeout(()=>{ btn.classList.remove('loading'); btn.disabled = false; goStep(target); }, 260);
   });

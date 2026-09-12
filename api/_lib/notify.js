@@ -123,6 +123,7 @@ function shopEmailHtml(order) {
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Address</td><td style="padding:4px 0;font-size:13px">${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}<br>${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, ${escapeHtml(countryName(a.country))}</td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Shipping</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.shippingMethod.label)} (${escapeHtml(order.shippingMethod.sub)})</td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Payment</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.paymentMethod.label)} &middot; <b>${escapeHtml(order.paymentStatus.toUpperCase())}</b></td></tr>
+          ${order.paymentMethod.senderNumber ? `<tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Paid from</td><td style="padding:4px 0;font-size:13px"><b>${escapeHtml(order.paymentMethod.senderNumber)}</b></td></tr>` : ''}
           ${order.notes ? `<tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Notes</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.notes)}</td></tr>` : ''}
         </table>
         ${order.paymentMethod.receiptUrl ? `
@@ -198,7 +199,10 @@ function whatsappText(order, tpl) {
     // placed) — dropped straight into the WhatsApp text as a link since
     // CallMeBot only relays plain text, not attachments. Tapping it opens
     // the receipt the same way any shared photo link would.
-    receiptLine: order.paymentMethod.receiptUrl ? `🧾 Receipt: ${order.paymentMethod.receiptUrl}` : '',
+    receiptLine: [
+      order.paymentMethod.senderNumber ? `📲 Paid from: ${order.paymentMethod.senderNumber}` : '',
+      order.paymentMethod.receiptUrl ? `🧾 Receipt: ${order.paymentMethod.receiptUrl}` : ''
+    ].filter(Boolean).join('\n'),
     shippingMethod: order.shippingMethod.label,
     deliveryLabel: order.delivery.label,
     notesLine: order.notes ? `📝 ${order.notes}` : ''

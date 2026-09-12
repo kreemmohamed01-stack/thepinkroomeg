@@ -227,6 +227,7 @@ function renderDrawer(o){
     <div class="db-section">
       <h4>PAYMENT</h4>
       <div class="db-row"><span>Method</span><span>${escHtml(o.paymentMethod.label)}</span></div>
+      ${o.paymentMethod.senderNumber ? `<div class="db-row"><span>Paid from</span><span>${escHtml(o.paymentMethod.senderNumber)}</span></div>` : ''}
       ${o.promo ? `<div class="db-row"><span>Promo</span><span>${escHtml(o.promo.code)}</span></div>` : ''}
       ${o.paymentMethod.receiptUrl ? `
       <div class="db-row" style="align-items:flex-start">
