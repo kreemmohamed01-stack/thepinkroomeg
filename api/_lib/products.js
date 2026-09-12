@@ -25,6 +25,11 @@ function rowToProduct(row){
     images: parseMaybe(row.images, []),
     sizeLabel: row.size_label,
     dimensions: extra.dimensions || null,
+    // weight in kilograms, used only to add a per-kg shipping surcharge on
+    // top of the flat shipping price — see recomputePricing() in
+    // api/orders.js and the "Weight-based shipping" section of each
+    // method in dashboard-shipping.html. null = no surcharge for this item.
+    weight: extra.weight != null ? Number(extra.weight) : null,
     finish: extra.finish || null,
     finishes: extra.finishes || null,
     shortDescription: row.short_description,
@@ -70,6 +75,7 @@ function validateProduct(p){
   if (p.salePrice != null && (isNaN(Number(p.salePrice)) || Number(p.salePrice) < 0)) return { error: 'Sale price must be a positive number.' };
   if (p.stockQuantity != null && (isNaN(Number(p.stockQuantity)) || Number(p.stockQuantity) < 0)) return { error: 'Stock quantity must be a positive number.' };
   if (p.lowStockThreshold != null && (isNaN(Number(p.lowStockThreshold)) || Number(p.lowStockThreshold) < 0)) return { error: 'Low stock threshold must be a positive number.' };
+  if (p.weight != null && p.weight !== '' && (isNaN(Number(p.weight)) || Number(p.weight) < 0)) return { error: 'Weight must be a positive number.' };
 
   const slugify = (s) => String(s).toLowerCase().trim()
     .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
@@ -190,6 +196,7 @@ function validateProduct(p){
       lowStockThreshold: p.lowStockThreshold == null || p.lowStockThreshold === '' ? 5 : Math.max(0, Math.round(Number(p.lowStockThreshold))),
       extra: {
         dimensions: p.dimensions || null,
+        weight: p.weight == null || p.weight === '' ? null : Math.max(0, Number(p.weight)),
         finish: p.finish || null,
         finishes: p.finishes || null,
         collection: Array.isArray(p.collection) ? p.collection : [],

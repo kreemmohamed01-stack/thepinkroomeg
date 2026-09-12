@@ -71,6 +71,21 @@
       description:'Transfer directly from your bank account.',
       async process(){ return { status:'pending', note:'Order will be confirmed once the transfer is received.' }; }
     },
+    instapay: {
+      id:'instapay', label:'InstaPay', enabled:true,
+      description:'Transfer to our InstaPay number and attach your receipt.',
+      // the number customers send to — shown on the payment step and
+      // reused in the WhatsApp/email notification, so it only lives here
+      instapayNumber:'01222201630',
+      /* Unlike the other providers, this one needs a screenshot attached
+         before checkout.html will even let the customer reach Review —
+         see requireReceipt() there. Checked again here as a last line of
+         defense in case placeOrder() is ever called some other way. */
+      async process(state){
+        if (!state || !state.instapayReceiptUrl) throw new Error('Please attach a screenshot of your InstaPay transfer.');
+        return { status:'pending', note:'Order will be confirmed once your InstaPay transfer is verified.' };
+      }
+    },
     paymob: {
       id:'paymob', label:'Paymob', enabled:false,
       description:'Coming soon.',
@@ -152,10 +167,18 @@
   function calculatePricing(cart, shippingMethod, promo){
     const subtotal = cart.reduce((s,i)=> s + (i.price * i.qty), 0);
     const discount = (promo && promo.discount) ? Math.min(promo.discount, subtotal) : 0;
-    const shipping = shippingMethod ? shippingMethod.price : 0;
+    // Preview only — mirrors the server's recomputePricing() in
+    // api/orders.js so what the customer sees here matches what they're
+    // actually charged, but the server always re-reads weight/price from
+    // the DB at order time and is the real source of truth.
+    const basePrice = shippingMethod ? shippingMethod.price : 0;
+    const totalWeight = cart.reduce((s,i)=> s + ((i.weight || 0) * i.qty), 0);
+    const ratePerKg = (shippingMethod && shippingMethod.ratePerKg) || 0;
+    const weightSurcharge = Math.round(totalWeight * ratePerKg * 100) / 100;
+    const shipping = basePrice + weightSurcharge;
     const tax = 0; // VAT is included in listed prices, as on every product page ("Tax included.")
     const total = Math.max(0, subtotal - discount) + shipping + tax;
-    return { subtotal, discount, shipping, tax, total };
+    return { subtotal, discount, shipping, tax, total, basePrice, weightSurcharge, totalWeight };
   }
 
   /* ---------- delivery estimate — real calendar dates, Fri/Sat weekend ---------- */
@@ -200,6 +223,10 @@
     }
     if (!state.shippingMethod) return 'shipping';
     if (!state.paymentMethod) return 'payment';
+    // InstaPay needs the transfer screenshot uploaded (and successfully
+    // stored) before Review — otherwise placeOrder() would have no
+    // receipt to attach to the order at all
+    if (state.paymentMethod.id === 'instapay' && !state.instapayReceiptUrl) return 'payment';
     return 'review';
   }
   function stepIndex(step){ return Math.max(0, STEPS.indexOf(step)); }
@@ -227,7 +254,7 @@
     const pricing = calculatePricing(cart, shippingMethod, promo);
 
     let paymentResult;
-    try { paymentResult = await provider.process(); }
+    try { paymentResult = await provider.process(state); }
     catch(e){ return { ok:false, error: e.message || 'Payment could not be processed.' }; }
 
     let order = {
@@ -237,7 +264,9 @@
       shippingAddress: state.shippingAddress,
       shippingMethod: { id: shippingMethod.id, label: shippingMethod.label, sub: shippingMethod.sub, price: shippingMethod.price },
       billingAddress: state.billingAddress && !state.billingAddress.sameAsShipping ? state.billingAddress : { sameAsShipping:true },
-      paymentMethod: { id: provider.id, label: provider.label },
+      paymentMethod: provider.id === 'instapay'
+        ? { id: provider.id, label: provider.label, receiptUrl: state.instapayReceiptUrl }
+        : { id: provider.id, label: provider.label },
       notes: state.notes || '',
       items: cart.map(i => ({ id:i.id, name:i.name, variant:i.variant||'', color:i.color||null, size:i.size||null, price:i.price, img:i.img, qty:i.qty })),
       pricing,

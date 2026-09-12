@@ -428,6 +428,11 @@
           color: colorName || null,
           size: sizeName || null,
           price: product.salePrice || product.price,
+          // carried along only so checkout.js can preview the weight-based
+          // shipping surcharge before the order is placed — the server
+          // never trusts this and re-reads the real weight from the DB
+          // (see recomputePricing() in api/orders.js)
+          weight: product.weight != null ? Number(product.weight) : 0,
           img: (colorImg && colorImg[0]) || (sizeImg && sizeImg[0]) || (product.images && product.images[0]) || product.img,
           qty: 1
         });

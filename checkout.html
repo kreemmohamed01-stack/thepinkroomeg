@@ -274,6 +274,84 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   }
   .co-secure-note svg{width:15px;height:15px;stroke:var(--gold);fill:none;stroke-width:1.6;flex-shrink:0;}
 
+  /* ---------- InstaPay panel ----------
+     Same dashed-drawer treatment as .co-card-fields (border/margin match
+     exactly so the payment list never jumps width switching methods), but
+     built as one flowing block rather than a 2-col grid since a transfer
+     number + upload dropzone don't pair the way card fields do. */
+  .co-instapay-fields{
+    display:none;padding:18px 18px 20px;margin:-4px 0 12px;
+    border:1px dashed var(--line);border-top:none;border-radius:0 0 3px 3px;
+    background:linear-gradient(180deg, rgba(154,42,176,.03), transparent 60%);
+  }
+  .co-instapay-fields.show{display:block;}
+  .ip-number-card{
+    display:flex;align-items:center;gap:14px;
+    background:#fff;border:1px solid var(--line);border-radius:6px;
+    padding:14px 16px;margin-bottom:16px;
+  }
+  .ip-number-mark{
+    width:38px;height:38px;border-radius:50%;flex-shrink:0;
+    background:linear-gradient(135deg, #6C2EB5, #9A2AB0 55%, #D6247E);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .ip-number-mark svg{width:19px;height:19px;}
+  .ip-number-body{flex:1 1 auto;min-width:0;}
+  .ip-number-label{font-size:10px;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:3px;}
+  .ip-number-value{
+    font-family:'Poppins',sans-serif;font-size:17px;font-weight:600;letter-spacing:.5px;color:var(--ink);
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  }
+  .ip-copy-btn{
+    display:flex;align-items:center;gap:5px;flex-shrink:0;
+    font-family:'Poppins',sans-serif;font-size:10.5px;font-weight:600;letter-spacing:.8px;
+    color:#9A2AB0;background:rgba(154,42,176,.08);border:1px solid rgba(154,42,176,.25);
+    padding:6px 12px;border-radius:20px;cursor:pointer;transition:background .2s ease, transform .15s ease;
+  }
+  .ip-copy-btn:hover{background:rgba(154,42,176,.14);}
+  .ip-copy-btn:active{transform:scale(.96);}
+  .ip-copy-btn svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
+  .ip-copy-btn.copied{color:#2E9E5B;background:rgba(46,158,91,.1);border-color:rgba(46,158,91,.3);}
+
+  .ip-upload-label{font-size:11px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:8px;display:block;}
+  .ip-dropzone{
+    position:relative;
+    border:1.5px dashed rgba(154,42,176,.35);border-radius:6px;
+    background:#fff;padding:22px 16px;text-align:center;cursor:pointer;
+    transition:border-color .2s ease, background .2s ease;
+  }
+  .ip-dropzone:hover, .ip-dropzone.drag{border-color:#9A2AB0;background:rgba(154,42,176,.04);}
+  .ip-dropzone input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;}
+  .ip-dropzone-icon{width:30px;height:30px;margin:0 auto 10px;stroke:#9A2AB0;fill:none;stroke-width:1.3;opacity:.8;}
+  .ip-dropzone-text{font-size:12.5px;color:var(--ink);margin-bottom:3px;}
+  .ip-dropzone-hint{font-size:10.5px;color:var(--ink-soft);}
+  .ip-preview{
+    display:none;align-items:center;gap:12px;
+    background:#fff;border:1px solid var(--line);border-radius:6px;padding:10px 12px;
+  }
+  .ip-preview.show{display:flex;}
+  .ip-preview img{width:52px;height:52px;object-fit:cover;border-radius:4px;border:1px solid var(--line);flex-shrink:0;}
+  .ip-preview-info{flex:1 1 auto;min-width:0;}
+  .ip-preview-name{font-size:12.5px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .ip-preview-status{font-size:11px;margin-top:2px;display:flex;align-items:center;gap:5px;}
+  .ip-preview-status.uploading{color:var(--ink-soft);}
+  .ip-preview-status.ok{color:#2E9E5B;}
+  .ip-preview-status.bad{color:var(--err);}
+  .ip-preview-status svg{width:12px;height:12px;flex-shrink:0;}
+  .ip-preview-spin{
+    width:11px;height:11px;border-radius:50%;
+    border:1.6px solid rgba(107,84,51,.25);border-top-color:var(--ink-soft);
+    animation:ipSpin .7s linear infinite;flex-shrink:0;
+  }
+  @keyframes ipSpin{to{transform:rotate(360deg);}}
+  .ip-preview-remove{
+    flex-shrink:0;width:24px;height:24px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;
+    color:var(--ink-soft);transition:background .2s ease, color .2s ease;
+  }
+  .ip-preview-remove:hover{background:var(--beige-soft);color:var(--err);}
+  .ip-preview-remove svg{width:13px;height:13px;stroke:currentColor;fill:none;stroke-width:1.8;}
+
   /* saved-address display card (step 2) */
   .co-addr-card{
     display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
@@ -785,7 +863,19 @@ const PAY_ICON = {
   cash_on_delivery: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5.5" width="35" height="17" rx="2.5"/><circle cx="20" cy="14" r="4.5"/><circle cx="7.6" cy="14" r="1.1"/><circle cx="32.4" cy="14" r="1.1"/></svg>`,
   card: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="2.5" y="5" width="35" height="18" rx="2.5"/><path d="M2.5 10.6h35"/><rect x="6.5" y="15" width="6.5" height="4.4" rx="1.1"/></svg>`,
   bank_transfer: `<svg class="pm-ico line" viewBox="0 0 40 28"><path d="M20 4.6 4.6 11.6h30.8L20 4.6Z"/><path d="M8.4 12.8v8.2M15 12.8v8.2M25 12.8v8.2M31.6 12.8v8.2"/><path d="M4.2 23.4h31.6"/></svg>`,
-  paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`
+  paymob: `<svg class="pm-ico line" viewBox="0 0 40 28"><rect x="4.5" y="6.5" width="31" height="15" rx="7.5"/><path d="M13.5 14h13"/></svg>`,
+  /* InstaPay's real mark — the purple-to-magenta gradient roundel with the
+     two crossing arrows, same shape/colours as the app icon and the CBE
+     instant-payment network branding. Full colour, no stroke, matching how
+     visa/mastercard/mada are treated above rather than the hand-drawn line
+     icons the generic methods use. */
+  instapay: `<svg class="pm-ico" viewBox="0 0 40 28" role="img" aria-label="InstaPay">
+    <defs><linearGradient id="ipGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#6C2EB5"/><stop offset="55%" stop-color="#9A2AB0"/><stop offset="100%" stop-color="#D6247E"/>
+    </linearGradient></defs>
+    <circle cx="20" cy="14" r="13" fill="url(#ipGrad)"/>
+    <path d="M13.2 17.6 19.6 9.8c.5-.6 1.4-.1 1.2.6l-1.4 4.6h6.4c.7 0 1.1.9.6 1.4l-6.4 7.4c-.5.6-1.4.1-1.2-.6l1.5-5.2h-6.5c-.7 0-1.1-.8-.6-1.4Z" fill="#fff"/>
+  </svg>`
 };
 
 function payOptionMarkup(p, opts){
@@ -820,10 +910,11 @@ function renderPayOptions3(){
     if (!provider.enabled) return;
     el.addEventListener('click', ()=>{
       state.paymentMethod = { id: el.dataset.pay };
-      persist(); renderPayOptions3(); renderPayPreview1(); renderSummary(); renderCardFields();
+      persist(); renderPayOptions3(); renderPayPreview1(); renderSummary(); renderCardFields(); renderInstapayFields();
     });
   });
   renderCardFields();
+  renderInstapayFields();
 }
 function renderCardFields(){
   let box = document.getElementById('cardFieldsBox');
@@ -839,6 +930,154 @@ function renderCardFields(){
     <div class="co-field"><label>${t('expires')}</label><input type="text" placeholder="MM / YY" maxlength="7" id="ccExpiry"></div>
     <div class="co-field" style="grid-column:1/-1"><div class="co-secure-note"><svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>${t('cardDetailsNote')}</div></div>`;
   cardEl.insertAdjacentElement('afterend', box);
+}
+
+/* ---------- InstaPay: number display + receipt upload ----------
+   The receipt is uploaded to Cloudinary as soon as it's chosen (not
+   deferred to order placement), so by the time the customer reaches
+   Review the URL is already sitting in state.instapayReceiptUrl and
+   placeOrder() just attaches it — no upload happening at the moment
+   they click "Place Order", which is where a slow connection would be
+   most painful to make them wait on. */
+let instapayUploading = false;
+
+function renderInstapayFields(){
+  let box = document.getElementById('instapayFieldsBox');
+  if (box) box.remove();
+  if (!state.paymentMethod || state.paymentMethod.id !== 'instapay') return;
+
+  const provider = CO.PaymentProviders.instapay;
+  const ipEl = payOptions3.querySelector('[data-pay="instapay"]');
+  box = document.createElement('div');
+  box.className = 'co-instapay-fields show';
+  box.id = 'instapayFieldsBox';
+  box.innerHTML = `
+    <div class="ip-number-card">
+      <div class="ip-number-mark"><svg viewBox="0 0 40 28" role="img" aria-label="InstaPay"><path d="M13.2 17.6 19.6 9.8c.5-.6 1.4-.1 1.2.6l-1.4 4.6h6.4c.7 0 1.1.9.6 1.4l-6.4 7.4c-.5.6-1.4.1-1.2-.6l1.5-5.2h-6.5c-.7 0-1.1-.8-.6-1.4Z" fill="#fff"/></svg></div>
+      <div class="ip-number-body">
+        <div class="ip-number-label">${t('instapayNumberLabel')}</div>
+        <div class="ip-number-value"><span>${provider.instapayNumber}</span>
+          <button type="button" class="ip-copy-btn" id="ipCopyBtn">
+            <svg viewBox="0 0 24 24"><rect x="8" y="8" width="13" height="13" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+            <span id="ipCopyBtnText">${t('copyLabel')}</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <label class="ip-upload-label">${t('instapayUploadLabel')}</label>
+    <div class="ip-dropzone" id="ipDropzone">
+      <input type="file" accept="image/*" id="ipFileInput">
+      <svg class="ip-dropzone-icon" viewBox="0 0 24 24"><path d="M12 16V4M12 4 7 9M12 4l5 5"/><path d="M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3"/></svg>
+      <div class="ip-dropzone-text">${t('instapayDropText')}</div>
+      <div class="ip-dropzone-hint">${t('instapayDropHint')}</div>
+    </div>
+    <div class="ip-preview" id="ipPreview">
+      <img id="ipPreviewImg" alt="">
+      <div class="ip-preview-info">
+        <div class="ip-preview-name" id="ipPreviewName"></div>
+        <div class="ip-preview-status" id="ipPreviewStatus"></div>
+      </div>
+      <div class="ip-preview-remove" id="ipPreviewRemove" title="${t('removeLabel')}">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+    </div>`;
+  ipEl.insertAdjacentElement('afterend', box);
+
+  // copy-to-clipboard
+  const copyBtn = document.getElementById('ipCopyBtn');
+  copyBtn.addEventListener('click', async ()=>{
+    try { await navigator.clipboard.writeText(provider.instapayNumber); }
+    catch(e){
+      // clipboard API unavailable (older browser / non-https) — fall back
+      // to a temporary selectable input so the number can still be copied
+      const tmp = document.createElement('input');
+      tmp.value = provider.instapayNumber; document.body.appendChild(tmp);
+      tmp.select(); document.execCommand('copy'); tmp.remove();
+    }
+    copyBtn.classList.add('copied');
+    document.getElementById('ipCopyBtnText').textContent = t('copiedLabel');
+    setTimeout(()=>{ copyBtn.classList.remove('copied'); document.getElementById('ipCopyBtnText').textContent = t('copyLabel'); }, 1800);
+  });
+
+  // if a receipt is already attached (came back to this step), show it
+  if (state.instapayReceiptUrl && state.instapayReceiptPreview){
+    showInstapayPreview(state.instapayReceiptFilename || 'receipt.jpg', state.instapayReceiptPreview, 'ok');
+  }
+
+  const dropzone = document.getElementById('ipDropzone');
+  const fileInput = document.getElementById('ipFileInput');
+  ['dragenter','dragover'].forEach(ev => dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.add('drag'); }));
+  ['dragleave','drop'].forEach(ev => dropzone.addEventListener(ev, e=>{ e.preventDefault(); dropzone.classList.remove('drag'); }));
+  dropzone.addEventListener('drop', e=>{
+    const f = e.dataTransfer.files && e.dataTransfer.files[0];
+    if (f) handleReceiptFile(f);
+  });
+  fileInput.addEventListener('change', ()=>{
+    const f = fileInput.files && fileInput.files[0];
+    if (f) handleReceiptFile(f);
+  });
+  document.getElementById('ipPreviewRemove').addEventListener('click', (e)=>{
+    e.stopPropagation();
+    state.instapayReceiptUrl = null; state.instapayReceiptPreview = null; state.instapayReceiptFilename = null;
+    persist();
+    document.getElementById('ipPreview').classList.remove('show');
+    dropzone.style.display = '';
+    fileInput.value = '';
+  });
+}
+
+function showInstapayPreview(filename, previewSrc, status, message){
+  const dropzone = document.getElementById('ipDropzone');
+  const preview = document.getElementById('ipPreview');
+  if (!preview) return; // panel closed (customer switched method) before this resolved
+  dropzone.style.display = 'none';
+  preview.classList.add('show');
+  document.getElementById('ipPreviewImg').src = previewSrc;
+  document.getElementById('ipPreviewName').textContent = filename;
+  const statusEl = document.getElementById('ipPreviewStatus');
+  statusEl.className = 'ip-preview-status ' + status;
+  if (status === 'uploading'){
+    statusEl.innerHTML = `<span class="ip-preview-spin"></span><span>${t('uploadingLabel')}</span>`;
+  } else if (status === 'ok'){
+    statusEl.innerHTML = `<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg><span>${t('uploadedLabel')}</span>`;
+  } else {
+    statusEl.innerHTML = `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg><span>${message || t('uploadFailedLabel')}</span>`;
+  }
+}
+
+async function handleReceiptFile(file){
+  if (!file.type || !file.type.startsWith('image/')){
+    showError(t('instapayNotImage')); return;
+  }
+  if (file.size > 8 * 1024 * 1024){
+    showError(t('instapayTooLarge')); return;
+  }
+
+  const reader = new FileReader();
+  reader.onload = async ()=>{
+    const dataUrl = reader.result;
+    showInstapayPreview(file.name, dataUrl, 'uploading');
+    instapayUploading = true;
+    try {
+      const r = await fetch('/api/orders?action=upload-receipt', {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ dataUrl })
+      });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Upload failed.');
+      state.instapayReceiptUrl = d.url;
+      state.instapayReceiptPreview = dataUrl;
+      state.instapayReceiptFilename = file.name;
+      persist();
+      showInstapayPreview(file.name, dataUrl, 'ok');
+    } catch(e){
+      state.instapayReceiptUrl = null; persist();
+      showInstapayPreview(file.name, dataUrl, 'bad', e.message);
+    } finally {
+      instapayUploading = false;
+    }
+  };
+  reader.readAsDataURL(file);
 }
 
 /* ---------- promo code ---------- */
@@ -888,7 +1127,7 @@ function renderSummary(){
     <div class="co-totals">
       <div class="co-totals-row"><span>${t('subtotalLabel')}</span><span>${CO.money(pricing.subtotal)}</span></div>
       ${pricing.discount ? `<div class="co-totals-row discount"><span>${t('discountLabel')}</span><span>&minus;${CO.money(pricing.discount)}</span></div>` : ''}
-      <div class="co-totals-row"><span>${t('shippingLabel')}</span><span>${CO.money(pricing.shipping)}</span></div>
+      <div class="co-totals-row"><span>${t('shippingLabel')}${pricing.weightSurcharge ? `<span class="co-vat" style="display:block">(${t('includesWeightSurcharge')})</span>` : ''}</span><span>${CO.money(pricing.shipping)}</span></div>
       <div class="co-totals-row grand"><span>${t('totalLabel')}</span><span>${CO.money(pricing.total)}<span class="co-vat">${t('includingVat')}</span></span></div>
     </div>
     <div class="co-trust">
@@ -1030,6 +1269,7 @@ document.querySelectorAll('[data-next]').forEach(btn=>{
     if (target === 'shipping' && !validateInformation()) return;
     if (target === 'payment' && !state.shippingMethod){ showError(t('errShippingMethod')); return; }
     if (target === 'review' && (!state.paymentMethod || !CO.PaymentProviders[state.paymentMethod.id].enabled)){ showError(t('errPaymentMethod')); return; }
+    if (target === 'review' && state.paymentMethod && state.paymentMethod.id === 'instapay' && !state.instapayReceiptUrl){ showError(t('errInstapayReceipt')); return; }
     btn.classList.add('loading'); btn.disabled = true;
     setTimeout(()=>{ btn.classList.remove('loading'); btn.disabled = false; goStep(target); }, 260);
   });

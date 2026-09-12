@@ -8,6 +8,8 @@
                         not just the one that placed the order.
    GET  /api/orders?action=shipping-methods — public, checkout.js reads this
    POST /api/orders?action=validate-coupon  — public, checkout.js "Apply" preview
+   POST /api/orders?action=upload-receipt   — public, checkout.js uploads an
+                        InstaPay transfer screenshot before placing the order
    POST /api/orders?action=paymob-webhook   — Paymob calls this (see "Payments" —
                         integration pending, returns 501 until configured)
    ============================================================ */
@@ -18,9 +20,12 @@ const { validateCoupon } = require('./_lib/coupons');
 const { getSetting } = require('./_lib/settings');
 const { getActivePromotions, effectivePrice } = require('./_lib/promotions');
 const { sendPurchaseCAPI } = require('./_lib/capi');
+const { uploadToCloudinary } = require('./_lib/cloudinary');
 
 // same shape/values as the seed row in db/schema.sql — used only if the
 // settings table row is ever missing, so checkout never hard-fails.
+// ratePerKg is optional (undefined here = no weight surcharge, same as
+// every method saved before this feature existed).
 const DEFAULT_SHIPPING_METHODS = {
   standard: { id: 'standard', label: 'Standard Delivery', sub: '3 – 5 Business Days', price: 80, minDays: 3, maxDays: 5 },
   express:  { id: 'express',  label: 'Express Delivery',  sub: '1 – 2 Business Days', price: 150, minDays: 1, maxDays: 2 }
@@ -181,7 +186,7 @@ async function reserveStock(items, orderId) {
 async function recomputePricing(order) {
   const ids = (order.items || []).map(i => i && i.id).filter(Boolean);
   const [rows, activePromotions] = await Promise.all([
-    ids.length ? sql`SELECT id, price, sale_price FROM products WHERE id = ANY(${ids})` : Promise.resolve([]),
+    ids.length ? sql`SELECT id, price, sale_price, extra FROM products WHERE id = ANY(${ids})` : Promise.resolve([]),
     getActivePromotions()
   ]);
   // same overlay the public product list applies — a product in a live
@@ -192,13 +197,22 @@ async function recomputePricing(order) {
     r.id,
     effectivePrice(r.id, r.price != null ? Number(r.price) : null, r.sale_price != null ? Number(r.sale_price) : null, activePromotions)
   ]));
+  // weight (kg) lives in extra, same place dimensions/finish do — see
+  // api/_lib/products.js. Read from the DB, never trusted from the client,
+  // same reasoning as price above: the client can't lower what it's billed
+  // by claiming a lighter item.
+  const weightMap = new Map(rows.map(r => {
+    const extra = typeof r.extra === 'string' ? JSON.parse(r.extra) : (r.extra || {});
+    return [r.id, extra.weight != null ? Number(extra.weight) : 0];
+  }));
 
-  let subtotal = 0;
+  let subtotal = 0, totalWeight = 0;
   const items = order.items.map(item => {
     const qty = Math.max(1, Math.round(Number(item.qty) || 1));
     const known = priceMap.get(item.id);
     const price = known != null ? known : (Number(item.price) || 0);
     subtotal += price * qty;
+    totalWeight += (weightMap.get(item.id) || 0) * qty;
     return { ...item, price };
   });
 
@@ -216,14 +230,25 @@ async function recomputePricing(order) {
   const methods = await getSetting('shipping_methods', DEFAULT_SHIPPING_METHODS);
   const methodId = order.shippingMethod && order.shippingMethod.id;
   const method = methodId ? methods[methodId] : null;
-  const shipping = method ? Number(method.price) || 0 : 0;
+  const basePrice = method ? Number(method.price) || 0 : 0;
   if (methodId && !method) return { error: `"${methodId}" isn't a valid shipping method.` };
+
+  // Weight-based surcharge, on top of the flat price above — e.g. an order
+  // weighing 12kg at 5 EGP/kg adds 60 EGP to that method's base price.
+  // ratePerKg is optional per method (dashboard-shipping.html); methods
+  // without one behave exactly as before this feature existed. Rounded to
+  // the nearest piastre so the total never carries a fractional-cent tail.
+  const ratePerKg = method && method.ratePerKg != null ? Number(method.ratePerKg) || 0 : 0;
+  const weightSurcharge = Math.round(totalWeight * ratePerKg * 100) / 100;
+  const shipping = basePrice + weightSurcharge;
 
   const total = Math.max(0, subtotal - discount) + shipping;
 
   return {
     items, promo,
-    shippingMethod: method ? { id: method.id, label: method.label, sub: method.sub, price: shipping } : order.shippingMethod,
+    shippingMethod: method
+      ? { id: method.id, label: method.label, sub: method.sub, price: shipping, basePrice, weightSurcharge, totalWeight }
+      : order.shippingMethod,
     pricing: { subtotal, discount, shipping, tax: 0, total }
   };
 }
@@ -297,6 +322,41 @@ async function validateCouponPreview(req, res) {
   const result = await validateCoupon(code, Number(subtotal) || 0);
   if (result.error) return res.status(400).json({ ok: false, error: result.error });
   return res.status(200).json({ ok: true, discount: result.discount, code: result.code, pct: result.pct, label: result.label });
+}
+
+/* POST /api/orders?action=upload-receipt — public, checkout.js calls this
+   right before placing an InstaPay order, so the receipt screenshot is
+   already a Cloudinary URL by the time createOrder() runs and can be
+   stored on the order like any other field, then included in the shop's
+   WhatsApp/email notification.
+
+   Deliberately not behind requireAuth — a customer mid-checkout has no
+   dashboard session. Kept safe a different way instead of via auth: a
+   hard size cap, image-only mimetypes, and its own Cloudinary folder
+   (payment-receipts) so a flood of junk uploads can't be mistaken for
+   product images or moderated from the same place. */
+async function uploadPaymentReceipt(req, res) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const { dataUrl } = body || {};
+
+  if (!dataUrl || typeof dataUrl !== 'string' || !dataUrl.startsWith('data:')) {
+    return res.status(400).json({ ok: false, error: 'Missing receipt image.' });
+  }
+  const match = dataUrl.match(/^data:(image\/[a-zA-Z0-9+.-]+);base64,(.+)$/);
+  if (!match) return res.status(400).json({ ok: false, error: 'Unsupported image format.' });
+
+  const [, mime, base64] = match;
+  const buffer = Buffer.from(base64, 'base64');
+  if (buffer.length > 8 * 1024 * 1024) return res.status(400).json({ ok: false, error: 'Image is too large (max 8MB).' });
+
+  try {
+    const url = await uploadToCloudinary(buffer, mime, `receipt-${Date.now()}`, 'payment-receipts');
+    return res.status(200).json({ ok: true, url });
+  } catch (e) {
+    console.error('[orders] receipt upload error:', e);
+    return res.status(500).json({ ok: false, error: e.message || 'Upload failed.' });
+  }
 }
 
 async function createOrder(req, res) {
@@ -385,6 +445,10 @@ module.exports = async (req, res) => {
   if (req.query.action === 'validate-coupon') {
     if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
     return validateCouponPreview(req, res);
+  }
+  if (req.query.action === 'upload-receipt') {
+    if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    return uploadPaymentReceipt(req, res);
   }
   if (req.query.action === 'shipping-methods') {
     if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }

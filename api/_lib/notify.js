@@ -61,6 +61,7 @@ const DEFAULT_TEMPLATES = {
     '*Total: {total}*',
     '',
     '💳 {paymentMethod} ({paymentStatus})',
+    '{receiptLine}',
     '🚚 {shippingMethod} — {deliveryLabel}',
     '{notesLine}'
   ].join('\n')
@@ -111,6 +112,13 @@ function shopEmailHtml(order) {
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Payment</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.paymentMethod.label)} &middot; <b>${escapeHtml(order.paymentStatus.toUpperCase())}</b></td></tr>
           ${order.notes ? `<tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Notes</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.notes)}</td></tr>` : ''}
         </table>
+        ${order.paymentMethod.receiptUrl ? `
+        <div style="margin-bottom:18px">
+          <p style="margin:0 0 8px;font-size:11px;letter-spacing:1px;color:#6b6459">INSTAPAY TRANSFER RECEIPT</p>
+          <a href="${escapeHtml(order.paymentMethod.receiptUrl)}" target="_blank">
+            <img src="${escapeHtml(order.paymentMethod.receiptUrl)}" alt="InstaPay receipt" style="max-width:260px;width:100%;border-radius:4px;border:1px solid #e2d8c6;display:block">
+          </a>
+        </div>` : ''}
         <table style="width:100%;border-collapse:collapse;margin-bottom:6px">
           <thead><tr>
             <th style="text-align:left;padding:6px 8px;font-size:10.5px;letter-spacing:1px;color:#fff;background:${INK}">ITEM</th>
@@ -172,6 +180,12 @@ function whatsappText(order, tpl) {
     total: money(p.total),
     paymentMethod: order.paymentMethod.label,
     paymentStatus: order.paymentStatus,
+    // InstaPay orders carry the customer's transfer screenshot as a
+    // Cloudinary URL (uploaded from checkout.js before the order was
+    // placed) — dropped straight into the WhatsApp text as a link since
+    // CallMeBot only relays plain text, not attachments. Tapping it opens
+    // the receipt the same way any shared photo link would.
+    receiptLine: order.paymentMethod.receiptUrl ? `🧾 Receipt: ${order.paymentMethod.receiptUrl}` : '',
     shippingMethod: order.shippingMethod.label,
     deliveryLabel: order.delivery.label,
     notesLine: order.notes ? `📝 ${order.notes}` : ''

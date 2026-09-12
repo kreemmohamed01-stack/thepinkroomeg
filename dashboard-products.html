@@ -364,7 +364,11 @@ function renderProductForm(p){
       <div class="db-field"><label>Color</label><input type="text" id="fColor" value="${escAttr(p && p.color || '')}"></div>
     </div>
 
-    <div class="db-field"><label>SKU (optional)</label><input type="text" id="fSku" value="${escAttr(p && p.sku || '')}"></div>
+    <div class="db-2col">
+      <div class="db-field"><label>SKU (optional)</label><input type="text" id="fSku" value="${escAttr(p && p.sku || '')}"></div>
+      <div class="db-field"><label>Weight (kg, optional)</label><input type="number" id="fWeight" value="${p && p.weight != null ? p.weight : ''}" min="0" step="0.1" placeholder="e.g. 2.5"></div>
+    </div>
+    <p class="db-img-hint" style="margin-top:-6px">Used to add a per-kg shipping surcharge on top of each method's base price — set the rate in Shipping settings. Leave empty for no surcharge on this item.</p>
 
     <label class="db-checkline"><input type="checkbox" id="fTrackInventory" ${p && p.trackInventory ? 'checked' : ''}> Track stock quantity for this product</label>
     <div class="db-2col" id="fStockFields" style="${p && p.trackInventory ? '' : 'display:none'}">
@@ -716,6 +720,7 @@ async function saveProduct(existingId){
     color: $('fColor').value.trim() || null,
     availability: $('fAvailability').value,
     sku: $('fSku').value.trim() || null,
+    weight: $('fWeight').value === '' ? null : Number($('fWeight').value),
     isNew: $('fIsNew').checked,
     rooms: Array.from(document.querySelectorAll('.fRoom:checked')).map(cb => cb.value),
     trackInventory: $('fTrackInventory').checked,

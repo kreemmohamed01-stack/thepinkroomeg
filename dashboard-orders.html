@@ -228,6 +228,13 @@ function renderDrawer(o){
       <h4>PAYMENT</h4>
       <div class="db-row"><span>Method</span><span>${escHtml(o.paymentMethod.label)}</span></div>
       ${o.promo ? `<div class="db-row"><span>Promo</span><span>${escHtml(o.promo.code)}</span></div>` : ''}
+      ${o.paymentMethod.receiptUrl ? `
+      <div class="db-row" style="align-items:flex-start">
+        <span>Receipt</span>
+        <a href="${escHtml(o.paymentMethod.receiptUrl)}" target="_blank" rel="noopener">
+          <img src="${escHtml(o.paymentMethod.receiptUrl)}" alt="InstaPay receipt" style="max-width:160px;border-radius:4px;border:1px solid var(--line);display:block">
+        </a>
+      </div>` : ''}
     </div>
 
     <div class="db-section">

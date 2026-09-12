@@ -60,13 +60,14 @@ function methodCard(id, m){
     <div class="db-field"><label>Label</label><input type="text" class="fLabel" value="${escAttr(m.label || '')}"></div>
     <div class="db-field"><label>Delivery window text (shown to customer)</label><input type="text" class="fSub" value="${escAttr(m.sub || '')}" placeholder="e.g. 3 – 5 Business Days"></div>
     <div class="db-2col">
-      <div class="db-field"><label>Price (EGP)</label><input type="number" class="fPrice" value="${m.price != null ? m.price : 0}" min="0"></div>
-      <div class="db-field"></div>
+      <div class="db-field"><label>Base Price (EGP)</label><input type="number" class="fPrice" value="${m.price != null ? m.price : 0}" min="0"></div>
+      <div class="db-field"><label>+ EGP per kg (optional)</label><input type="number" class="fRatePerKg" value="${m.ratePerKg != null ? m.ratePerKg : ''}" min="0" step="0.5" placeholder="0"></div>
     </div>
     <div class="db-2col">
       <div class="db-field"><label>Min business days</label><input type="number" class="fMinDays" value="${m.minDays != null ? m.minDays : 1}" min="0"></div>
       <div class="db-field"><label>Max business days</label><input type="number" class="fMaxDays" value="${m.maxDays != null ? m.maxDays : 1}" min="0"></div>
     </div>
+    <p class="db-img-hint" style="margin-top:-6px">Weight-based add-on: if set, each order's total weight (from each product's Weight field in Products) is multiplied by this rate and added on top of the Base Price above. Leave empty for a flat price regardless of weight, same as before.</p>
   </div>`;
 }
 
@@ -86,11 +87,13 @@ function render(){
 function collectFromDom(){
   $('shipList').querySelectorAll('.ship-card').forEach(card=>{
     const id = card.dataset.id;
+    const ratePerKgRaw = card.querySelector('.fRatePerKg').value;
     methods[id] = {
       id,
       label: card.querySelector('.fLabel').value.trim() || id,
       sub: card.querySelector('.fSub').value.trim(),
       price: Math.max(0, Number(card.querySelector('.fPrice').value) || 0),
+      ratePerKg: ratePerKgRaw === '' ? null : Math.max(0, Number(ratePerKgRaw) || 0),
       minDays: Math.max(0, Math.round(Number(card.querySelector('.fMinDays').value) || 0)),
       maxDays: Math.max(0, Math.round(Number(card.querySelector('.fMaxDays').value) || 0))
     };
@@ -104,7 +107,7 @@ $('btnAddMethod').addEventListener('click', ()=>{
   if (!clean){ toast('Enter a valid id.', 'bad'); return; }
   if (methods[clean]){ toast('That id already exists.', 'bad'); return; }
   collectFromDom();
-  methods[clean] = { id: clean, label: 'New Method', sub: '', price: 0, minDays: 1, maxDays: 3 };
+  methods[clean] = { id: clean, label: 'New Method', sub: '', price: 0, ratePerKg: null, minDays: 1, maxDays: 3 };
   render();
 });
 
