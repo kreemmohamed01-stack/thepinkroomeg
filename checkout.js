@@ -81,7 +81,7 @@
       async process(){ return { status:'pending', note:'Payment due on delivery.' }; }
     },
     card: {
-      id:'card', label:'Credit / Debit Card', enabled:true,
+      id:'card', label:'Credit / Debit Card', enabled:false,
       description:'Pay securely with your card',
       /* NOTE: card number / expiry / CVV are read from the form for display
          purposes only and are NEVER written to checkout state, the order
@@ -90,7 +90,7 @@
       async process(){ return { status:'pending', note:'Card payments require a connected payment gateway. Your order has been recorded and will be confirmed once payment is captured.' }; }
     },
     bank_transfer: {
-      id:'bank_transfer', label:'Bank Transfer', enabled:true,
+      id:'bank_transfer', label:'Bank Transfer', enabled:false,
       description:'Transfer directly from your bank account.',
       async process(){ return { status:'pending', note:'Order will be confirmed once the transfer is received.' }; }
     },

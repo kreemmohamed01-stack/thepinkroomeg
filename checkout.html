@@ -255,17 +255,18 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   /* every mark sits in a white tile of the same size, so a wordmark logo
      and a line icon still read as the same family down the list */
   .co-option-icon{
-    width:132px;height:58px;flex-shrink:0;
+    width:175px;height:68px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
-    background:#fff;border:1px solid #f2e6e8;border-radius:10px;padding:4px 10px;
+    background:#fff;border:1px solid #f2e6e8;border-radius:10px;padding:2px 8px;
   }
   .co-option-icon .pm-ico{width:100%;height:100%;}
-  /* the line icons are square-ish, so in the now-wider tile they'd float
-     as a small mark in a big box — cap them to their natural height and
-     let the wide InstaPay wordmark be the one that fills it */
-  .co-option-icon .pm-ico.line{width:auto;height:100%;}
+  /* the line icons are square-ish, so in this wide tile they'd float as a
+     small mark in a big box — cap them to a sensible height and let the
+     wide InstaPay wordmark be the one that actually fills it */
+  .co-option-icon .pm-ico.line{width:auto;height:44px;}
   @media (max-width:620px){
-    .co-option-icon{width:92px;height:48px;}
+    .co-option-icon{width:112px;height:52px;}
+    .co-option-icon .pm-ico.line{height:34px;}
   }
   /* line-art methods (cash, bank) share one stroke weight + colour */
   .co-option-icon .pm-ico.line{
@@ -810,6 +811,12 @@ state.customer = state.customer || {};
 state.shippingAddress = state.shippingAddress || {};
 state.shippingMethod = state.shippingMethod || { id:'standard' };
 state.paymentMethod = state.paymentMethod || null;
+// a returning customer may have a method saved that has since been turned
+// off (card and bank transfer are Coming Soon now) — drop it rather than
+// letting them sit on a choice they can no longer continue with
+if (state.paymentMethod && !(CO.PaymentProviders[state.paymentMethod.id] || {}).enabled){
+  state.paymentMethod = null;
+}
 state.billingAddress = state.billingAddress || { sameAsShipping:true };
 state.notes = state.notes || '';
 state.promo = state.promo || null;
@@ -1051,13 +1058,17 @@ function selectPaymentMethod(id, fromContainer){
   renderInstapayFields(fromContainer);
 }
 
+/* The two methods customers can actually use come first, then the ones
+   still marked Coming Soon — same order in the step-1 preview and the
+   real payment step so the list never appears to reshuffle. */
+const PAY_ORDER = ['cash_on_delivery','instapay','card','bank_transfer','paymob'];
+const payList = () => PAY_ORDER.map(id => CO.PaymentProviders[id]).filter(Boolean);
+
 function paintPayPreview1(){
-  const list = ['card','instapay','cash_on_delivery'].map(id => CO.PaymentProviders[id]);
-  payPreview1.innerHTML = list.map(p => payOptionMarkup(p, { preview:true })).join('');
+  payPreview1.innerHTML = payList().map(p => payOptionMarkup(p, { preview:true })).join('');
 }
 function paintPayOptions3(){
-  const list = Object.values(CO.PaymentProviders);
-  payOptions3.innerHTML = list.map(p => payOptionMarkup(p, { showSelected:true })).join('');
+  payOptions3.innerHTML = payList().map(p => payOptionMarkup(p, { showSelected:true })).join('');
 }
 
 function renderPayPreview1(){
