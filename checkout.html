@@ -241,6 +241,10 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     box-shadow:0 6px 20px -12px rgba(168,90,110,.45);
   }
   .co-option.disabled{opacity:.5;cursor:not-allowed;}
+  /* step-1 preview: the same cards, shown purely as "here's what you can
+     pay with" — not pressable, so no pointer or hover lift */
+  .co-option.preview{cursor:default;}
+  .co-option.preview:hover{border-color:#f0e2e4;box-shadow:none;}
   .co-option-radio{
     width:20px;height:20px;border-radius:50%;border:1.8px solid #e0cdd1;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;transition:border-color .25s ease;
@@ -251,11 +255,18 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   /* every mark sits in a white tile of the same size, so a wordmark logo
      and a line icon still read as the same family down the list */
   .co-option-icon{
-    width:62px;height:44px;flex-shrink:0;
+    width:132px;height:58px;flex-shrink:0;
     display:flex;align-items:center;justify-content:center;
-    background:#fff;border:1px solid #f2e6e8;border-radius:10px;padding:6px;
+    background:#fff;border:1px solid #f2e6e8;border-radius:10px;padding:4px 10px;
   }
   .co-option-icon .pm-ico{width:100%;height:100%;}
+  /* the line icons are square-ish, so in the now-wider tile they'd float
+     as a small mark in a big box — cap them to their natural height and
+     let the wide InstaPay wordmark be the one that fills it */
+  .co-option-icon .pm-ico.line{width:auto;height:100%;}
+  @media (max-width:620px){
+    .co-option-icon{width:92px;height:48px;}
+  }
   /* line-art methods (cash, bank) share one stroke weight + colour */
   .co-option-icon .pm-ico.line{
     stroke:#b76e82;fill:none;stroke-width:1.5;
@@ -298,7 +309,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .co-option-body{flex:1;min-width:0;}
   .co-option-body b{display:block;font-size:13.5px;font-weight:500;}
   .co-option-body span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
-  .co-option-price{font-size:13px;font-weight:600;color:var(--gold);white-space:nowrap;}
+  .co-option-price{font-size:14px;font-weight:600;color:#b03d5c;white-space:nowrap;flex-shrink:0;}
   .co-option-badge{
     font-size:9px;letter-spacing:1.4px;font-weight:600;color:#fff;background:var(--gold);
     padding:4px 9px;border-radius:2px;white-space:nowrap;
@@ -931,7 +942,7 @@ function shipOptionMarkup(m){
   const selected = state.shippingMethod && state.shippingMethod.id === m.id;
   return `<div class="co-option ${selected?'selected':''}" data-ship="${m.id}">
     <div class="co-option-radio"><i></i></div>
-    <div class="co-option-icon"><svg viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg></div>
+    <div class="co-option-icon"><svg class="pm-ico line" viewBox="0 0 24 24"><rect x="1" y="7" width="13" height="10" rx="1"/><path d="M14 10h4l3 3v4h-7z"/><circle cx="6" cy="19" r="1.6"/><circle cx="17" cy="19" r="1.6"/></svg></div>
     <div class="co-option-body"><b>${m.label}</b><span>${m.sub}</span></div>
     <div class="co-option-price">${CO.money(m.price)}</div>
   </div>`;
@@ -979,7 +990,7 @@ const PAY_ICON = {
      used on the network's own payment badges, rather than the square app
      tile. Drawn as text so it stays crisp at any size and needs no
      hosted asset. */
-  instapay: `<svg class="pm-ico" viewBox="0 0 124 26" role="img" aria-label="InstaPay">
+  instapay: `<svg class="pm-ico" viewBox="0 0.4 111 23.9" role="img" aria-label="InstaPay">
     <text x="0" y="19" font-family="Arial Black, Arial, Helvetica, sans-serif" font-size="17" font-weight="900" font-style="italic" letter-spacing="-.5" fill="#4A2A87">INSTA</text>
     <path d="M54 7 61 13l-7 6v-4l-4 3.6V7.4l4 3.6Z" fill="#E8552B"/>
     <path d="M63 7 70 13l-7 6v-4l-4 3.6V7.4l4 3.6Z" fill="#F0834F"/>
@@ -1005,11 +1016,13 @@ function payNote(id){
 
 function payOptionMarkup(p, opts){
   opts = opts || {};
-  const selected = state.paymentMethod && state.paymentMethod.id === p.id;
+  const selected = !opts.preview && state.paymentMethod && state.paymentMethod.id === p.id;
   const disabled = !p.enabled;
   const badge = disabled ? `<span class="co-option-soon">${t('comingSoon')}</span>` : '';
-  return `<div class="co-option ${selected?'selected':''} ${disabled?'disabled':''}" data-pay="${p.id}">
-    <div class="co-option-radio"><i></i></div>
+  // preview mode (step 1) is display-only: no radio to press, nothing
+  // selected, and .preview turns off the hover/pointer affordances
+  return `<div class="co-option ${opts.preview?'preview':''} ${selected?'selected':''} ${disabled?'disabled':''}" data-pay="${p.id}">
+    ${opts.preview ? '' : '<div class="co-option-radio"><i></i></div>'}
     <div class="co-option-icon">${PAY_ICON[p.id]||''}</div>
     <div class="co-option-body"><b>${p.label}</b><span>${p.description}</span></div>
     ${disabled ? badge : payNote(p.id)}
@@ -1039,8 +1052,8 @@ function selectPaymentMethod(id, fromContainer){
 }
 
 function paintPayPreview1(){
-  const list = ['cash_on_delivery','card','instapay'].map(id => CO.PaymentProviders[id]);
-  payPreview1.innerHTML = list.map(p => payOptionMarkup(p, {})).join('');
+  const list = ['card','instapay','cash_on_delivery'].map(id => CO.PaymentProviders[id]);
+  payPreview1.innerHTML = list.map(p => payOptionMarkup(p, { preview:true })).join('');
 }
 function paintPayOptions3(){
   const list = Object.values(CO.PaymentProviders);
@@ -1049,12 +1062,6 @@ function paintPayOptions3(){
 
 function renderPayPreview1(){
   paintPayPreview1();
-  // this preview has no card-number fields, but InstaPay's receipt upload
-  // has to be reachable from wherever the customer picks it — including
-  // here, on step 1 — otherwise picking it on this screen would let them
-  // continue with no way to attach a receipt until they happen to reach
-  // the full payment step
-  renderInstapayFields(payPreview1);
 }
 function renderPayOptions3(){
   paintPayOptions3();
@@ -1062,10 +1069,11 @@ function renderPayOptions3(){
   renderInstapayFields(payOptions3);
 }
 
-payPreview1.addEventListener('click', (e)=>{
-  const el = e.target.closest('[data-pay]');
-  if (el) selectPaymentMethod(el.dataset.pay, payPreview1);
-});
+/* Step 1's payment list is a preview only — it shows the customer what
+   they'll be able to pay with, but the actual choice (and anything it
+   needs, like InstaPay's receipt) happens on the Payment step. So no
+   click handler here: the cards are rendered read-only via
+   payOptionMarkup's `preview` flag. */
 payOptions3.addEventListener('click', (e)=>{
   const el = e.target.closest('[data-pay]');
   // clicks inside the InstaPay panel (upload, copy button) bubble up to
@@ -1441,11 +1449,8 @@ function goStep(step, opts){
 
   if (step === 'shipping') renderSavedAddress();
   if (step === 'review') renderReview();
-  // Only one InstaPay panel exists at a time (see renderInstapayFields),
-  // so it has to follow the customer: mount it into whichever payment
-  // list belongs to the step now on screen, or it would sit invisible in
-  // the hidden one.
-  if (step === 'information') renderInstapayFields(payPreview1);
+  // The InstaPay panel only belongs on the Payment step — step 1's list
+  // is a read-only preview, so there's nothing to fill in there.
   if (step === 'payment') renderInstapayFields(payOptions3);
 
   const url = new URL(location.href);
