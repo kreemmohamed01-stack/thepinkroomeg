@@ -203,6 +203,14 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     padding:13px 14px;border-radius:2px;transition:border-color .25s ease, box-shadow .25s ease;
   }
   .co-input-wrap input, .co-input-wrap select{padding-left:40px;}
+  /* the phone field's dial-code prefix sits where the other fields' icons
+     do, but is text (from Country) rather than a fixed svg glyph */
+  .co-dial-code{
+    position:absolute;left:14px;top:50%;transform:translateY(-50%);
+    font-size:13px;color:var(--ink-soft);pointer-events:none;
+    padding-right:8px;border-right:1px solid var(--line);
+  }
+  .co-phone-wrap input{padding-left:62px;}
   .co-field input:focus, .co-field select:focus, .co-field textarea:focus{
     outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,169,124,.14);
   }
@@ -573,9 +581,12 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
           </div>
           <div class="co-field" id="f-phone">
             <label data-i18n="phoneNumber">Phone Number</label>
-            <div class="co-input-wrap">
-              <svg viewBox="0 0 24 24"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.6a16 16 0 0 0 6 6l1.1-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2Z"/></svg>
-              <input type="tel" id="inPhone" autocomplete="tel" placeholder="e.g. +20 100 123 4567" data-i18n-placeholder="phoneExample">
+            <div class="co-input-wrap co-phone-wrap">
+              <!-- Dial code shown as a fixed prefix, kept in sync with the
+                   Country field below — a customer never has to know or
+                   type their own country code. -->
+              <span class="co-dial-code" id="phoneDialCode">+20</span>
+              <input type="tel" id="inPhone" autocomplete="tel" placeholder="100 123 4567" data-i18n-placeholder="phoneExampleLocal">
             </div>
             <p class="co-field-msg" data-i18n="errValidPhone">Please enter a valid phone number.</p>
           </div>
@@ -589,7 +600,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
           <p class="co-block-title" data-i18n="shippingAddressHeading">SHIPPING ADDRESS</p>
           <div class="co-field" id="f-country">
             <label data-i18n="countryRegion">Country / Region</label>
-            <select id="inCountry"><option data-i18n="egypt">Egypt</option></select>
+            <select id="inCountry"></select>
           </div>
           <div class="co-field" id="f-street">
             <label data-i18n="streetAddress">Street Address</label>
@@ -607,8 +618,16 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
               <p class="co-field-msg" data-i18n="errCity">Please enter your city.</p>
             </div>
             <div class="co-field" id="f-gov">
-              <label data-i18n="governorate">Governorate</label>
+              <label id="govLabel" data-i18n="governorate">Governorate</label>
               <select id="inGov"><option value="" data-i18n="selectGovernorate">Select Governorate</option></select>
+              <!-- Governorate is an Egypt-only concept (see GOVERNORATES in
+                   checkout.js) — every other country gets a free-text
+                   State/Region field instead, swapped in by
+                   toggleGovernorateField() whenever Country changes. Same
+                   #f-gov wrapper and error element so nothing else
+                   (validateInformation, the field-error CSS) needs to know
+                   which one is showing. -->
+              <input type="text" id="inGovText" data-i18n-placeholder="stateRegionPh" placeholder="State / Region" style="display:none">
               <p class="co-field-msg" data-i18n="errGovernorate">Please select your governorate.</p>
             </div>
           </div>
@@ -788,15 +807,45 @@ else if (typeof fbq === 'function'){
   });
 });
 
+/* ---------- country <select> — populated from CO.COUNTRIES ---------- */
+CO.COUNTRIES.forEach(c=>{
+  const o = document.createElement('option');
+  o.value = c.code;
+  o.textContent = `${c.flag}  ${t('country_' + c.code)}`;
+  inCountry.appendChild(o);
+});
+
+/* Governorate only exists as a fixed list for Egypt (CO.GOVERNORATES) —
+   every other country gets a free-text State/Region field instead, in
+   the same #f-gov slot so no other code needs to know which is active.
+   Also keeps the phone field's dial-code prefix in sync, since both are
+   driven by the same Country choice. */
+function applyCountry(code){
+  const country = CO.COUNTRIES.find(c => c.code === code) || CO.COUNTRIES[0];
+  phoneDialCode.textContent = country.dial;
+  const isEgypt = country.code === 'EG';
+  inGov.style.display = isEgypt ? '' : 'none';
+  inGovText.style.display = isEgypt ? 'none' : '';
+  govLabel.textContent = isEgypt ? t('governorate') : t('stateRegion');
+}
+
 /* ---------- prefill from saved state ---------- */
 (function prefill(){
   inName.value = state.customer.name || '';
   inEmail.value = state.customer.email || '';
-  inPhone.value = state.customer.phone || '';
+  inCountry.value = state.shippingAddress.country || 'EG';
+  applyCountry(inCountry.value);
+  // strip the just-applied dial code back off a saved full number so the
+  // field shows only the local part, same as if the customer had typed it
+  const savedPhone = state.customer.phone || '';
+  inPhone.value = savedPhone.startsWith(phoneDialCode.textContent)
+    ? savedPhone.slice(phoneDialCode.textContent.length).trim()
+    : savedPhone;
   inStreet.value = state.shippingAddress.street || '';
   inApt.value = state.shippingAddress.apt || '';
   inCity.value = state.shippingAddress.city || '';
   inGov.value = state.shippingAddress.governorate || '';
+  inGovText.value = state.shippingAddress.governorate || '';
   inPostal.value = state.shippingAddress.postal || '';
   inNotes1.value = state.notes || '';
   inNotes2.value = state.notes || '';
@@ -815,11 +864,26 @@ else if (typeof fbq === 'function'){
 function syncField(el, fn){ el.addEventListener('input', fn); }
 syncField(inName, ()=>{ state.customer.name = inName.value; persist(); });
 syncField(inEmail, ()=>{ state.customer.email = inEmail.value; persist(); });
-syncField(inPhone, ()=>{ state.customer.phone = inPhone.value; persist(); });
+// The field only ever shows the local number; the dial code prefix
+// (kept in sync with Country by applyCountry()) is prepended here so
+// state.customer.phone — what actually gets saved to the order — is
+// always the full international number, e.g. "+20 100 123 4567".
+syncField(inPhone, ()=>{ state.customer.phone = (phoneDialCode.textContent + ' ' + inPhone.value).trim(); persist(); });
 syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
 syncField(inApt, ()=>{ state.shippingAddress.apt = inApt.value; persist(); });
 syncField(inCity, ()=>{ state.shippingAddress.city = inCity.value; persist(); });
 inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
+syncField(inGovText, ()=>{ state.shippingAddress.governorate = inGovText.value; persist(); });
+inCountry.addEventListener('change', ()=>{
+  state.shippingAddress.country = inCountry.value;
+  applyCountry(inCountry.value);
+  // switching countries swaps which governorate field is authoritative —
+  // clear the one that just got hidden so a leftover Egypt governorate
+  // never silently rides along on, say, a Saudi Arabia order, and vice versa
+  state.shippingAddress.governorate = '';
+  inGov.value = ''; inGovText.value = '';
+  persist();
+});
 syncField(inPostal, ()=>{ state.shippingAddress.postal = inPostal.value; persist(); });
 syncField(inNotes1, ()=>{ state.notes = inNotes1.value; inNotes2.value = state.notes; persist(); });
 syncField(inNotes2, ()=>{ state.notes = inNotes2.value; inNotes1.value = state.notes; persist(); });
@@ -1188,6 +1252,12 @@ function renderSummary(){
   document.getElementById('promoInput').addEventListener('keydown', e=>{ if (e.key === 'Enter') applyPromo(e.target.value); });
 }
 
+/* Country name for whatever was actually picked, not a hardcoded "Egypt" —
+   falls back to Egypt only if the state predates this field existing. */
+function countryName(){
+  return t('country_' + (state.shippingAddress.country || 'EG'));
+}
+
 /* ---------- step 2: saved address summary card ---------- */
 function renderSavedAddress(){
   const a = state.shippingAddress, c = state.customer;
@@ -1197,7 +1267,7 @@ function renderSavedAddress(){
         <b>${c.name || t('yourNamePh')}</b><br>
         ${[a.street, a.apt].filter(Boolean).join(', ') || t('streetAddressPh')}<br>
         ${[a.city, a.governorate].filter(Boolean).join(', ')}<br>
-        ${t('egypt')}<br>
+        ${countryName()}<br>
         ${c.phone || ''}
       </p>
       <a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a>
@@ -1223,7 +1293,7 @@ function renderReview(){
         <div class="co-review-head"><h4>${t('shippingAddressCard')}</h4><a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a></div>
         <p>${c.name || ''}</p>
         <p class="muted">${[a.street, a.apt].filter(Boolean).join(', ')}</p>
-        <p class="muted">${[a.city, a.governorate].filter(Boolean).join(', ')}, ${t('egypt')}</p>
+        <p class="muted">${[a.city, a.governorate].filter(Boolean).join(', ')}, ${countryName()}</p>
         <p class="muted">${c.phone || ''}</p>
         <p style="margin-top:8px">${shippingMethod.label} <span class="muted">(${shippingMethod.sub})</span> &mdash; ${CO.money(shippingMethod.price)}</p>
       </div>
@@ -1254,7 +1324,10 @@ function validateInformation(){
   const phoneOk = CO.isPhone(inPhone.value); setFieldError('f-phone', !phoneOk); ok = ok && phoneOk;
   const streetOk = CO.isFilled(inStreet.value); setFieldError('f-street', !streetOk); ok = ok && streetOk;
   const cityOk = CO.isFilled(inCity.value); setFieldError('f-city', !cityOk); ok = ok && cityOk;
-  const govOk = CO.isFilled(inGov.value); setFieldError('f-gov', !govOk); ok = ok && govOk;
+  // whichever of Governorate (Egypt) / State-Region (everywhere else) is
+  // actually visible is the one that has to be filled — see applyCountry()
+  const govField = inCountry.value === 'EG' ? inGov : inGovText;
+  const govOk = CO.isFilled(govField.value); setFieldError('f-gov', !govOk); ok = ok && govOk;
   if (!ok) showError(t('errAllFields'));
   return ok;
 }

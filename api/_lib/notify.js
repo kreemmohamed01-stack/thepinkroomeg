@@ -32,6 +32,19 @@ const GOLD = '#c9a97c';
 const INK = '#1c1a17';
 const CREAM = '#f8f4ee';
 
+/* Same country list checkout.js ships with (see COUNTRIES there) — kept
+   as a plain code->name map here since notifications only ever need the
+   display name, not the flag/dial-code fields the checkout UI also uses.
+   order.shippingAddress.country is a code like "EG"/"SA"; anything older
+   or missing falls back to Egypt, which was the only option before this
+   field existed. */
+const COUNTRY_NAMES = {
+  EG: 'Egypt', SA: 'Saudi Arabia', AE: 'United Arab Emirates', QA: 'Qatar',
+  IQ: 'Iraq', TN: 'Tunisia', JO: 'Jordan', OM: 'Oman', KW: 'Kuwait',
+  MA: 'Morocco', DZ: 'Algeria'
+};
+const countryName = (code) => COUNTRY_NAMES[code] || COUNTRY_NAMES.EG;
+
 /* Dashboard-editable pieces of the notifications — subjects, the two
    short customer-facing lines, and the WhatsApp message. Deliberately
    NOT the whole HTML layout: these are safe to edit as plain strings
@@ -107,7 +120,7 @@ function shopEmailHtml(order) {
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459;width:140px">Customer</td><td style="padding:4px 0;font-size:13px"><b>${escapeHtml(c.name)}</b></td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Phone</td><td style="padding:4px 0;font-size:13px"><a href="tel:${escapeHtml(c.phone)}">${escapeHtml(c.phone)}</a></td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Email</td><td style="padding:4px 0;font-size:13px"><a href="mailto:${escapeHtml(c.email)}">${escapeHtml(c.email)}</a></td></tr>
-          <tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Address</td><td style="padding:4px 0;font-size:13px">${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}<br>${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, Egypt</td></tr>
+          <tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Address</td><td style="padding:4px 0;font-size:13px">${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}<br>${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, ${escapeHtml(countryName(a.country))}</td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Shipping</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.shippingMethod.label)} (${escapeHtml(order.shippingMethod.sub)})</td></tr>
           <tr><td style="padding:4px 0;font-size:12px;color:#6b6459">Payment</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.paymentMethod.label)} &middot; <b>${escapeHtml(order.paymentStatus.toUpperCase())}</b></td></tr>
           ${order.notes ? `<tr><td style="padding:4px 0;font-size:12px;color:#6b6459;vertical-align:top">Notes</td><td style="padding:4px 0;font-size:13px">${escapeHtml(order.notes)}</td></tr>` : ''}
@@ -156,7 +169,7 @@ function customerEmailHtml(order, tpl, storeSettings) {
           <tbody>${itemsRowsHtml(order.items)}</tbody>
         </table>
         <table style="width:100%;border-collapse:collapse;margin-bottom:20px">${pricingRowsHtml(order.pricing, order.promo)}</table>
-        <p style="font-size:12px;color:#6b6459;line-height:1.8;margin-bottom:4px"><b style="color:${INK}">Delivery address:</b><br>${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}, ${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, Egypt</p>
+        <p style="font-size:12px;color:#6b6459;line-height:1.8;margin-bottom:4px"><b style="color:${INK}">Delivery address:</b><br>${escapeHtml([a.street, a.apt].filter(Boolean).join(', '))}, ${escapeHtml([a.city, a.governorate].filter(Boolean).join(', '))}, ${escapeHtml(countryName(a.country))}</p>
         <p style="font-size:12px;color:#6b6459;line-height:1.8;margin-bottom:20px"><b style="color:${INK}">Payment method:</b> ${escapeHtml(order.paymentMethod.label)}</p>
         <p style="font-size:12.5px;color:#6b6459;line-height:1.8;text-align:center;border-top:1px solid #e2d8c6;padding-top:16px">${fillTemplate(escapeHtml(tpl.customerEmailFooter), { shopWhatsapp: `<a href="https://wa.me/${String((storeSettings && storeSettings.whatsapp) || '+201207803666').replace(/[^0-9]/g, '')}" style="color:${GOLD}">${escapeHtml((storeSettings && storeSettings.whatsapp) || '+20 120 780 3666')}</a>` })}</p>
       </div>
@@ -172,7 +185,7 @@ function whatsappText(order, tpl) {
     customerName: c.name,
     customerPhone: c.phone,
     customerEmail: c.email || '—',
-    address: `${[a.street, a.apt].filter(Boolean).join(', ')}, ${[a.city, a.governorate].filter(Boolean).join(', ')}, Egypt`,
+    address: `${[a.street, a.apt].filter(Boolean).join(', ')}, ${[a.city, a.governorate].filter(Boolean).join(', ')}, ${countryName(a.country)}`,
     items,
     subtotal: money(p.subtotal),
     discountLine: p.discount ? `Discount: -${money(p.discount)}` : '',

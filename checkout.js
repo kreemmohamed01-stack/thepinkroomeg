@@ -17,6 +17,29 @@
 
   const STEPS = ['information', 'shipping', 'payment', 'review'];
 
+  /* Countries the store ships to. Egypt first (the default and the only
+     one with a real Governorate list below); the rest are the countries
+     added for international shipping, in the order shown on the shipping
+     announcement. `dial` is shown next to the phone field and prefilled
+     into it — same idea as any checkout that shows "+20" before the
+     phone input once a country is picked — so a customer never has to
+     know or type their own country code. `flag` is a plain Unicode flag
+     emoji: no image asset to host, renders natively in every mobile OS
+     and modern desktop browser without a network request. */
+  const COUNTRIES = [
+    { code:'EG', name:'Egypt',        flag:'🇪🇬', dial:'+20'  },
+    { code:'SA', name:'Saudi Arabia', flag:'🇸🇦', dial:'+966' },
+    { code:'AE', name:'United Arab Emirates', flag:'🇦🇪', dial:'+971' },
+    { code:'QA', name:'Qatar',        flag:'🇶🇦', dial:'+974' },
+    { code:'IQ', name:'Iraq',         flag:'🇮🇶', dial:'+964' },
+    { code:'TN', name:'Tunisia',      flag:'🇹🇳', dial:'+216' },
+    { code:'JO', name:'Jordan',       flag:'🇯🇴', dial:'+962' },
+    { code:'OM', name:'Oman',         flag:'🇴🇲', dial:'+968' },
+    { code:'KW', name:'Kuwait',       flag:'🇰🇼', dial:'+965' },
+    { code:'MA', name:'Morocco',      flag:'🇲🇦', dial:'+212' },
+    { code:'DZ', name:'Algeria',      flag:'🇩🇿', dial:'+213' }
+  ];
+
   const GOVERNORATES = [
     'Cairo','Giza','Alexandria','Qalyubia','Port Said','Suez','Dakahlia','Sharqia',
     'Gharbia','Monufia','Beheira','Ismailia','Faiyum','Beni Suef','Minya','Asyut',
@@ -350,7 +373,7 @@
   }
 
   window.TPRCheckout = {
-    STEPS, GOVERNORATES, SHIPPING_METHODS, SHIPPING_METHODS_READY, PaymentProviders,
+    STEPS, GOVERNORATES, COUNTRIES, SHIPPING_METHODS, SHIPPING_METHODS_READY, PaymentProviders,
     loadCart, loadCheckoutState, saveCheckoutState, clearCheckoutState,
     loadOrders, getOrder, getLatestOrder, fetchOrder, getOrderAnywhere,
     money, isEmail, isPhone, isFilled,
