@@ -264,9 +264,19 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
      small mark in a big box — cap them to a sensible height and let the
      wide InstaPay wordmark be the one that actually fills it */
   .co-option-icon .pm-ico.line{width:auto;height:44px;}
+  /* InstaPay only: its wordmark is the one real brand logo in the list and
+     was reading small, so its tile alone is bigger. The extra margin-inline
+     keeps the enlarged mark clear of the radio on its left and the method
+     name on its right — it grows without ever touching a neighbour. */
+  .co-option[data-pay="instapay"] .co-option-icon{
+    width:236px;height:86px;padding:6px 14px;margin:2px 6px 2px 2px;
+  }
   @media (max-width:620px){
     .co-option-icon{width:112px;height:52px;}
     .co-option-icon .pm-ico.line{height:34px;}
+    .co-option[data-pay="instapay"] .co-option-icon{
+      width:152px;height:60px;padding:4px 10px;margin:2px 2px 2px 0;
+    }
   }
   /* line-art methods (cash, bank) share one stroke weight + colour */
   .co-option-icon .pm-ico.line{
