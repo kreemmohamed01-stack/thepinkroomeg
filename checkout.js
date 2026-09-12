@@ -82,17 +82,23 @@
     },
     card: {
       id:'card', label:'Credit / Debit Card', enabled:false,
-      description:'Pay securely with your card',
-      /* NOTE: card number / expiry / CVV are read from the form for display
-         purposes only and are NEVER written to checkout state, the order
-         object, or localStorage. A real integration would tokenize them
-         through a PCI-compliant gateway and only store the returned token. */
-      async process(){ return { status:'pending', note:'Card payments require a connected payment gateway. Your order has been recorded and will be confirmed once payment is captured.' }; }
+      description:'Coming soon.',
+      /* Closed the same way Paymob is: disabled in the list, and process()
+         refuses outright rather than recording a 'pending' order nobody can
+         collect on. Card payments need a connected gateway holding the
+         secret key server-side; until that exists there is nothing here
+         that could take a real charge.
+         NOTE for when it is switched back on: card number / expiry / CVV are
+         read from the form for display purposes only and are NEVER written
+         to checkout state, the order object, or localStorage. A real
+         integration would tokenize them through a PCI-compliant gateway and
+         only store the returned token. */
+      async process(){ throw new Error('Card payments are not yet available.'); }
     },
     bank_transfer: {
       id:'bank_transfer', label:'Bank Transfer', enabled:false,
-      description:'Transfer directly from your bank account.',
-      async process(){ return { status:'pending', note:'Order will be confirmed once the transfer is received.' }; }
+      description:'Coming soon.',
+      async process(){ throw new Error('Bank transfer is not yet available.'); }
     },
     instapay: {
       id:'instapay', label:'InstaPay', enabled:true,
