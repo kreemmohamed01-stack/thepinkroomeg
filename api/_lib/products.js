@@ -44,7 +44,9 @@ function rowToProduct(row){
     // its primary `category` — see productPlacements() in catalog.js
     extraCategories: extra.extraCategories || [],
     // color options a customer picks between before adding to bag — each
-    // { name, images: [indices into `images` above], stockQuantity }.
+    // { name, hex, images: [urls from `images` above], stockQuantity }.
+    // hex is the dashboard-picked swatch color (null on older products —
+    // product.html falls back to guessing one from the name in that case).
     // Empty array = no color choice for this product (the common case).
     colors: extra.colors || [],
     // size options a customer picks between — each { name, images }, a
@@ -105,7 +107,7 @@ function validateProduct(p){
     })
     .filter(Boolean);
 
-  /* Color options — each { name, images: [urls from p.images], stockQuantity }.
+  /* Color options — each { name, hex, images: [urls from p.images], stockQuantity }.
      Images are matched by URL rather than index so reordering/removing a
      photo in the dashboard (which shifts indices) never silently points a
      color at the wrong picture. Names are deduped (case-insensitive). A
@@ -113,8 +115,14 @@ function validateProduct(p){
      top-level stockQuantity becomes the sum of every color's, kept here
      so the rest of the dashboard/site (low-stock badges, the inventory
      page) that only look at the one number keep working without knowing
-     colors exist. */
+     colors exist.
+     hex is the actual swatch color picked in the dashboard (e.g.
+     "#c9a97c") so the product page can show a real color circle instead
+     of the name as text — optional, null when not set (older products,
+     or a name that isn't really a single color), in which case the
+     product page falls back to guessing from the name. */
   const validImages = new Set(p.images.filter(Boolean));
+  const hexPattern = /^#[0-9a-f]{6}$/i;
   const seenColorNames = new Set();
   const colors = (Array.isArray(p.colors) ? p.colors : [])
     .map(c => {
@@ -127,7 +135,8 @@ function validateProduct(p){
       const images = (Array.isArray(c.images) ? c.images : [])
         .filter(u => typeof u === 'string' && validImages.has(u));
       const stockQuantity = Math.max(0, Math.round(Number(c.stockQuantity) || 0));
-      return { name, images, stockQuantity };
+      const hex = typeof c.hex === 'string' && hexPattern.test(c.hex.trim()) ? c.hex.trim().toLowerCase() : null;
+      return { name, hex, images, stockQuantity };
     })
     .filter(Boolean);
 

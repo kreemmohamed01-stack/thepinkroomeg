@@ -288,11 +288,18 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 /* ---------- COLOR OPTIONS WIDGET ---------- */
 .db-colors{display:flex;flex-direction:column;gap:12px;margin-bottom:6px;}
 .db-color-row{border:1px solid var(--line);border-radius:4px;background:#fff;padding:12px;}
-.db-color-row-top{display:grid;grid-template-columns:1fr 110px 28px;gap:8px;align-items:center;margin-bottom:10px;}
+.db-color-row-top{display:grid;grid-template-columns:36px 1fr 110px 28px;gap:8px;align-items:center;margin-bottom:10px;}
 .db-color-row-top input[type="text"], .db-color-row-top input[type="number"]{
   border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:12.5px;font-family:inherit;
 }
 .db-color-row-top input:focus{outline:none;border-color:var(--gold);}
+.fColorHex{
+  -webkit-appearance:none;appearance:none;width:36px;height:36px;padding:0;border:1px solid var(--line);
+  border-radius:50%;overflow:hidden;cursor:pointer;background:none;
+}
+.fColorHex::-webkit-color-swatch-wrapper{padding:0;}
+.fColorHex::-webkit-color-swatch{border:none;border-radius:50%;}
+.fColorHex::-moz-color-swatch{border:none;border-radius:50%;}
 .db-color-remove{
   width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;
   color:var(--err);font-size:15px;line-height:1;border:1px solid var(--line);

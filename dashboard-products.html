@@ -225,7 +225,7 @@ async function openProductDrawer(id){
     if (!d.ok) throw new Error(d.error || 'Could not load this product.');
     drawerImages = (d.product.images || []).slice();
     (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
-    drawerColors = (d.product.colors || []).map(c => ({ name: c.name, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
+    drawerColors = (d.product.colors || []).map(c => ({ name: c.name, hex: c.hex || null, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
     drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '', images: (s.images || []).slice() }));
     drawerImageFocus = Object.assign({}, d.product.imageFocus || {});
     renderProductForm(d.product);
@@ -300,7 +300,7 @@ function renderProductForm(p){
       <label>Color Options (optional)</label>
       <div class="db-colors" id="colorList"></div>
       <button type="button" class="db-color-add" id="colorAddBtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD COLOR</button>
-      <p class="db-img-hint">Give a piece color choices — e.g. "Beige" and "White" — each with its own photos (pick from the photos above) and its own stock count. Leave empty for a product with no color choice. When colors are set, the Stock Quantity below is added up from them automatically.</p>
+      <p class="db-img-hint">Give a piece color choices — e.g. "Beige" and "White" — each with its own swatch color (the circle), photos (pick from the photos above) and stock count. The swatch color is what shows on the product page, so pick it close to the real color. Leave empty for a product with no color choice. When colors are set, the Stock Quantity below is added up from them automatically.</p>
     </div>
 
     <div class="db-field"><label>Name</label><input type="text" id="fName" value="${escAttr(p && p.name || '')}"></div>
@@ -396,7 +396,7 @@ function renderProductForm(p){
   renderImageList();
   renderColorList();
   $('colorAddBtn').addEventListener('click', ()=>{
-    drawerColors.push({ name: '', images: [], stockQuantity: 0 });
+    drawerColors.push({ name: '', hex: '#c9a97c', images: [], stockQuantity: 0 });
     renderColorList();
   });
   renderSizeList();
@@ -586,6 +586,7 @@ function renderColorList(){
   wrap.innerHTML = drawerColors.map((c, i) => `
     <div class="db-color-row" data-i="${i}">
       <div class="db-color-row-top">
+        <input type="color" class="fColorHex" title="Swatch color shown on the product page" value="${escAttr(c.hex || '#c9a97c')}">
         <input type="text" class="fColorName" placeholder="Color name (e.g. Beige)" value="${escAttr(c.name)}">
         <input type="number" class="fColorStock" placeholder="Stock" min="0" value="${c.stockQuantity}">
         <button type="button" class="db-color-remove" data-i="${i}" aria-label="Remove color">&times;</button>
@@ -598,6 +599,7 @@ function renderColorList(){
       </div>
     </div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No color options — this product will show one set of photos with no color choice.</p>';
 
+  wrap.querySelectorAll('.fColorHex').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerColors[i].hex = inp.value; }));
   wrap.querySelectorAll('.fColorName').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerColors[i].name = inp.value; }));
   wrap.querySelectorAll('.fColorStock').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerColors[i].stockQuantity = Math.max(0, Math.round(Number(inp.value)) || 0); }));
   wrap.querySelectorAll('.db-color-remove').forEach(btn => btn.addEventListener('click', ()=>{
@@ -712,7 +714,7 @@ async function saveProduct(existingId){
     salePrice: $('fSalePrice').value === '' ? null : Number($('fSalePrice').value),
     images: drawerImages,
     imageFocus: drawerImageFocus,
-    colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), images: c.images.slice(), stockQuantity: c.stockQuantity })),
+    colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), hex: c.hex || null, images: c.images.slice(), stockQuantity: c.stockQuantity })),
     size: $('fSize').value || null,
     sizeLabel: $('fSizeLabel').value.trim() || null,
     sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), images: s.images.slice() })),

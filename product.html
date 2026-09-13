@@ -221,6 +221,46 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .pdp-swatch.active{border-color:var(--gold);background:var(--gold);color:var(--ink);font-weight:500;}
   .pdp-swatch.oos{color:var(--ink-soft);text-decoration:line-through;opacity:.55;cursor:not-allowed;}
   .pdp-swatch.oos:hover{border-color:var(--line);}
+
+  /* Color choice as real color circles, sat right under the gallery so
+     it's the first thing a shopper sees — not the text buttons further
+     down in the info column (those still exist for size). */
+  .gal-colors{display:flex;align-items:center;flex-wrap:wrap;gap:12px;margin-top:16px;}
+  .gal-colors-label{font-size:11px;letter-spacing:1.5px;color:var(--ink-soft);margin-right:2px;}
+  .gal-color-dot{
+    position:relative;width:34px;height:34px;border-radius:50%;
+    border:2px solid transparent;padding:3px;flex-shrink:0;
+    background-clip:content-box, border-box;
+    background-image:var(--dot-color), var(--dot-color);
+    background-origin:content-box, border-box;
+    transition:border-color .25s ease, transform .2s ease;
+  }
+  .gal-color-dot::after{
+    content:'';position:absolute;inset:0;border-radius:50%;
+    box-shadow:inset 0 0 0 1px rgba(20,17,12,.12);
+  }
+  .gal-color-dot:hover{transform:translateY(-2px);}
+  .gal-color-dot.active{border-color:var(--gold);}
+  .gal-color-dot.oos{opacity:.35;cursor:not-allowed;}
+  .gal-color-dot.oos:hover{transform:none;}
+  .gal-color-dot .dot-check{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    opacity:0;transition:opacity .2s ease;color:#fff;
+    filter:drop-shadow(0 0 2px rgba(0,0,0,.85));
+  }
+  .gal-color-dot .dot-check svg{width:13px;height:13px;stroke-width:2.5;}
+  .gal-color-dot.active .dot-check{opacity:1;}
+  .gal-color-dot .dot-tip{
+    position:absolute;bottom:calc(100% + 8px);left:50%;transform:translateX(-50%);
+    background:var(--ink);color:#fff;font-size:11px;letter-spacing:.3px;
+    padding:5px 9px;border-radius:3px;white-space:nowrap;
+    opacity:0;pointer-events:none;transition:opacity .2s ease;
+  }
+  .gal-color-dot .dot-tip::after{
+    content:'';position:absolute;top:100%;left:50%;transform:translateX(-50%);
+    border:4px solid transparent;border-top-color:var(--ink);
+  }
+  .gal-color-dot:hover .dot-tip{opacity:1;}
   .pdp-size-box{
     border:1px solid var(--line);
     background:var(--cream-light);
@@ -469,6 +509,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
       color:var(--ink-soft);
     }
     .gal-counter svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.7;}
+    .gal-colors{justify-content:center;margin-top:14px;}
+    .gal-color-dot{width:30px;height:30px;}
     .pdp-name{font-size:27px;}
     .pdp-price{font-size:22px;}
     .btn-row{grid-template-columns:1fr;}
@@ -520,8 +562,36 @@ const ICON = {
   zoom:  '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
   leaf:  '<svg viewBox="0 0 24 24"><path d="M4 20c0-8 6-14 16-15 0 10-6 15-13 15Z"/><line x1="4" y1="20" x2="12" y2="12"/></svg>',
   bulb:  '<svg viewBox="0 0 24 24"><path d="M9 18h6"/><path d="M10 21h4"/><path d="M12 3a6 6 0 0 0-3.5 10.9c.5.4.8.9.9 1.5l.1.6h5l.1-.6c.1-.6.4-1.1.9-1.5A6 6 0 0 0 12 3Z"/></svg>',
-  ruler: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="1.5"/><line x1="6" y1="7" x2="6" y2="11"/><line x1="10" y1="7" x2="10" y2="11"/><line x1="14" y1="7" x2="14" y2="11"/><line x1="18" y1="7" x2="18" y2="11"/></svg>'
+  ruler: '<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="10" rx="1.5"/><line x1="6" y1="7" x2="6" y2="11"/><line x1="10" y1="7" x2="10" y2="11"/><line x1="14" y1="7" x2="14" y2="11"/><line x1="18" y1="7" x2="18" y2="11"/></svg>',
+  check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>'
 };
+
+/* Fallback swatch color for a color option that has no hex saved (set in
+   the dashboard's color picker) — older products, or ones added before
+   that field existed. Matches common furniture/decor color words; falls
+   back to a neutral gray dot with no name match rather than guessing
+   wrong, so it's still clearly a swatch, just an honest "unknown" one. */
+const COLOR_NAME_FALLBACK = {
+  black:'#1a1a1a', white:'#f7f5f2', ivory:'#f3ecdf', cream:'#eee3ce', beige:'#d9c9a8',
+  tan:'#c9a97c', brown:'#6b4a30', chocolate:'#4a3220', espresso:'#3b2a1e', taupe:'#8b7d6b',
+  grey:'#8a8a8a', gray:'#8a8a8a', charcoal:'#3a3a3a', silver:'#c4c4c4',
+  gold:'#c9a95c', 'rose gold':'#b8876b', bronze:'#8c6239', brass:'#b5a26a', copper:'#b56a4a',
+  pink:'#e3aab8', blush:'#e8c3cb', rose:'#c98a9a', red:'#b23b3b', burgundy:'#6b1f2a', maroon:'#5c1e26',
+  orange:'#c96a30', rust:'#a0522d', terracotta:'#c1694f', mustard:'#c9a227', yellow:'#d9c14a',
+  green:'#4c6b4f', olive:'#6f7143', sage:'#a3ad93', emerald:'#2f6b52', forest:'#2e4a34', mint:'#a9d3c1',
+  blue:'#3f5f78', navy:'#26374d', teal:'#2f6b6b', turquoise:'#3fa6a1', denim:'#3f5e7a',
+  purple:'#6a4d7a', lavender:'#b6a3c9', violet:'#6f4a8a', plum:'#5a3550',
+  natural:'#cdbb98', oak:'#b98f5e', walnut:'#5a3d28', mahogany:'#4a2418'
+};
+function colorSwatchHex(c){
+  if (c && c.hex) return c.hex;
+  const name = String((c && c.name) || '').trim().toLowerCase();
+  if (COLOR_NAME_FALLBACK[name]) return COLOR_NAME_FALLBACK[name];
+  // try the last word ("dusty rose" → "rose") before giving up
+  const lastWord = name.split(/\s+/).pop();
+  if (lastWord && COLOR_NAME_FALLBACK[lastWord]) return COLOR_NAME_FALLBACK[lastWord];
+  return '#c9c2b4';
+}
 
 const money = n => 'EGP ' + Number(n).toLocaleString('en-US');
 const escHtml = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
@@ -754,6 +824,17 @@ function buildPage(p){
         <span id="galCount">1 / ${imgs.length}</span>
         <button id="cntNext" aria-label="Next">${ICON.next}</button>
       </div>
+
+      ${hasColors ? `<div class="gal-colors" id="galColors">
+        <span class="gal-colors-label">${t('pdpColor')}</span>
+        ${p.colors.map(c => {
+          const cOos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p, c.name) : c.stockQuantity <= 0;
+          return `<button type="button" class="gal-color-dot ${c.name === pdpState.color ? 'active' : ''} ${cOos ? 'oos' : ''}" data-color="${escHtml(c.name)}" ${cOos ? 'disabled' : ''} style="--dot-color:${colorSwatchHex(c)}" aria-label="${escHtml(c.name)}${cOos ? t('pdpSoldOutSuffix') : ''}">
+            <span class="dot-check">${ICON.check}</span>
+            <span class="dot-tip">${escHtml(c.name)}${cOos ? t('pdpSoldOutSuffix') : ''}</span>
+          </button>`;
+        }).join('')}
+      </div>` : ''}
     </div>
 
     <div class="pdp-info">
@@ -782,16 +863,6 @@ function buildPage(p){
         <span class="pdp-label">${t('pdpSize')}</span>
         <div class="pdp-size-box">${sizeText}</div>
       </div>` : '')}
-
-      ${hasColors ? `<div class="pdp-field">
-        <span class="pdp-label">${t('pdpColor')}<span class="val" id="pdpColorLabel"> &mdash; ${escHtml(pdpState.color)}</span></span>
-        <div class="pdp-swatches" id="pdpSwatches">
-          ${p.colors.map(c => {
-            const cOos = window.TPR && window.TPR.isOutOfStock ? window.TPR.isOutOfStock(p, c.name) : c.stockQuantity <= 0;
-            return `<button type="button" class="pdp-swatch ${c.name === pdpState.color ? 'active' : ''} ${cOos ? 'oos' : ''}" data-color="${escHtml(c.name)}" ${cOos ? 'disabled' : ''}>${escHtml(c.name)}${cOos ? t('pdpSoldOutSuffix') : ''}</button>`;
-          }).join('')}
-        </div>
-      </div>` : ''}
 
       ${p.category === 'paintings' ? `<a class="pdp-customize" id="pdpCustomizeWA" href="https://wa.me/${customizeWaNum}?text=${customizeMsg}" target="_blank" rel="noopener">
         ${ICON.ruler}
@@ -943,16 +1014,14 @@ async function translateDescriptionIfArabic(){
    page (name, price, description…) doesn't depend on color, so nothing
    else needs to change. */
 function wireColorSwatches(p, pdpState, galleryApi){
-  const swatches = document.getElementById('pdpSwatches');
+  const swatches = document.getElementById('galColors');
   if (!swatches) return;
   swatches.addEventListener('click', e => {
-    const btn = e.target.closest('.pdp-swatch');
+    const btn = e.target.closest('.gal-color-dot');
     if (!btn || btn.disabled) return;
     pdpState.color = btn.dataset.color;
 
-    swatches.querySelectorAll('.pdp-swatch').forEach(b => b.classList.toggle('active', b === btn));
-    const label = document.getElementById('pdpColorLabel');
-    if (label) label.textContent = ' — ' + pdpState.color;
+    swatches.querySelectorAll('.gal-color-dot').forEach(b => b.classList.toggle('active', b === btn));
 
     galleryApi.setImages(imagesForColor(p, pdpState.color, pdpState.size));
 
