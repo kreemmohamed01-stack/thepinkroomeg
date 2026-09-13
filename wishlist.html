@@ -18,6 +18,12 @@ var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
 n.queue=[]}(window, document,'script');
+/* Meta's auto-config watches the page and invents events (including
+   Purchase) on its own, with no code from us — it is on by default and is
+   why Ads Manager kept climbing after every client-side Purchase call was
+   removed. Turned off so the ONLY Purchase Meta ever receives is the one
+   the server sends per saved order in api/_lib/capi.js. Must precede init. */
+fbq('set', 'autoConfig', false, '1792484121921078');
 fbq('init', '1792484121921078');
 fbq('track', 'PageView');
 (function(){
