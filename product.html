@@ -154,7 +154,10 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .gal-arrow:hover{background:var(--ink);transform:translateY(-50%) scale(1.08);}
   .gal-arrow:hover svg{stroke:#fff;}
 
-  .gal-thumbs{display:flex;gap:12px;margin-top:14px;}
+  /* wraps rather than one long row — a piece with 9 photos would
+     otherwise overflow the gallery column and drag the whole grid
+     sideways, which is what broke the newer multi-photo products */
+  .gal-thumbs{display:flex;flex-wrap:wrap;gap:12px;margin-top:14px;}
   .gal-thumb{
     width:104px;height:104px;flex-shrink:0;
     border:1px solid var(--line);
@@ -229,18 +232,18 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .gal-colors-label{font-size:11px;letter-spacing:1.5px;color:var(--ink-soft);margin-right:2px;}
   .gal-color-dot{
     position:relative;width:34px;height:34px;border-radius:50%;
-    border:2px solid transparent;padding:3px;flex-shrink:0;
-    background-clip:content-box, border-box;
-    background-image:var(--dot-color), var(--dot-color);
-    background-origin:content-box, border-box;
-    transition:border-color .25s ease, transform .2s ease;
-  }
-  .gal-color-dot::after{
-    content:'';position:absolute;inset:0;border-radius:50%;
-    box-shadow:inset 0 0 0 1px rgba(20,17,12,.12);
+    flex-shrink:0;padding:0;cursor:pointer;
+    background-color:var(--dot-color, #c9c2b4);
+    /* selected ring sits outside the dot so it never covers the color
+       itself; the faint inner line keeps pale swatches (ivory, white)
+       from disappearing into the cream page background */
+    box-shadow:inset 0 0 0 1px rgba(20,17,12,.16);
+    transition:box-shadow .25s ease, transform .2s ease;
   }
   .gal-color-dot:hover{transform:translateY(-2px);}
-  .gal-color-dot.active{border-color:var(--gold);}
+  .gal-color-dot.active{
+    box-shadow:inset 0 0 0 1px rgba(20,17,12,.16), 0 0 0 2px var(--cream-light), 0 0 0 4px var(--gold);
+  }
   .gal-color-dot.oos{opacity:.35;cursor:not-allowed;}
   .gal-color-dot.oos:hover{transform:none;}
   .gal-color-dot .dot-check{
@@ -581,15 +584,22 @@ const COLOR_NAME_FALLBACK = {
   green:'#4c6b4f', olive:'#6f7143', sage:'#a3ad93', emerald:'#2f6b52', forest:'#2e4a34', mint:'#a9d3c1',
   blue:'#3f5f78', navy:'#26374d', teal:'#2f6b6b', turquoise:'#3fa6a1', denim:'#3f5e7a',
   purple:'#6a4d7a', lavender:'#b6a3c9', violet:'#6f4a8a', plum:'#5a3550',
-  natural:'#cdbb98', oak:'#b98f5e', walnut:'#5a3d28', mahogany:'#4a2418'
+  natural:'#cdbb98', oak:'#b98f5e', walnut:'#5a3d28', mahogany:'#4a2418',
+  // multi-word names actually used in the catalog, kept whole so they get
+  // their own shade rather than collapsing to the generic base color
+  'olive green':'#6f7143', 'navy blue':'#26374d', 'mint green':'#a9d3c1',
+  'off white':'#f2eee7', offwhite:'#f2eee7', cafe:'#6f4e37', coffee:'#6f4e37'
 };
 function colorSwatchHex(c){
   if (c && c.hex) return c.hex;
-  const name = String((c && c.name) || '').trim().toLowerCase();
+  const name = String((c && c.name) || '').trim().toLowerCase().replace(/\s+/g, ' ');
   if (COLOR_NAME_FALLBACK[name]) return COLOR_NAME_FALLBACK[name];
-  // try the last word ("dusty rose" → "rose") before giving up
-  const lastWord = name.split(/\s+/).pop();
-  if (lastWord && COLOR_NAME_FALLBACK[lastWord]) return COLOR_NAME_FALLBACK[lastWord];
+  // "dusty rose" → rose, "light olive" → olive: try each word, most
+  // specific first (the last word is usually the base color)
+  const words = name.split(' ');
+  for (let i = words.length - 1; i >= 0; i--){
+    if (COLOR_NAME_FALLBACK[words[i]]) return COLOR_NAME_FALLBACK[words[i]];
+  }
   return '#c9c2b4';
 }
 
