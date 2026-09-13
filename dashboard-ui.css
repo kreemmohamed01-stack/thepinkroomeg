@@ -313,6 +313,12 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 .db-color-img-pick img{width:100%;height:100%;object-fit:cover;display:block;}
 .db-color-img-pick input{position:absolute;top:2px;left:2px;width:13px;height:13px;accent-color:var(--gold);}
 .db-color-img-pick.on{opacity:1;border-color:var(--gold);}
+/* flags a color that would silently do nothing on the product page —
+   clicking its swatch can't swap photos if none are tied to it */
+.db-color-warn{
+  margin-top:8px;font-size:11px;line-height:1.5;color:#8a6a1f;
+  background:#fdf6e3;border:1px solid #e8d9a8;border-radius:3px;padding:7px 9px;
+}
 /* size options — same card as the color rows, with its own photo picker
    so a size can show a different set of the product's pictures */
 .db-sizes{display:flex;flex-direction:column;gap:12px;margin-bottom:8px;}

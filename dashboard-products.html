@@ -597,6 +597,7 @@ function renderColorList(){
           <img src="${escAttr(url)}">
         </label>`).join('') : '<p style="font-size:11px;color:var(--ink-soft)">Add photos above first, then pick which ones show for this color.</p>'}
       </div>
+      ${drawerImages.length ? `<p class="db-color-warn" ${c.images.length ? 'style="display:none"' : ''}>No photos picked for this color &mdash; the product page will keep showing the same photos when a shopper clicks it. Tick the photos that show this color.</p>` : ''}
     </div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No color options — this product will show one set of photos with no color choice.</p>';
 
   wrap.querySelectorAll('.fColorHex').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerColors[i].hex = inp.value; }));
@@ -615,6 +616,10 @@ function renderColorList(){
       const pick = cb.closest('.db-color-img-pick');
       if (cb.checked) { if (!c.images.includes(url)) c.images.push(url); pick.classList.add('on'); }
       else { c.images = c.images.filter(u => u !== url); pick.classList.remove('on'); }
+      // keep the "no photos picked" warning honest without re-rendering
+      // the whole list (which would lose scroll position mid-edit)
+      const warn = row.querySelector('.db-color-warn');
+      if (warn) warn.style.display = c.images.length ? 'none' : '';
     });
   });
 }
