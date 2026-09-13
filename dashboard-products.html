@@ -300,6 +300,7 @@ function renderProductForm(p){
       <label>Color Options (optional)</label>
       <div class="db-colors" id="colorList"></div>
       <button type="button" class="db-color-add" id="colorAddBtn"><svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>ADD COLOR</button>
+      <button type="button" class="db-color-add" id="colorAutoBtn" title="Split the photos above evenly between the colors, in order">SPLIT PHOTOS BETWEEN COLORS</button>
       <p class="db-img-hint">Give a piece color choices — e.g. "Beige" and "White" — each with its own swatch color (the circle), photos (pick from the photos above) and stock count. The swatch color is what shows on the product page, so pick it close to the real color. Leave empty for a product with no color choice. When colors are set, the Stock Quantity below is added up from them automatically.</p>
     </div>
 
@@ -397,6 +398,28 @@ function renderProductForm(p){
   renderColorList();
   $('colorAddBtn').addEventListener('click', ()=>{
     drawerColors.push({ name: '', hex: '#c9a97c', images: [], stockQuantity: 0 });
+    renderColorList();
+  });
+  /* Ticking photos by hand for a piece with 8 colors is where color
+     photos quietly end up unset — and a color with no photos of its own
+     can't swap the gallery, so its swatch looks broken on the site.
+     This deals the photos out in order: with 8 photos and 4 colors each
+     gets 2, and any remainder goes to the earlier colors. */
+  $('colorAutoBtn').addEventListener('click', ()=>{
+    if (!drawerColors.length || !drawerImages.length) return;
+    const n = drawerColors.length;
+    const per = Math.floor(drawerImages.length / n);
+    if (per < 1){
+      alert('There are fewer photos (' + drawerImages.length + ') than colors (' + n + '), so they can\'t be split evenly. Pick the photos for each color by hand.');
+      return;
+    }
+    const extra = drawerImages.length % n;
+    let at = 0;
+    drawerColors.forEach((c, i) => {
+      const take = per + (i < extra ? 1 : 0);
+      c.images = drawerImages.slice(at, at + take);
+      at += take;
+    });
     renderColorList();
   });
   renderSizeList();

@@ -1236,9 +1236,27 @@ function wireGallery(initialImgs, isDim, altName){
 
   return {
     setImages(newImgs){
-      imgs = (newImgs && newImgs.length) ? newImgs : imgs;
+      if (!newImgs || !newImgs.length) return;
+      imgs = newImgs;
       renderThumbsAndSwipe();
-      show(0);
+
+      /* Jump straight to the new first photo instead of going through
+         show(0)'s fade + smooth scroll. Two reasons that path fails here:
+         show() sets img.src inside a 160ms timeout, so a quick second
+         color tap lands while the previous swap is still pending and the
+         later timeout can win with the older list; and on mobile the
+         stage is display:none while the swipe track is what's visible,
+         where a smooth scrollTo issued before layout settles on the
+         freshly rebuilt track leaves it parked on the old photo — which
+         read as "the picture never changes when I pick a color". */
+      idx = 0;
+      img.src = thumbSrc(imgs[0], 1200);
+      img.classList.toggle('contain', isDim(0));
+      img.style.opacity = '1';
+      thumbsWrap.querySelectorAll('.gal-thumb').forEach((t,n)=> t.classList.toggle('active', n === 0));
+      if (count) count.textContent = '1 / ' + imgs.length;
+      stage.classList.remove('zoomed');
+      if (swipe) swipe.scrollTo({ left: 0, behavior: 'auto' });
     }
   };
 }
