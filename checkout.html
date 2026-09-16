@@ -126,48 +126,7 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     .co-logo{width:118px;}
   }
 
-  /* ---------- PROGRESS ---------- */
-  .co-progress{
-    display:flex;align-items:flex-start;justify-content:center;gap:0;
-    max-width:640px;margin:0 auto;padding:26px 24px 10px;
-  }
-  .co-step-pill{display:flex;align-items:center;flex:1;min-width:0;}
-  .co-step-pill:last-child{flex:0 0 auto;}
-  .co-step-dot{
-    width:30px;height:30px;border-radius:50%;flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-    font-size:12px;font-weight:600;color:var(--ink-soft);
-    border:1px solid var(--line);background:var(--cream-light);
-    transition:background .35s ease, border-color .35s ease, color .35s ease;
-  }
-  .co-step-pill.done .co-step-dot{background:var(--gold);border-color:var(--gold);color:#fff;}
-  .co-step-pill.active .co-step-dot{border-color:var(--gold);color:var(--gold);box-shadow:0 0 0 4px rgba(201,169,124,.16);}
-  .co-step-dot svg{width:13px;height:13px;stroke:#fff;fill:none;stroke-width:2.4;}
-  .co-step-label{margin-left:10px;white-space:nowrap;}
-  .co-step-label b{display:block;font-size:10.5px;letter-spacing:1.6px;color:var(--ink-soft);}
-  .co-step-pill.active .co-step-label b{color:var(--gold);}
-  .co-step-pill.done .co-step-label b{color:var(--ink);}
-  .co-step-label span{display:block;font-size:9.5px;color:var(--ink-soft);opacity:.7;}
-  .co-step-line{flex:1;height:1px;background:var(--line);margin:0 12px;transition:background .35s ease;}
-  .co-step-pill.done + .co-step-pill .co-step-line, .co-step-pill.done .co-step-line{background:var(--gold);}
-  /* the progress bar keeps its desktop shape — labels stay visible on every
-     screen, they just scale down so all four steps still fit a phone */
-  @media (max-width:900px){
-    .co-progress{padding:22px 20px 8px;}
-    .co-step-label{margin-left:8px;}
-    .co-step-label b{font-size:9px;letter-spacing:1px;}
-    .co-step-label span{font-size:8.5px;}
-    .co-step-line{margin:0 8px;}
-  }
-  @media (max-width:560px){
-    .co-progress{padding:16px 10px 4px;}
-    .co-step-dot{width:24px;height:24px;font-size:10px;}
-    .co-step-dot svg{width:11px;height:11px;}
-    .co-step-label{margin-left:5px;}
-    .co-step-label b{font-size:7px;letter-spacing:.2px;}
-    .co-step-label span{display:none;}          /* sub-caption only; the step name stays */
-    .co-step-line{margin:0 4px;min-width:6px;}
-  }
+  /* ---------- PROGRESS (removed — single-page checkout has no steps) ---------- */
 
   /* ---------- LAYOUT ---------- */
   .co-layout{
@@ -184,9 +143,8 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   }
   .co-error svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0;}
 
-  .co-step{display:none;}
-  .co-step.show{display:block;animation:coStepIn .4s cubic-bezier(.16,1,.3,1);}
-  @keyframes coStepIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .co-section{margin-bottom:40px;padding-bottom:8px;}
+  .co-section:not(:last-child){border-bottom:1px solid var(--line);padding-bottom:36px;}
 
   .co-h1{font-family:'Playfair Display', serif;font-weight:400;font-size:34px;margin-bottom:6px;}
   .co-lead{font-size:13.5px;color:var(--gold);margin-bottom:28px;}
@@ -432,44 +390,6 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   .ip-note svg{width:16px;height:16px;stroke:#b76e82;fill:none;stroke-width:1.5;flex-shrink:0;}
   @media (max-width:620px){ .ip-grid{grid-template-columns:1fr;} }
 
-  /* saved-address display card (step 2) */
-  .co-addr-card{
-    display:flex;align-items:flex-start;justify-content:space-between;gap:14px;
-    border:1px solid var(--line);border-radius:3px;padding:18px;margin-bottom:14px;background:#fff;
-  }
-  .co-addr-card p{font-size:13.5px;line-height:1.75;color:var(--ink-soft);}
-  .co-addr-card p b{color:var(--ink);}
-  .co-edit-link{
-    display:inline-flex;align-items:center;gap:6px;font-size:11px;letter-spacing:1px;color:var(--gold);
-    flex-shrink:0;white-space:nowrap;transition:opacity .25s ease;
-  }
-  .co-edit-link:hover{opacity:.7;}
-  .co-edit-link svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
-  .co-add-addr{
-    display:flex;align-items:center;justify-content:center;gap:8px;
-    border:1px dashed var(--line);border-radius:3px;padding:16px;
-    font-size:12px;letter-spacing:1px;color:var(--ink-soft);margin-bottom:26px;
-    transition:border-color .25s ease, color .25s ease;
-  }
-  .co-add-addr:hover{border-color:var(--gold);color:var(--gold);}
-  .co-add-addr svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:1.8;}
-
-  /* review cards (step 4) */
-  .co-review-card{
-    border:1px solid var(--line);border-radius:3px;padding:18px 20px;margin-bottom:14px;background:#fff;
-    display:flex;gap:14px;
-  }
-  .co-review-icon{
-    width:36px;height:36px;border-radius:50%;background:var(--beige-soft);flex-shrink:0;
-    display:flex;align-items:center;justify-content:center;
-  }
-  .co-review-icon svg{width:16px;height:16px;stroke:var(--gold);fill:none;stroke-width:1.6;}
-  .co-review-body{flex:1;min-width:0;}
-  .co-review-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px;}
-  .co-review-head h4{font-size:11px;letter-spacing:1.8px;color:var(--ink-soft);}
-  .co-review-body p{font-size:13.5px;line-height:1.7;color:var(--ink);}
-  .co-review-body p.muted{color:var(--ink-soft);}
-
   .co-btn-row{display:flex;gap:12px;margin-top:30px;}
   .co-btn-primary{
     flex:1;display:flex;align-items:center;justify-content:center;gap:10px;
@@ -489,14 +409,6 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
   }
   .co-btn-primary.loading .co-spin{opacity:1;}
   @keyframes coSpin{to{transform:rotate(360deg);}}
-  .co-btn-secondary{
-    flex:0 0 auto;display:flex;align-items:center;gap:8px;
-    border:1px solid var(--line);color:var(--ink);
-    padding:16px 22px;font-size:12px;letter-spacing:1.6px;border-radius:2px;
-    transition:border-color .3s ease, color .3s ease;
-  }
-  .co-btn-secondary svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;}
-  .co-btn-secondary:hover{border-color:var(--ink);}
   .co-place-note{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:7px;}
   .co-place-note svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
 
@@ -565,8 +477,6 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     .co-grid{grid-template-columns:1fr;}      /* side-by-side inputs get unusable below this */
     .co-card-fields{grid-template-columns:1fr;}
     .co-summary{padding:18px;}
-    .co-btn-row{flex-direction:column-reverse;}
-    .co-btn-secondary{justify-content:center;}
     .co-option{padding:13px 13px;gap:11px;}
     .co-option-icon{width:38px;height:26px;}
     .co-option-body b{font-size:12.5px;}
@@ -575,7 +485,6 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
        the "we accept" strip in the order summary just below */
     .co-option .brand-row{display:none;}
     .co-pay-icons{gap:6px;}
-    .co-review-card{padding:16px;}
   }
 </style>
 </head>
@@ -595,20 +504,18 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
     </div>
   </header>
 
-  <nav class="co-progress" id="coProgress"></nav>
-
   <main class="co-layout">
     <section class="co-form-col">
+      <h1 class="co-h1" data-i18n="coCheckoutTitle">Checkout</h1>
+      <p class="co-lead" data-i18n="coLead">We&rsquo;re almost there. Please complete your order.</p>
+
       <div class="co-error" id="coError">
         <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><line x1="12" y1="16.5" x2="12.01" y2="16.5"/></svg>
         <span id="coErrorText"></span>
       </div>
 
-      <!-- ============ STEP 1 — INFORMATION ============ -->
-      <div class="co-step" id="step-information">
-        <h1 class="co-h1" data-i18n="coCheckoutTitle">Checkout</h1>
-        <p class="co-lead" data-i18n="coLead">We&rsquo;re almost there. Please complete your order.</p>
-
+      <!-- ============ CONTACT + SHIPPING ADDRESS ============ -->
+      <div class="co-section" id="step-information">
         <div class="co-block">
           <p class="co-block-title" data-i18n="contactInformation">CONTACT INFORMATION</p>
           <div class="co-grid">
@@ -696,57 +603,23 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
             <span data-i18n="saveAddressNextTime">Save this address for next time</span>
           </label>
         </div>
+      </div>
 
+      <!-- ============ SHIPPING METHOD + ORDER NOTES ============ -->
+      <div class="co-section" id="step-shipping">
         <div class="co-block">
           <p class="co-block-title" data-i18n="shippingMethodHeading">SHIPPING METHOD</p>
           <div id="shipOptions1"></div>
         </div>
 
         <div class="co-block">
-          <p class="co-block-title" data-i18n="paymentMethodHeading">PAYMENT METHOD</p>
-          <div id="payPreview1"></div>
-        </div>
-
-        <div class="co-btn-row">
-          <button class="co-btn-primary" data-next="shipping"><span class="co-btn-txt"><span data-i18n="continueToShipping">CONTINUE TO SHIPPING</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
-        </div>
-      </div>
-
-      <!-- ============ STEP 2 — SHIPPING ============ -->
-      <div class="co-step" id="step-shipping">
-        <h1 class="co-h1" data-i18n="coShippingTitle">Shipping Address</h1>
-        <p class="co-lead" data-i18n="coShippingLead">Please confirm your delivery address and shipping method.</p>
-
-        <div class="co-block">
-          <p class="co-block-title" data-i18n="deliveryAddress">DELIVERY ADDRESS</p>
-          <div id="savedAddrCard"></div>
-          <button class="co-add-addr" data-edit="information">
-            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            <span data-i18n="addNewAddress">ADD A NEW ADDRESS</span>
-          </button>
-        </div>
-
-        <div class="co-block">
-          <p class="co-block-title" data-i18n="shippingMethodHeading">SHIPPING METHOD</p>
-          <div id="shipOptions2"></div>
-        </div>
-
-        <div class="co-block">
           <p class="co-block-title" data-i18n="orderNotesOptional">ORDER NOTES (OPTIONAL)</p>
           <textarea id="inNotes2" maxlength="250" placeholder="Add a note about your order (optional)" data-i18n-placeholder="orderNotePh"></textarea>
         </div>
-
-        <div class="co-btn-row">
-          <button class="co-btn-secondary" data-back="information"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span data-i18n="backToInformation">BACK TO INFORMATION</span></button>
-          <button class="co-btn-primary" data-next="payment"><span class="co-btn-txt"><span data-i18n="continueToPayment">CONTINUE TO PAYMENT</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
-        </div>
       </div>
 
-      <!-- ============ STEP 3 — PAYMENT ============ -->
-      <div class="co-step" id="step-payment">
-        <h1 class="co-h1" data-i18n="coPaymentTitle">Payment Method</h1>
-        <p class="co-lead" data-i18n="coPaymentLead">Choose your preferred payment option.</p>
-
+      <!-- ============ PAYMENT + BILLING ============ -->
+      <div class="co-section" id="step-payment">
         <div class="co-block">
           <p class="co-block-title" data-i18n="paymentOptions">PAYMENT OPTIONS</p>
           <div id="payOptions3"></div>
@@ -770,27 +643,16 @@ src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
             <div class="co-field"><label data-i18n="governorate">Governorate</label><select id="inBillGov"><option value="" data-i18n="selectGovernorate">Select Governorate</option></select></div>
           </div>
         </div>
-
-        <div class="co-btn-row">
-          <button class="co-btn-secondary" data-back="shipping"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span data-i18n="backToShippingBtn">BACK TO SHIPPING</span></button>
-          <button class="co-btn-primary" data-next="review"><span class="co-btn-txt"><span data-i18n="continueToReview">CONTINUE TO REVIEW ORDER</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span><span class="co-spin"></span></button>
-        </div>
       </div>
 
-      <!-- ============ STEP 4 — REVIEW ============ -->
-      <div class="co-step" id="step-review">
-        <h1 class="co-h1" data-i18n="coReviewTitle">Review Your Order</h1>
-        <p class="co-lead" data-i18n="coReviewLead">Please review all details below before placing your order.</p>
-
-        <div id="reviewBlocks"></div>
-
+      <!-- ============ PLACE ORDER ============ -->
+      <div class="co-section" id="step-review">
         <div class="co-secure-note" style="margin-bottom:26px">
           <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           <span data-i18n="sslNote">Your personal information and payment details are protected with 256-bit SSL encryption.</span>
         </div>
 
         <div class="co-btn-row">
-          <button class="co-btn-secondary" data-back="payment"><svg viewBox="0 0 24 24"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg><span data-i18n="backToPayment">BACK TO PAYMENT</span></button>
           <button class="co-btn-primary" id="placeOrderBtn"><span class="co-btn-txt"><span data-i18n="placeOrder">PLACE ORDER</span> <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="co-spin"></span></button>
         </div>
         <p class="co-place-note">
@@ -813,14 +675,6 @@ if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
 const t = window.TPR_I18N ? window.TPR_I18N.t : function(k){ return k; };
 const CO = window.TPRCheckout;
 const $ = id => document.getElementById(id);
-const params = new URLSearchParams(location.search);
-
-const STEP_META = {
-  information: { n:1, label:t('stepInformation'), sub:t('stepInformationSub') },
-  shipping:    { n:2, label:t('stepShipping'),    sub:t('stepShippingSub') },
-  payment:     { n:3, label:t('stepPayment'),     sub:t('stepPaymentSub') },
-  review:      { n:4, label:t('stepReview'),      sub:t('stepReviewSub') }
-};
 
 let cart = CO.loadCart();
 let state = CO.loadCheckoutState();
@@ -987,13 +841,10 @@ function shipOptionMarkup(m){
 function renderShipOptions(){
   const html = Object.values(CO.SHIPPING_METHODS).map(shipOptionMarkup).join('');
   shipOptions1.innerHTML = html;
-  shipOptions2.innerHTML = html;
-  [shipOptions1, shipOptions2].forEach(wrap=>{
-    wrap.querySelectorAll('[data-ship]').forEach(el=>{
-      el.addEventListener('click', ()=>{
-        state.shippingMethod = { id: el.dataset.ship };
-        persist(); renderShipOptions(); renderSummary();
-      });
+  shipOptions1.querySelectorAll('[data-ship]').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      state.shippingMethod = { id: el.dataset.ship };
+      persist(); renderShipOptions(); renderSummary();
     });
   });
 }
@@ -1116,44 +967,25 @@ function selectPaymentMethod(id, fromContainer){
   if (!provider || !provider.enabled) return;
   state.paymentMethod = { id };
   persist();
-  // repaint both lists so the radio/selected state matches in each, then
-  // the extra fields. Only one InstaPay receipt panel can exist in the
-  // DOM at a time (see renderInstapayFields), so the container the click
-  // came from — the screen actually on screen — must mount it last.
-  paintPayPreview1();
   paintPayOptions3();
   renderSummary();
   renderCardFields();
   renderInstapayFields(fromContainer);
 }
 
-/* The two methods customers can actually use come first, then the ones
-   still marked Coming Soon — same order in the step-1 preview and the
-   real payment step so the list never appears to reshuffle. */
 const PAY_ORDER = ['cash_on_delivery','instapay','card','bank_transfer','paymob'];
 const payList = () => PAY_ORDER.map(id => CO.PaymentProviders[id]).filter(Boolean);
 
-function paintPayPreview1(){
-  payPreview1.innerHTML = payList().map(p => payOptionMarkup(p, { preview:true })).join('');
-}
 function paintPayOptions3(){
   payOptions3.innerHTML = payList().map(p => payOptionMarkup(p, { showSelected:true })).join('');
 }
 
-function renderPayPreview1(){
-  paintPayPreview1();
-}
 function renderPayOptions3(){
   paintPayOptions3();
   renderCardFields();
   renderInstapayFields(payOptions3);
 }
 
-/* Step 1's payment list is a preview only — it shows the customer what
-   they'll be able to pay with, but the actual choice (and anything it
-   needs, like InstaPay's receipt) happens on the Payment step. So no
-   click handler here: the cards are rendered read-only via
-   payOptionMarkup's `preview` flag. */
 payOptions3.addEventListener('click', (e)=>{
   const el = e.target.closest('[data-pay]');
   // clicks inside the InstaPay panel (upload, copy button) bubble up to
@@ -1452,70 +1284,7 @@ function renderSummary(){
   document.getElementById('promoInput').addEventListener('keydown', e=>{ if (e.key === 'Enter') applyPromo(e.target.value); });
 }
 
-/* Country name for whatever was actually picked, not a hardcoded "Egypt" —
-   falls back to Egypt only if the state predates this field existing. */
-function countryName(){
-  return t('country_' + (state.shippingAddress.country || 'EG'));
-}
-
-/* ---------- step 2: saved address summary card ---------- */
-function renderSavedAddress(){
-  const a = state.shippingAddress, c = state.customer;
-  savedAddrCard.innerHTML = `
-    <div class="co-addr-card">
-      <p>
-        <b>${c.name || t('yourNamePh')}</b><br>
-        ${[a.street, a.apt].filter(Boolean).join(', ') || t('streetAddressPh')}<br>
-        ${[a.city, a.governorate].filter(Boolean).join(', ')}<br>
-        ${countryName()}<br>
-        ${c.phone || ''}
-      </p>
-      <a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a>
-    </div>`;
-}
-
-/* ---------- step 4: review cards ---------- */
-function renderReview(){
-  const c = state.customer, a = state.shippingAddress;
-  const shippingMethod = CO.SHIPPING_METHODS[state.shippingMethod.id];
-  const payment = CO.PaymentProviders[state.paymentMethod && state.paymentMethod.id];
-  reviewBlocks.innerHTML = `
-    <div class="co-review-card">
-      <div class="co-review-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg></div>
-      <div class="co-review-body">
-        <div class="co-review-head"><h4>${t('contactInformation')}</h4><a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a></div>
-        <p>${c.name || ''}</p><p class="muted">${c.email || ''}</p><p class="muted">${c.phone || ''}</p>
-      </div>
-    </div>
-    <div class="co-review-card">
-      <div class="co-review-icon"><svg viewBox="0 0 24 24"><path d="M12 21s7-6.5 7-12a7 7 0 0 0-14 0c0 5.5 7 12 7 12Z"/><circle cx="12" cy="9" r="2.5"/></svg></div>
-      <div class="co-review-body">
-        <div class="co-review-head"><h4>${t('shippingAddressCard')}</h4><a class="co-edit-link" data-edit="information"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a></div>
-        <p>${c.name || ''}</p>
-        <p class="muted">${[a.street, a.apt].filter(Boolean).join(', ')}</p>
-        <p class="muted">${[a.city, a.governorate].filter(Boolean).join(', ')}, ${countryName()}</p>
-        <p class="muted">${c.phone || ''}</p>
-        <p style="margin-top:8px">${shippingMethod.label} <span class="muted">(${shippingMethod.sub})</span> &mdash; ${CO.money(shippingMethod.price)}</p>
-      </div>
-    </div>
-    <div class="co-review-card">
-      <div class="co-review-icon"><svg viewBox="0 0 24 24"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></div>
-      <div class="co-review-body">
-        <div class="co-review-head"><h4>${t('paymentMethodCard')}</h4><a class="co-edit-link" data-edit="payment"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a></div>
-        <p>${payment ? payment.label : t('notSelected')}</p>
-      </div>
-    </div>
-    ${state.notes ? `<div class="co-review-card">
-      <div class="co-review-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></svg></div>
-      <div class="co-review-body">
-        <div class="co-review-head"><h4>${t('orderNotesCard')}</h4><a class="co-edit-link" data-edit="shipping"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>${t('editLabel')}</a></div>
-        <p class="muted">${state.notes}</p>
-      </div>
-    </div>` : ''}
-  `;
-}
-
-/* ---------- validation per step ---------- */
+/* ---------- validation (whole page at once — no more steps) ---------- */
 function setFieldError(id, hasErr){ $(id).classList.toggle('err', !!hasErr); }
 function validateInformation(){
   let ok = true;
@@ -1538,74 +1307,6 @@ function showError(msg){
 }
 function hideError(){ coError.style.display = 'none'; }
 
-/* ---------- step routing ---------- */
-function renderProgress(active){
-  const idx = STEPS_ORDER.indexOf(active);
-  coProgress.innerHTML = STEPS_ORDER.map((s,i)=>{
-    const meta = STEP_META[s];
-    const done = i < idx;
-    const isActive = i === idx;
-    return `<div class="co-step-pill ${done?'done':''} ${isActive?'active':''}">
-      <div class="co-step-dot">${done ? '<svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>' : meta.n}</div>
-      <div class="co-step-label"><b>${meta.label}</b><span>${meta.sub}</span></div>
-      ${i < STEPS_ORDER.length-1 ? '<div class="co-step-line"></div>' : ''}
-    </div>`;
-  }).join('');
-}
-const STEPS_ORDER = CO.STEPS;
-
-function goStep(step, opts){
-  opts = opts || {};
-  if (!STEPS_ORDER.includes(step)) step = 'information';
-  const allowed = CO.stepAllowed(step, state, cart);
-  if (!allowed) step = CO.furthestAllowedStep(state, cart);
-
-  document.querySelectorAll('.co-step').forEach(el => el.classList.remove('show'));
-  $('step-' + step).classList.add('show');
-  renderProgress(step);
-  hideError();
-
-  if (step === 'shipping') renderSavedAddress();
-  if (step === 'review') renderReview();
-  // The InstaPay panel only belongs on the Payment step — step 1's list
-  // is a read-only preview, so there's nothing to fill in there.
-  if (step === 'payment') renderInstapayFields(payOptions3);
-
-  const url = new URL(location.href);
-  url.searchParams.set('step', step);
-  if (opts.replace) history.replaceState({ step }, '', url);
-  else history.pushState({ step }, '', url);
-  window.scrollTo({ top:0, behavior:'smooth' });
-}
-
-document.querySelectorAll('[data-edit]').forEach(el=>{
-  el.addEventListener('click', ()=> goStep(el.dataset.edit));
-});
-
-document.querySelectorAll('[data-back]').forEach(el=>{
-  el.addEventListener('click', ()=> goStep(el.dataset.back));
-});
-
-document.querySelectorAll('[data-next]').forEach(btn=>{
-  btn.addEventListener('click', ()=>{
-    const target = btn.dataset.next;
-    if (target === 'shipping' && !validateInformation()) return;
-    if (target === 'payment' && !state.shippingMethod){ showError(t('errShippingMethod')); return; }
-    if (target === 'review' && (!state.paymentMethod || !CO.PaymentProviders[state.paymentMethod.id].enabled)){ showError(t('errPaymentMethod')); return; }
-    if (target === 'review' && state.paymentMethod && state.paymentMethod.id === 'instapay'){
-      if (!state.instapayReceiptUrl){ showError(t('errInstapayReceipt')); return; }
-      if (!CO.isFilled(state.instapaySender)){ showError(t('errInstapaySender')); return; }
-    }
-    btn.classList.add('loading'); btn.disabled = true;
-    setTimeout(()=>{ btn.classList.remove('loading'); btn.disabled = false; goStep(target); }, 260);
-  });
-});
-
-window.addEventListener('popstate', (e)=>{
-  const step = (e.state && e.state.step) || new URLSearchParams(location.search).get('step') || 'information';
-  goStep(step, { replace:true });
-});
-
 $('coBack').addEventListener('click', ()=>{
   if (document.referrer && document.referrer.includes(location.host)) history.back();
   else location.href = 'category.html?cat=all';
@@ -1615,9 +1316,17 @@ $('coBack').addEventListener('click', ()=>{
 let placing = false;
 placeOrderBtn.addEventListener('click', async ()=>{
   if (placing) return;
+  hideError();
+  if (!validateInformation()) return;
+  if (!state.shippingMethod){ showError(t('errShippingMethod')); return; }
+  if (!state.paymentMethod || !CO.PaymentProviders[state.paymentMethod.id].enabled){ showError(t('errPaymentMethod')); return; }
+  if (state.paymentMethod.id === 'instapay'){
+    if (!state.instapayReceiptUrl){ showError(t('errInstapayReceipt')); return; }
+    if (!CO.isFilled(state.instapaySender)){ showError(t('errInstapaySender')); return; }
+  }
+
   placing = true;
   placeOrderBtn.classList.add('loading'); placeOrderBtn.disabled = true;
-  hideError();
   const result = await CO.placeOrder();
   if (!result.ok){
     placing = false;
@@ -1630,10 +1339,8 @@ placeOrderBtn.addEventListener('click', async ()=>{
 
 /* ---------- go ---------- */
 renderShipOptions();
-renderPayPreview1();
 renderPayOptions3();
 renderSummary();
-goStep(params.get('step') || 'information', { replace:true });
 
 // once the real shipping settings arrive (near-instant, but never
 // blocks first render), refresh anything showing a price/label from them
