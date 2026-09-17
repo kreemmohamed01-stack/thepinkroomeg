@@ -152,6 +152,13 @@
         <a href="${MAP}" target="_blank" rel="noopener" class="tpr-social" aria-label="Google Maps" id="tprSocialMap">${ICONS.pin}</a>
         <a href="${WA}" target="_blank" rel="noopener" class="tpr-social" aria-label="WhatsApp" id="tprSocialWA">${ICONS.wa}</a>
       </div>
+
+      <div class="footer-credit">
+        <span class="footer-credit-box">
+          Powered by
+          <a href="https://kreemaly.com" target="_blank" rel="noopener" class="footer-credit-name">Kreemaly</a>
+        </span>
+      </div>
     </aside>
 
     <aside class="tpr-drawer" id="tprCart" aria-label="Shopping bag">

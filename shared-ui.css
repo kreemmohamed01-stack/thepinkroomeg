@@ -235,6 +235,44 @@
 .tpr-social svg{width:15px;height:15px;stroke:#fff;fill:none;stroke-width:1.5;}
 .tpr-social:hover{transform:scale(1.12) translateY(-2px);border-color:var(--gold);background:rgba(201,169,124,.12);}
 
+.tpr-menu .footer-credit{text-align:center;padding:22px 0 4px;margin-top:4px;}
+.tpr-menu .footer-credit-box{
+  display:inline-flex;align-items:center;gap:8px;
+  position:relative;overflow:hidden;
+  padding:10px 24px;
+  border:1px solid rgba(201,169,124,.35);
+  border-radius:30px;
+  background:linear-gradient(180deg,rgba(201,169,124,.09),rgba(201,169,124,.04));
+  font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
+  font-size:12px;font-weight:400;font-style:italic;letter-spacing:2px;
+  color:rgba(255,255,255,.45);
+  animation:footerCreditGlow 3.2s ease-in-out infinite;
+}
+.tpr-menu .footer-credit-box::after{
+  content:'';position:absolute;top:0;left:-150%;width:60%;height:100%;
+  background:linear-gradient(115deg,transparent 0%,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%,transparent 100%);
+  transform:skewX(-20deg);pointer-events:none;
+  animation:footerCreditShine 3.8s ease-in-out infinite;
+}
+@keyframes footerCreditGlow{
+  0%,100%{box-shadow:0 0 0 rgba(201,169,124,0);border-color:rgba(201,169,124,.35);}
+  50%{box-shadow:0 0 20px rgba(201,169,124,.45);border-color:rgba(201,169,124,.9);}
+}
+@keyframes footerCreditShine{
+  0%{left:-150%;} 55%{left:150%;} 100%{left:150%;}
+}
+.tpr-menu .footer-credit-name{
+  position:relative;display:inline-block;margin-left:2px;
+  font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
+  font-style:normal;font-weight:600;letter-spacing:2.5px;
+  background:linear-gradient(90deg, #d8b787 0%, #f7e7c4 25%, #fff8e8 50%, #f7e7c4 75%, #d8b787 100%);
+  background-size:220% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;
+  text-decoration:none;animation:textShine 3.5s linear infinite;
+  transition:filter .3s ease, transform .3s ease;
+}
+.tpr-menu .footer-credit-name:hover{filter:drop-shadow(0 0 12px rgba(247,231,196,.7));transform:scale(1.05);}
+@keyframes textShine{0%{background-position:0% 0;}100%{background-position:220% 0;}}
+
 /* ---------- RIGHT-SIDE DRAWERS (cart + search) ---------- */
 .tpr-drawer{
   position:fixed;top:0;right:0;
