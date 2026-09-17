@@ -245,7 +245,7 @@
   background:linear-gradient(180deg,rgba(201,169,124,.09),rgba(201,169,124,.04));
   font-family:'Cormorant Garamond','Playfair Display',Georgia,serif;
   font-size:12px;font-weight:400;font-style:italic;letter-spacing:2px;
-  color:rgba(255,255,255,.45);
+  color:#fff;
   animation:footerCreditGlow 3.2s ease-in-out infinite;
 }
 .tpr-menu .footer-credit-box::after{
