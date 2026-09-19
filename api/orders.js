@@ -418,8 +418,7 @@ async function createOrder(req, res) {
   }
 
   // never lets a Meta outage/misconfiguration delay or fail order creation —
-  // logged, not thrown; same event_id as the browser Pixel's Purchase call
-  // (order.id) so Meta de-dupes the two into a single counted conversion
+  // logged, not thrown; fires exactly once per saved order (see capi.js)
   const capi = await sendPurchaseCAPI(order, req).catch(e => ({ ok: false, error: e.message }));
   if (!capi.ok && !capi.skipped) console.error('[orders] Meta CAPI Purchase failed:', capi.error);
 

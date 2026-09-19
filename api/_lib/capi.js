@@ -1,25 +1,22 @@
 /* ============================================================
    THE PINK ROOM — Meta Conversions API (server-side)
-   Sends the Purchase event straight from the server to Meta, in
-   parallel with (never instead of) the browser Pixel's own
-   fbq('track','Purchase') on order-success.html. Both carry the same
-   eventID (the order id) so Meta's Events Manager de-duplicates them
-   into one event instead of double-counting a single sale — this is
-   Meta's own documented dedup key, not something custom.
+   Sends the Purchase event straight from the server to Meta. This is the
+   ONLY place Purchase is ever tracked — there is deliberately no
+   fbq('track','Purchase') anywhere in the browser code, because that is
+   what caused the phantom-purchase problem before: a bot fetching a link
+   preview, a customer reopening the confirmation page on another device,
+   or anyone loading order-success.html without a real order behind it
+   used to fire a fake "purchase" with nothing to back it up.
 
-   Server-side is deliberately separate from the Pixel because the
-   Pixel alone can miss a real purchase (ad blockers, Safari ITP,
-   the customer closing the tab a beat before the pixel call fires);
-   the server call happens right after the order is durably saved to
-   Postgres, so it can't be skipped by anything happening in the
-   browser.
+   This call happens right after the order is durably saved to Postgres,
+   inside createOrder(), so it fires exactly once per real order and
+   cannot be triggered by a page view, a refresh, or a shared link.
 
    Required environment variable (Vercel → Project → Settings →
    Environment Variables, never committed to the repo):
-     META_PIXEL_ID           same id already hardcoded in the <head>
-                              pixel snippet on every page (currently
-                              1792484121921078) — kept as an env var
-                              here so it's not duplicated/hand-typed
+     META_PIXEL_ID           same id used in the <head> pixel snippet on
+                              every page — kept as an env var here so
+                              it's not duplicated/hand-typed
      META_CAPI_ACCESS_TOKEN  a Conversions API access token, generated
                               in Events Manager → Settings → Conversions
                               API → "Generate access token"
@@ -54,8 +51,8 @@ async function sendPurchaseCAPI(order, req) {
       data: [{
         event_name: 'Purchase',
         event_time: Math.floor((order.createdAt || Date.now()) / 1000),
-        // same id the browser Pixel's Purchase call uses (order.id) —
-        // this exact match is what lets Meta dedupe the two into one
+        // the DB order id — a duplicate is rejected by Postgres' primary
+        // key before this code can ever run twice for the same order
         event_id: String(order.id),
         action_source: 'website',
         event_source_url: `https://www.thepinkroomeg.com/order-success.html?order=${encodeURIComponent(order.id)}`,

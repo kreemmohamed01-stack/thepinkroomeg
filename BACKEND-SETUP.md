@@ -89,41 +89,45 @@ Already configured. Reference if the API key ever needs regenerating
 ## Marketing — Meta Pixel + Conversions API
 
 The browser Pixel (`fbq`, in the `<head>` of every storefront page) fires:
-- **PageView** — every page load (unchanged, was already there)
+- **PageView** — every page load
 - **ViewContent** — opening a product page (`product.html`)
 - **AddToCart** — adding an item to the bag (`shared-ui.js`'s `TPR.addToCart()`,
   the one place every "add to bag" button on the site goes through)
 - **InitiateCheckout** — landing on `checkout.html` with a non-empty cart
-- **Purchase** — only on `order-success.html`, only once a real,
-  server-confirmed order has rendered (never on a plain visit or a
-  product page view) — includes `value`/`currency`, guarded by
-  `sessionStorage` so refreshing the confirmation page doesn't double-count
 
-**Purchase is also sent server-side** (Conversions API, `api/_lib/capi.js`),
-right after the order is durably saved to Postgres in `createOrder()` —
-this catches sales the browser Pixel alone can miss (ad blockers, Safari
-ITP, the tab closing a moment too soon). Both the browser and server
-Purchase calls carry the same `event_id`/`eventID` (the order id), which
-is Meta's documented way to de-duplicate two calls for the same sale
-into a single counted conversion in Events Manager — so turning both on
-does not double-count revenue.
+**Purchase is intentionally never fired from the browser.** It is only
+ever sent server-side (Conversions API, `api/_lib/capi.js`), right after
+the order is durably saved to Postgres in `createOrder()`. This is the
+fix for the earlier phantom-purchase problem: a client-side Purchase call
+on `order-success.html` used to fire again on link previews, page
+refreshes, or the page being opened on a second device with no real order
+behind it, inflating Ads Manager with sales that never happened. A
+server-side call tied to one row in the orders table cannot repeat —
+Postgres' primary key rejects a duplicate order id before the code can
+run a second time — so one real order is always exactly one Purchase
+event, no more.
+
+Auto-config is also disabled (`fbq('set', 'autoConfig', false, ...)`),
+which stops Meta from inventing its own events (including its own guess
+at Purchase) by watching the page — that guess is what caused Ads Manager
+to keep climbing even after every client-side Purchase call had already
+been removed.
 
 To enable the server-side half:
 1. Events Manager → **Settings** → **Conversions API** → **Generate access token**.
 2. In Vercel env vars, set:
-   - `META_PIXEL_ID` = `1792484121921078` (same id already in every page's
+   - `META_PIXEL_ID` = the pixel id (same one already in every page's
      Pixel snippet — kept as its own env var so it isn't hand-typed twice)
    - `META_CAPI_ACCESS_TOKEN` = the token from step 1
 3. Without these two set, `sendPurchaseCAPI()` is a no-op (logs nothing,
    never blocks or fails order creation) — the browser Pixel keeps working
-   on its own either way.
+   on its own either way, just without Purchase tracking.
 
 **To verify:** Events Manager → **Test Events**, paste the store's URL,
 then walk through: open the homepage (PageView) → open a product
 (ViewContent) → add it to the bag (AddToCart) → go to checkout
-(InitiateCheckout) → place a real order (Purchase, shown twice in Test
-Events — once tagged "Browser", once "Server" — Meta's own UI for
-confirming the dedup is working, not a bug).
+(InitiateCheckout) → place a real order (Purchase, tagged "Server" —
+there is no "Browser" Purchase anymore by design).
 
 ---
 

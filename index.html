@@ -15,22 +15,18 @@ var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})
 <script>
 /* fbq() is defined synchronously here, so any fbq(...) call anywhere on the
    page queues normally and nothing needs to know about the delay. Only the
-   ~550KB fbevents.js download is deferred, until after first paint — it was
-   costing about a second of main-thread time before the hero could render,
-   and Meta replays the queue in order once it loads, so the PageView still
-   lands with everything it had before. */
+   ~550KB fbevents.js download is deferred, until after first paint. */
 !function(f,b,e,v,n,t,s)
 {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
 n.callMethod.apply(n,arguments):n.queue.push(arguments)};
 if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
 n.queue=[]}(window, document,'script');
 /* Meta's auto-config watches the page and invents events (including
-   Purchase) on its own, with no code from us — it is on by default and is
-   why Ads Manager kept climbing after every client-side Purchase call was
-   removed. Turned off so the ONLY Purchase Meta ever receives is the one
-   the server sends per saved order in api/_lib/capi.js. Must precede init. */
-fbq('set', 'autoConfig', false, '1792484121921078');
-fbq('init', '1792484121921078');
+   Purchase) on its own, with no code from us. Turned off so the ONLY
+   Purchase Meta ever receives is the one the server sends per saved
+   order in api/_lib/capi.js. Must precede init. */
+fbq('set', 'autoConfig', false, '1112698284528072');
+fbq('init', '1112698284528072');
 fbq('track', 'PageView');
 (function(){
   var loaded = false;
@@ -42,9 +38,6 @@ fbq('track', 'PageView');
     t.src = 'https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(t);
   }
-  /* Whichever comes first: the browser going idle after paint, or the
-     visitor doing anything at all. The timeout is the backstop so a tab
-     that never goes idle still loads it. */
   if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 2500 });
   else setTimeout(loadPixel, 1800);
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){
@@ -54,7 +47,7 @@ fbq('track', 'PageView');
 })();
 </script>
 <noscript><img height="1" width="1" style="display:none"
-src="https://www.facebook.com/tr?id=1792484121921078&ev=PageView&noscript=1"
+src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 /></noscript>
 <!-- End Meta Pixel Code -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
