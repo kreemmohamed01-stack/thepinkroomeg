@@ -322,8 +322,8 @@ tbody td{padding:14px 16px;font-size:13px;vertical-align:middle;}
 /* size options — same card as the color rows, with its own photo picker
    so a size can show a different set of the product's pictures */
 .db-sizes{display:flex;flex-direction:column;gap:12px;margin-bottom:8px;}
-.db-size-row-top{display:grid;grid-template-columns:1fr 28px;gap:8px;align-items:center;margin-bottom:10px;}
-.db-size-row-top input[type="text"]{
+.db-size-row-top{display:grid;grid-template-columns:1fr 110px 28px;gap:8px;align-items:center;margin-bottom:10px;}
+.db-size-row-top input[type="text"], .db-size-row-top input[type="number"]{
   border:1px solid var(--line);border-radius:3px;padding:8px 10px;font-size:12.5px;font-family:inherit;
 }
 .db-size-row-top input:focus{outline:none;border-color:var(--gold);}

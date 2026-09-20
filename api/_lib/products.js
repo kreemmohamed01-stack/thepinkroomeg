@@ -49,9 +49,10 @@ function rowToProduct(row){
     // product.html falls back to guessing one from the name in that case).
     // Empty array = no color choice for this product (the common case).
     colors: extra.colors || [],
-    // size options a customer picks between — each { name, images }, a
+    // size options a customer picks between — each { name, images, price }, a
     // free-text label (word or measurement) with an optional subset of
-    // the product's photos. Empty = no size choice.
+    // the product's photos and an optional per-size price override (null =
+    // uses the product's normal price/salePrice). Empty = no size choice.
     sizeOptions: extra.sizeOptions || [],
     // per-image crop focus for the square card thumbnail — { url: "50% 30%" },
     // used as CSS object-position so the card can show the part of the photo
@@ -149,7 +150,14 @@ function validateProduct(p){
      colors above) so the gallery swaps when a size is picked; an empty
      images list just means that size shows all of them. Deduped
      case-insensitively and capped so a bad payload can't bloat the row.
-     Empty = no size choice, and `sizeLabel` renders as it always has. */
+     Empty = no size choice, and `sizeLabel` renders as it always has.
+     `price` optionally overrides the product's base price/salePrice for
+     that one size (e.g. "Large" costs more than "Small") — null means
+     that size just uses the product's normal price, same as before this
+     field existed. Server-side order pricing (recomputePricing() in
+     api/orders.js) is the actual source of truth for what a customer is
+     charged, so this value is re-read from here rather than trusted from
+     the browser. */
   const seenSizeNames = new Set();
   const sizeOptions = (Array.isArray(p.sizeOptions) ? p.sizeOptions : [])
     .map(s => {
@@ -160,7 +168,8 @@ function validateProduct(p){
       seenSizeNames.add(key);
       const images = (s && Array.isArray(s.images) ? s.images : [])
         .filter(u => typeof u === 'string' && validImages.has(u));
-      return { name, images };
+      const price = (s && s.price != null && s.price !== '') ? Math.max(0, Number(s.price)) : null;
+      return { name, images, price: Number.isFinite(price) ? price : null };
     })
     .filter(Boolean)
     .slice(0, 30);

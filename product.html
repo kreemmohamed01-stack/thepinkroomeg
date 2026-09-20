@@ -662,12 +662,25 @@ PRODUCTS_READY.then(()=>{
   }
 });
 
-function priceMarkup(p){
-  if (p.salePrice){
-    const pct = Math.round((1 - p.salePrice / p.price) * 100);
-    return `${money(p.salePrice)} <span class="was">${money(p.price)}</span> <span class="pct">-${pct}%</span>`;
+/* A size can optionally override the product's price (e.g. "Large" costs
+   more than "Small") — set in the dashboard's product editor. null/unset
+   just falls back to the product's normal price/salePrice, exactly as
+   before this field existed. The sale price / discount % only applies
+   when the size has no price override of its own, since a per-size price
+   is already the specific price for that size. */
+function effectivePriceFor(p, sizeName){
+  const sizeOpt = sizeName && Array.isArray(p.sizeOptions) ? p.sizeOptions.find(s => s.name === sizeName) : null;
+  if (sizeOpt && sizeOpt.price != null) return { price: sizeOpt.price, salePrice: null };
+  return { price: p.price, salePrice: p.salePrice };
+}
+
+function priceMarkup(p, sizeName){
+  const { price, salePrice } = effectivePriceFor(p, sizeName);
+  if (salePrice){
+    const pct = Math.round((1 - salePrice / price) * 100);
+    return `${money(salePrice)} <span class="was">${money(price)}</span> <span class="pct">-${pct}%</span>`;
   }
-  if (p.price != null) return money(p.price);
+  if (price != null) return money(price);
   return `<span class="tbc">EGP &mdash;</span>`;
 }
 
@@ -856,7 +869,7 @@ function buildPage(p){
     <div class="pdp-info">
       <p class="pdp-cat">${p.categoryName.toUpperCase()}</p>
       <h1 class="pdp-name">${p.name}</h1>
-      <div class="pdp-price">${priceMarkup(p)}</div>
+      <div class="pdp-price" id="pdpPrice">${priceMarkup(p, pdpState.size)}</div>
       <p class="pdp-tax">${t('pdpTaxIncluded')}</p>
       <p class="pdp-stock ${stock.oos ? 'oos' : (stock.low ? 'low' : '')}" id="pdpStockMsg">${stock.oos ? t('pdpSoldOut') : (stock.low ? t('pdpOnlyLeftInStock').replace('{n}', stock.qty) : '')}</p>
       <div class="pdp-rule"></div>
@@ -1071,6 +1084,8 @@ function wireSizeSwatches(p, pdpState, galleryApi){
     wrap.querySelectorAll('.pdp-swatch').forEach(b => b.classList.toggle('active', b === btn));
     const label = document.getElementById('pdpSizeLabel');
     if (label) label.textContent = ' — ' + pdpState.size;
+    const priceEl = document.getElementById('pdpPrice');
+    if (priceEl) priceEl.innerHTML = priceMarkup(p, pdpState.size);
     galleryApi.setImages(imagesForColor(p, pdpState.color, pdpState.size));
   });
 }

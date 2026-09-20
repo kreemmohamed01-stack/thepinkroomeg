@@ -416,6 +416,15 @@
       const existing = cart.find(i => String(i.id) === String(product.id)
         && (i.color || null) === (colorName || null)
         && (i.size || null) === (sizeName || null));
+      // a size can carry its own price (set in the dashboard) that
+      // overrides the product's normal price/salePrice. The server
+      // re-checks this from the DB regardless (see recomputePricing() in
+      // api/orders.js), so this is only a preview.
+      const sizeOpt = sizeName && Array.isArray(product.sizeOptions)
+        ? product.sizeOptions.find(s => s.name === sizeName)
+        : null;
+      const linePrice = (sizeOpt && sizeOpt.price != null) ? sizeOpt.price : (product.salePrice || product.price);
+
       if (existing) existing.qty++;
       else {
         // the bag thumbnail follows the same precedence the product
@@ -434,7 +443,7 @@
           variant: variantBits.length ? variantBits.join(' · ') : (product.subcategoryName || product.categoryName || ''),
           color: colorName || null,
           size: sizeName || null,
-          price: product.salePrice || product.price,
+          price: linePrice,
           // carried along only so checkout.js can preview the weight-based
           // shipping surcharge before the order is placed — the server
           // never trusts this and re-reads the real weight from the DB
@@ -455,7 +464,7 @@
           content_ids: [String(product.id)],
           content_type: 'product',
           content_name: product.name,
-          value: product.salePrice || product.price || 0,
+          value: linePrice || 0,
           currency: 'EGP'
         });
       }

@@ -226,7 +226,7 @@ async function openProductDrawer(id){
     drawerImages = (d.product.images || []).slice();
     (d.product.extraCategories || []).forEach(e => { drawerExtraCats[e.category] = e.subcategory || ''; });
     drawerColors = (d.product.colors || []).map(c => ({ name: c.name, hex: c.hex || null, images: (c.images || []).slice(), stockQuantity: c.stockQuantity || 0 }));
-    drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '', images: (s.images || []).slice() }));
+    drawerSizes = (d.product.sizeOptions || []).map(s => ({ name: s.name || '', images: (s.images || []).slice(), price: s.price != null ? s.price : null }));
     drawerImageFocus = Object.assign({}, d.product.imageFocus || {});
     renderProductForm(d.product);
   } catch(e){
@@ -424,7 +424,7 @@ function renderProductForm(p){
   });
   renderSizeList();
   $('sizeAddBtn').addEventListener('click', ()=>{
-    drawerSizes.push({ name: '', images: [] });
+    drawerSizes.push({ name: '', images: [], price: null });
     renderSizeList();
   });
   populateSubcategories(p && p.category, p && p.subcategory);
@@ -576,6 +576,7 @@ function renderSizeList(){
     <div class="db-color-row" data-i="${i}">
       <div class="db-size-row-top">
         <input type="text" class="fSizeName" placeholder="Size (e.g. Small, Large, 120 × 80 cm)" value="${escAttr(s.name)}">
+        <input type="number" class="fSizePrice" placeholder="Price (optional)" min="0" step="0.01" value="${s.price != null ? s.price : ''}">
         <button type="button" class="db-size-remove" data-i="${i}" aria-label="Remove size">&times;</button>
       </div>
       <div class="db-color-imgs">
@@ -587,6 +588,9 @@ function renderSizeList(){
     </div>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No size options — the product page shows just the Size Label above.</p>';
 
   wrap.querySelectorAll('.fSizeName').forEach((inp, i) => inp.addEventListener('input', ()=> { drawerSizes[i].name = inp.value; }));
+  wrap.querySelectorAll('.fSizePrice').forEach((inp, i) => inp.addEventListener('input', ()=> {
+    drawerSizes[i].price = inp.value === '' ? null : Math.max(0, Number(inp.value) || 0);
+  }));
   wrap.querySelectorAll('.db-size-remove').forEach(btn => btn.addEventListener('click', ()=>{
     drawerSizes.splice(Number(btn.dataset.i), 1);
     renderSizeList();
@@ -745,7 +749,7 @@ async function saveProduct(existingId){
     colors: drawerColors.filter(c => c.name.trim()).map(c => ({ name: c.name.trim(), hex: c.hex || null, images: c.images.slice(), stockQuantity: c.stockQuantity })),
     size: $('fSize').value || null,
     sizeLabel: $('fSizeLabel').value.trim() || null,
-    sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), images: s.images.slice() })),
+    sizeOptions: drawerSizes.filter(s => s.name.trim()).map(s => ({ name: s.name.trim(), images: s.images.slice(), price: s.price != null ? s.price : null })),
     material: $('fMaterial').value.trim() || null,
     color: $('fColor').value.trim() || null,
     availability: $('fAvailability').value,

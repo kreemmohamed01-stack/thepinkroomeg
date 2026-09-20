@@ -189,6 +189,7 @@ async function recomputePricing(order) {
     ids.length ? sql`SELECT id, price, sale_price, extra FROM products WHERE id = ANY(${ids})` : Promise.resolve([]),
     getActivePromotions()
   ]);
+  const rowMap = new Map(rows.map(r => [r.id, r]));
   // same overlay the public product list applies — a product in a live
   // sale campaign is charged its campaign price here too, never just
   // its raw price/sale_price, so the banner's "15% off" is never a lie
@@ -206,11 +207,26 @@ async function recomputePricing(order) {
     return [r.id, extra.weight != null ? Number(extra.weight) : 0];
   }));
 
+  // A size can carry its own price (set in the dashboard's product editor)
+  // that overrides the product's normal price/salePrice — e.g. "Large"
+  // costs more than "Small". Read straight from the DB's extra.sizeOptions,
+  // never trusted from the client, same reasoning as price/weight above:
+  // a shopper can't pick "Large" and still be charged for "Small".
+  function sizePriceOverride(productId, sizeName){
+    if (!sizeName) return null;
+    const row = rowMap.get(productId);
+    if (!row) return null;
+    const extra = typeof row.extra === 'string' ? JSON.parse(row.extra) : (row.extra || {});
+    const sizeOpt = (extra.sizeOptions || []).find(s => s.name === sizeName);
+    return (sizeOpt && sizeOpt.price != null) ? Number(sizeOpt.price) : null;
+  }
+
   let subtotal = 0, totalWeight = 0;
   const items = order.items.map(item => {
     const qty = Math.max(1, Math.round(Number(item.qty) || 1));
+    const sizeOverride = sizePriceOverride(item.id, item.size);
     const known = priceMap.get(item.id);
-    const price = known != null ? known : (Number(item.price) || 0);
+    const price = sizeOverride != null ? sizeOverride : (known != null ? known : (Number(item.price) || 0));
     subtotal += price * qty;
     totalWeight += (weightMap.get(item.id) || 0) * qty;
     return { ...item, price };
