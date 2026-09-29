@@ -415,18 +415,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .co-place-note{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:14px;display:flex;align-items:center;justify-content:center;gap:7px;}
   .co-place-note svg{width:12px;height:12px;stroke:currentColor;fill:none;stroke-width:1.8;}
 
-  /* ---------- ORDER REVIEW (above Place Order) ---------- */
-  .co-review{border:1px solid var(--line);border-radius:4px;background:#fff;padding:22px;margin-bottom:26px;}
-  .co-review-lead{font-size:12.5px;color:var(--ink-soft);margin:-6px 0 14px;}
-  .co-review-item{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--beige-soft);}
-  .co-review-item-info{flex:1;min-width:0;}
-  .co-review-item-info b{display:block;font-size:13px;font-weight:500;line-height:1.35;}
-  .co-review-item-info span{display:block;font-size:11.5px;color:var(--ink-soft);margin-top:2px;}
-  .co-review-item-price{font-size:13px;font-weight:600;white-space:nowrap;}
-  .co-review-meta{margin-top:14px;font-size:12.5px;color:var(--ink-soft);line-height:1.6;}
-  .co-review-meta b{color:var(--ink);font-weight:500;}
-  .co-review .co-totals{margin-top:14px;}
-
   /* ---------- ORDER SUMMARY ---------- */
   .co-summary{border:1px solid var(--line);border-radius:4px;background:#fff;padding:22px;}
   .co-summary-title{font-size:11px;letter-spacing:2px;font-weight:600;color:var(--ink-soft);margin-bottom:16px;}
@@ -481,8 +469,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   @media (max-width:860px){
     .co-layout{grid-template-columns:1fr;gap:34px;padding:26px 22px 70px;}
-    .co-form-col{order:1;}
-    .co-summary-col{position:static;order:2;}
+    .co-summary-col{position:static;order:1;}
+    .co-form-col{order:2;}
     .co-summary-items{max-height:none;}
   }
   @media (max-width:560px){
@@ -662,8 +650,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
       <!-- ============ PLACE ORDER ============ -->
       <div class="co-section" id="step-review">
-        <div class="co-review" id="coReview"></div>
-
         <div class="co-secure-note" style="margin-bottom:26px">
           <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           <span data-i18n="sslNote">Your personal information and payment details are protected with 256-bit SSL encryption.</span>
@@ -1295,44 +1281,6 @@ async function applyPromo(code){
   renderSummary();
 }
 
-/* ---------- order review (just above Place Order) ----------
-   Display only — it reads the same cart/pricing the summary uses and
-   fires nothing (no tracking). The server still recomputes every figure. */
-const escHtml = v => String(v == null ? '' : v).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
-function renderOrderReview(cart, shippingMethod, pricing){
-  const el = document.getElementById('coReview');
-  if (!el) return;
-  const pay = state.paymentMethod && CO.PaymentProviders[state.paymentMethod.id];
-  const addr = [inStreet.value, inCity.value, (inCountry.value === 'EG' ? inGov : inGovText).value].filter(x => x && x.trim()).join(', ');
-  const items = cart.map(i => `
-    <div class="co-review-item">
-      <div class="co-review-item-info"><b>${escHtml(i.name)}</b><span>${escHtml([i.variant, t('qtyLabel') + ' ' + i.qty].filter(Boolean).join(' · '))}</span></div>
-      <div class="co-review-item-price">${CO.money(i.price * i.qty)}</div>
-    </div>`).join('');
-  el.innerHTML = `
-    <p class="co-summary-title">${t('orderReview')}</p>
-    <p class="co-review-lead">${t('orderReviewLead')}</p>
-    ${items}
-    <div class="co-totals">
-      <div class="co-totals-row"><span>${t('subtotalLabel')}</span><span>${CO.money(pricing.subtotal)}</span></div>
-      ${pricing.discount ? `<div class="co-totals-row discount"><span>${t('discountLabel')}</span><span>&minus;${CO.money(pricing.discount)}</span></div>` : ''}
-      <div class="co-totals-row"><span>${t('shippingLabel')} (${escHtml(shippingMethod.label)})</span><span>${CO.money(pricing.shipping)}</span></div>
-      <div class="co-totals-row grand"><span>${t('totalLabel')}</span><span>${CO.money(pricing.total)}<span class="co-vat">${t('includingVat')}</span></span></div>
-    </div>
-    <div class="co-review-meta">
-      ${addr ? `<div><b>${t('deliverToLabel')}:</b> ${escHtml(addr)}</div>` : ''}
-      ${pay ? `<div><b>${t('payWithLabel')}:</b> ${escHtml(pay.label)}</div>` : ''}
-    </div>`;
-}
-function refreshReview(){
-  const cartNow = CO.loadCart();
-  const method = CO.SHIPPING_METHODS[state.shippingMethod.id] || CO.SHIPPING_METHODS.standard;
-  renderOrderReview(cartNow, method, CO.calculatePricing(cartNow, method, state.promo));
-}
-// the address line in the review follows what is typed
-[inStreet, inCity, inGovText].forEach(el => el.addEventListener('input', refreshReview));
-[inGov, inCountry].forEach(el => el.addEventListener('change', refreshReview));
-
 /* ---------- order summary (renders on every step) ---------- */
 function renderSummary(){
   cart = CO.loadCart();
@@ -1367,7 +1315,6 @@ function renderSummary(){
     </div>
     <div class="co-pay-icons">${chip('ssl', true)}${chip('visa')}${chip('mastercard')}${chip('mada')}${chip('applepay')}</div>
   `;
-  renderOrderReview(cart, shippingMethod, pricing);
   document.getElementById('promoApply').addEventListener('click', ()=> applyPromo(document.getElementById('promoInput').value));
   document.getElementById('promoInput').addEventListener('keydown', e=>{ if (e.key === 'Enter') applyPromo(e.target.value); });
 }
