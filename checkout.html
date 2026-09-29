@@ -469,8 +469,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   @media (max-width:860px){
     .co-layout{grid-template-columns:1fr;gap:34px;padding:26px 22px 70px;}
-    .co-summary-col{position:static;order:1;}
-    .co-form-col{order:2;}
+    .co-form-col{order:1;}
+    .co-summary-col{display:none;}   /* the summary moves above Place Order instead (see summarySlot) */
     .co-summary-items{max-height:none;}
   }
   @media (max-width:560px){
@@ -509,7 +509,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <main class="co-layout">
     <section class="co-form-col">
-      <h1 class="co-h1" data-i18n="coCheckoutTitle">Checkout</h1>
+      <h1 class="co-h1" data-i18n="coCheckoutTitle">Check out</h1>
       <p class="co-lead" data-i18n="coLead">We&rsquo;re almost there. Please complete your order.</p>
 
       <div class="co-error" id="coError">
@@ -571,12 +571,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
             <label data-i18n="aptSuiteUnit">Apartment, suite, unit, etc. (optional)</label>
             <input type="text" id="inApt" autocomplete="address-line2">
           </div>
-          <div class="co-grid">
-            <div class="co-field" id="f-city">
-              <label data-i18n="city">City</label>
-              <input type="text" id="inCity" autocomplete="address-level2" placeholder="City" data-i18n-placeholder="city">
-              <p class="co-field-msg" data-i18n="errCity">Please enter your city.</p>
-            </div>
+          <div>
             <div class="co-field" id="f-gov">
               <label id="govLabel" data-i18n="governorate">Governorate</label>
               <select id="inGov"><option value="" data-i18n="selectGovernorate">Select Governorate</option></select>
@@ -649,6 +644,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
           <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
           <span data-i18n="sslNote">Your personal information and payment details are protected with 256-bit SSL encryption.</span>
         </div>
+
+        <div id="summarySlot" style="margin-bottom:26px"></div>
 
         <div class="co-btn-row">
           <button class="co-btn-primary" id="placeOrderBtn"><span class="co-btn-txt"><span data-i18n="placeOrder">PLACE ORDER</span> <svg viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></span><span class="co-spin"></span></button>
@@ -791,7 +788,6 @@ function phoneIsValid(){
   inPhone.value = normalizePhoneInput(savedPhone, phoneDialCode.textContent).display;
   inStreet.value = state.shippingAddress.street || '';
   inApt.value = state.shippingAddress.apt || '';
-  inCity.value = state.shippingAddress.city || '';
   inGov.value = state.shippingAddress.governorate || '';
   inGovText.value = state.shippingAddress.governorate || '';
   inPostal.value = state.shippingAddress.postal || '';
@@ -823,7 +819,6 @@ syncField(inPhone, ()=>{
 });
 syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
 syncField(inApt, ()=>{ state.shippingAddress.apt = inApt.value; persist(); });
-syncField(inCity, ()=>{ state.shippingAddress.city = inCity.value; persist(); });
 inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
 syncField(inGovText, ()=>{ state.shippingAddress.governorate = inGovText.value; persist(); });
 inCountry.addEventListener('change', ()=>{
@@ -1320,7 +1315,6 @@ function validateInformation(){
   const emailOk = CO.isEmail(inEmail.value); setFieldError('f-email', !emailOk); ok = ok && emailOk;
   const phoneOk = phoneIsValid(); setFieldError('f-phone', !phoneOk); ok = ok && phoneOk;
   const streetOk = CO.isFilled(inStreet.value); setFieldError('f-street', !streetOk); ok = ok && streetOk;
-  const cityOk = CO.isFilled(inCity.value); setFieldError('f-city', !cityOk); ok = ok && cityOk;
   // whichever of Governorate (Egypt) / State-Region (everywhere else) is
   // actually visible is the one that has to be filled — see applyCountry()
   const govField = inCountry.value === 'EG' ? inGov : inGovText;
@@ -1364,6 +1358,19 @@ placeOrderBtn.addEventListener('click', async ()=>{
   }
   location.href = 'order-success.html?order=' + encodeURIComponent(result.order.id);
 });
+
+/* On desktop the order summary sits in the side column; on phones/tablets
+   (where that column stacks away) it is moved to sit right above Place
+   Order, so it is the last thing the customer sees before ordering. */
+(function(){
+  const mq = window.matchMedia('(max-width:860px)');
+  function place(){
+    const target = mq.matches ? document.getElementById('summarySlot') : document.querySelector('.co-summary-col');
+    if (target && coSummary.parentNode !== target) target.appendChild(coSummary);
+  }
+  place();
+  if (mq.addEventListener) mq.addEventListener('change', place); else mq.addListener(place);
+})();
 
 /* ---------- go ---------- */
 renderShipOptions();

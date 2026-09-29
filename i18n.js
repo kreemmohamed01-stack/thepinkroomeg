@@ -175,7 +175,7 @@
       // saved order records the dashboard reads, so translating them would
       // put Arabic text into the database instead of just the display.
       continueShoppingCo: 'CONTINUE SHOPPING', secureCheckout: 'SECURE CHECKOUT',
-      coCheckoutTitle: 'Checkout', coLead: 'We’re almost there. Please complete your order.',
+      coCheckoutTitle: 'Check out', coLead: 'We’re almost there. Please complete your order.',
       contactInformation: 'CONTACT INFORMATION', fullName: 'Full Name', emailAddress: 'Email Address',
       phoneNumber: 'Phone Number', phoneExample: 'e.g. +20 100 123 4567', phoneExampleLocal: '100 123 4567', phoneExampleEg: '01XXXXXXXXX',
       errEnterName: 'Please enter your name.', errValidEmail: 'Please enter a valid email.',

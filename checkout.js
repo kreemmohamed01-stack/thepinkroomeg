@@ -248,7 +248,7 @@
     if (!cart.length) return 'information'; // nothing to check out — send back
     if (!state.customer || !isFilled(state.customer.name) || !isEmail(state.customer.email) ||
         !isPhone(state.customer.phone) || !state.shippingAddress || !isFilled(state.shippingAddress.street) ||
-        !isFilled(state.shippingAddress.city) || !isFilled(state.shippingAddress.governorate)){
+        !isFilled(state.shippingAddress.governorate)){
       return 'information';
     }
     if (!state.shippingMethod) return 'shipping';
