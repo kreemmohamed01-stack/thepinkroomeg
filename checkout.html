@@ -596,10 +596,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
               <label data-i18n="postalCodeOptional">Postal Code (optional)</label>
               <input type="text" id="inPostal" autocomplete="postal-code">
             </div>
-            <div class="co-field">
-              <label data-i18n="additionalNotesOptional">Additional Notes (optional)</label>
-              <input type="text" id="inNotes1" placeholder="Additional notes" data-i18n-placeholder="additionalNotesPh">
-            </div>
           </div>
           <label class="co-check">
             <input type="checkbox" id="inSaveAddr" checked>
@@ -800,7 +796,6 @@ function phoneIsValid(){
   inGov.value = state.shippingAddress.governorate || '';
   inGovText.value = state.shippingAddress.governorate || '';
   inPostal.value = state.shippingAddress.postal || '';
-  inNotes1.value = state.notes || '';
   inNotes2.value = state.notes || '';
   inSaveAddr.checked = state.saveAddress !== false;
   inSameBilling.checked = !state.billingAddress || state.billingAddress.sameAsShipping !== false;
@@ -843,8 +838,7 @@ inCountry.addEventListener('change', ()=>{
   persist();
 });
 syncField(inPostal, ()=>{ state.shippingAddress.postal = inPostal.value; persist(); });
-syncField(inNotes1, ()=>{ state.notes = inNotes1.value; inNotes2.value = state.notes; persist(); });
-syncField(inNotes2, ()=>{ state.notes = inNotes2.value; inNotes1.value = state.notes; persist(); });
+syncField(inNotes2, ()=>{ state.notes = inNotes2.value; persist(); });
 inSaveAddr.addEventListener('change', ()=>{ state.saveAddress = inSaveAddr.checked; persist(); });
 
 function setBillingMode(same){
