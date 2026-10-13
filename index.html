@@ -2458,6 +2458,68 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 </head>
 <body data-tpr-chrome="drawers-only">
 
+  <!-- ===== INTRO VIDEO (once per visitor session; built by JS only when shown, so it costs nothing otherwise) ===== -->
+  <style>
+    #tprIntro{position:fixed;inset:0;z-index:2147483000;background:#0d0b0a;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;transition:opacity .7s ease,transform .9s cubic-bezier(.7,0,.2,1);}
+    #tprIntro.out{opacity:0;transform:scale(1.04);pointer-events:none;}
+    #tprIntro .bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(38px) brightness(.55) saturate(1.2);}
+    #tprIntro .main{position:relative;height:100%;width:100%;object-fit:contain;animation:tprIntroIn 1s ease both;}
+    @media (orientation:portrait){#tprIntro .main{object-fit:cover;}#tprIntro .bg{display:none;}}
+    @media (min-aspect-ratio:1/1){#tprIntro .main{height:92%;width:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55);}}
+    @keyframes tprIntroIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
+    #tprIntro .ctl{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));display:flex;gap:10px;z-index:2;}
+    #tprIntro .ctl.r{right:22px}#tprIntro .ctl.l{left:22px}
+    #tprIntro button{font:600 11px/1 'Poppins',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:11px 16px;border-radius:999px;cursor:pointer;}
+    #tprIntro button:hover{background:rgba(255,255,255,.26);}
+    #tprIntro .bar{position:absolute;left:0;top:0;height:3px;background:#f2b8c6;width:0;z-index:2;}
+    html.tpr-intro-lock,html.tpr-intro-lock body{overflow:hidden;}
+  </style>
+  <script>
+  (function(){
+    var SRC='/intro/pinkroom-intro.mp4', KEY='tpr_intro_seen';
+    try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
+    var c=navigator.connection||{};
+    if(c.saveData || /(^|-)2g$/.test(c.effectiveType||'') ) return;
+    if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if(/bot|crawl|spider|lighthouse|headless/i.test(navigator.userAgent)) return;
+    try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+
+    var root=document.createElement('div'); root.id='tprIntro'; root.setAttribute('aria-label','The Pink Room intro');
+    root.innerHTML='<div class="bar"></div>'+
+      '<video class="bg" muted playsinline preload="auto" aria-hidden="true"></video>'+
+      '<video class="main" playsinline preload="auto"></video>'+
+      '<div class="ctl l"><button type="button" class="snd" hidden>🔊 Sound</button></div>'+
+      '<div class="ctl r"><button type="button" class="skip">Skip</button></div>';
+    var v=root.querySelector('.main'), bg=root.querySelector('.bg'), bar=root.querySelector('.bar'), snd=root.querySelector('.snd');
+    v.src=SRC; bg.src=SRC;
+    document.documentElement.classList.add('tpr-intro-lock');
+    document.body.insertBefore(root, document.body.firstChild);
+
+    var done=false;
+    function close(){
+      if(done) return; done=true;
+      root.classList.add('out');
+      document.documentElement.classList.remove('tpr-intro-lock');
+      setTimeout(function(){ v.pause(); bg.pause(); v.removeAttribute('src'); bg.removeAttribute('src'); v.load(); bg.load(); root.remove(); },900);
+    }
+    root.querySelector('.skip').onclick=close;
+    snd.onclick=function(){ v.muted=false; v.volume=1; snd.hidden=true; };
+    v.addEventListener('ended',close);
+    v.addEventListener('error',close);
+    v.addEventListener('timeupdate',function(){ if(v.duration){ bar.style.width=(v.currentTime/v.duration*100)+'%'; if(Math.abs(bg.currentTime-v.currentTime)>.3) bg.currentTime=v.currentTime; } });
+    setTimeout(function(){ if(v.readyState<3) close(); },4000);   // slow network: never hold the shop hostage
+    setTimeout(close,15000);                                      // hard safety cap
+
+    // Browsers only allow autoplay WITH sound after the user has interacted; try it, fall back to muted + a sound button.
+    v.muted=false;
+    var p=v.play();
+    if(p && p.catch){ p.then(function(){ bg.play().catch(function(){}); }).catch(function(){
+      v.muted=true; snd.hidden=false;
+      v.play().then(function(){ bg.play().catch(function(){}); }).catch(close);
+    }); }
+  })();
+  </script>
+
   <!-- ===== TOPBAR (same on every screen size) ===== -->
   <header class="topbar-mobile">
     <div class="side">
