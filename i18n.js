@@ -117,7 +117,6 @@
       footerFindMaps: 'Find us on Google Maps', footerTerms: 'Terms & Conditions', footerPrivacy: 'Privacy Policy',
 
       // Category page (category.html)
-      freeDelivery: 'FREE DELIVERY ON ORDERS OVER EGP 5000',
       catBack: 'BACK', catEyebrow: 'THE COLLECTION', catSearchResults: 'SEARCH RESULTS',
       catCuratedCollection: 'CURATED COLLECTION', catShopByRoom: 'SHOP BY ROOM',
       catShowingSearch: 'Showing everything matching your search.',
@@ -372,7 +371,6 @@
       footerFindMaps: 'اعثري علينا على خرائط جوجل', footerTerms: 'الشروط والأحكام', footerPrivacy: 'سياسة الخصوصية',
 
       // Category page (category.html)
-      freeDelivery: 'توصيل مجاني للطلبات فوق 5000 جنيه',
       catBack: 'رجوع', catEyebrow: 'المجموعة', catSearchResults: 'نتائج البحث',
       catCuratedCollection: 'مجموعة مختارة', catShopByRoom: 'تسوقي حسب الغرفة',
       catShowingSearch: 'عرض كل ما يطابق بحثك.',
