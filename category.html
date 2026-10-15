@@ -284,7 +284,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   .card-media img{
     width:100%;height:100%;display:block;
-    object-fit:contain;object-position:center !important;
+    object-fit:cover;
     transition:transform 1s cubic-bezier(.16,1,.3,1);
   }
   .product-card:hover .card-media img{transform:scale(1.07);}
@@ -320,9 +320,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .card-add.is-oos{opacity:1;background:rgba(107,107,107,.88);cursor:not-allowed;}
   @media (hover:none){
     .card-add{opacity:1;transform:none;position:static;margin-top:10px;left:auto;right:auto;bottom:auto;}
-    /* Keep the photo itself square; the button sits under it, not inside it */
-    .card-media{overflow:visible;aspect-ratio:auto;border:0;background:none;border-radius:0;}
-    .card-media img{aspect-ratio:1/1;height:auto;background:#fff;border:1px solid var(--line);border-radius:3px;}
+    .card-media{overflow:visible;}
   }
   .card-name{font-size:14px;color:var(--ink);margin-bottom:3px;}
   .card-cat{font-size:11.5px;color:var(--ink-soft);opacity:.8;margin-bottom:9px;}
