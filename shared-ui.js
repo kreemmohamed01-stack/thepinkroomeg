@@ -316,6 +316,95 @@
     document.querySelectorAll('.tpr-dd.open').forEach(o => o.classList.remove('open'));
   });
 
+  /* ---------- fly-to-bag ----------
+     The product photo lifts off the card, spins through 3D on an arc and
+     drops into the bag icon, which gulps it; the drawer opens after.
+     Returns the delay (ms) before the drawer should open, or 0 if skipped. */
+  let lastTap = null, flyBusy = 0, flyOpenTimer = 0;
+  document.addEventListener('pointerdown', e => { lastTap = e.target; }, true);
+
+  function visibleRect(el){
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height || r.bottom < 0 || r.top > innerHeight || r.right < 0 || r.left > innerWidth) return null;
+    const cs = getComputedStyle(el);
+    return cs.visibility === 'hidden' || cs.display === 'none' ? null : r;
+  }
+  function flyToBag(src){
+    if (!src || !Element.prototype.animate) return 0;
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return 0;
+    const now = Date.now();
+    if (now - flyBusy < 600) return 900;          // product page adds qty×; one flight is enough
+    flyBusy = now;
+
+    const bag = ['tprCartBtn','cartTrigger','tprTabCart'].map($).find(visibleRect);
+    if (!bag) return 0;
+    const to = bag.getBoundingClientRect();
+
+    // start from the product photo nearest the tapped button, else the button itself
+    const tap = lastTap && lastTap.closest ? lastTap : null;
+    const card = tap && tap.closest('article, li, [class*="card"], [class*="item"], [class*="product"]');
+    let fromEl = card && Array.from(card.querySelectorAll('img')).find(visibleRect);
+    if (!fromEl && document.body.querySelector('.pdp-main img, .gallery img, [class*="gallery"] img'))
+      fromEl = Array.from(document.querySelectorAll('.pdp-main img, .gallery img, [class*="gallery"] img')).find(visibleRect);
+    if (!fromEl) fromEl = tap && tap.closest('button, a');
+    const from = visibleRect(fromEl) || { left: innerWidth/2 - 60, top: innerHeight/2 - 60, width: 120, height: 120 };
+
+    const size = Math.max(70, Math.min(170, Math.min(from.width, from.height)));
+    const sx = from.left + from.width/2 - size/2, sy = from.top + from.height/2 - size/2;
+    const tx = to.left + to.width/2 - size/2,     ty = to.top + to.height/2 - size/2;
+    const dx = tx - sx, dy = ty - sy;
+    const lift = Math.min(220, Math.max(110, Math.abs(dx) * .35 + 80));
+
+    const stage = document.createElement('div');
+    stage.setAttribute('aria-hidden', 'true');
+    stage.style.cssText = `position:fixed;left:${sx}px;top:${sy}px;width:${size}px;height:${size}px;z-index:2147483600;pointer-events:none;perspective:700px;`;
+    const card3d = document.createElement('div');
+    card3d.style.cssText = `width:100%;height:100%;border-radius:16px;overflow:hidden;transform-style:preserve-3d;background:#f6eee8 center/cover no-repeat;background-image:url("${String(src).replace(/"/g,'%22')}");box-shadow:0 18px 40px rgba(60,20,30,.35),0 0 0 2px rgba(255,255,255,.85) inset;will-change:transform,opacity;`;
+    const shine = document.createElement('div');
+    shine.style.cssText = 'position:absolute;inset:0;background:linear-gradient(115deg,transparent 30%,rgba(255,255,255,.55) 48%,transparent 62%);background-size:250% 100%;mix-blend-mode:screen;';
+    card3d.appendChild(shine);
+    stage.appendChild(card3d);
+    document.body.appendChild(stage);
+
+    const D = 950, ease = 'cubic-bezier(.45,0,.2,1)';
+    // the path: lift toward the viewer, arc up and over, then dive into the bag
+    stage.animate([
+      { transform: 'translate(0,0)' },
+      { transform: `translate(${dx*.08}px,${-lift*.45}px)`, offset: .18 },
+      { transform: `translate(${dx*.5}px,${Math.min(dy*.5, 0) - lift}px)`, offset: .55 },
+      { transform: `translate(${dx}px,${dy}px)` }
+    ], { duration: D, easing: ease, fill: 'forwards' });
+    // the card itself: pops out in 3D, spins, shrinks and is swallowed
+    const spin = card3d.animate([
+      { transform: 'translateZ(0) rotateX(0) rotateY(0) scale(1)', opacity: 1, borderRadius: '16px' },
+      { transform: 'translateZ(140px) rotateX(18deg) rotateY(-25deg) scale(1.08)', opacity: 1, offset: .18 },
+      { transform: 'translateZ(60px) rotateX(-12deg) rotateY(200deg) scale(.62)', opacity: 1, offset: .55 },
+      { transform: 'translateZ(-40px) rotateX(10deg) rotateY(340deg) scale(.32)', opacity: 1, borderRadius: '50%', offset: .86 },
+      { transform: 'translateZ(-160px) rotateX(0) rotateY(360deg) scale(.04)', opacity: 0, borderRadius: '50%' }
+    ], { duration: D, easing: ease, fill: 'forwards' });
+    shine.animate([{ backgroundPosition: '150% 0' }, { backgroundPosition: '-50% 0' }], { duration: D * .6, delay: D * .1, fill: 'forwards' });
+
+    spin.onfinish = () => {
+      stage.remove();
+      // the bag "swallows" it: squash, stretch, settle
+      bag.animate([
+        { transform: 'scale(1)' },
+        { transform: 'scale(1.28,.78)', offset: .25 },
+        { transform: 'scale(.88,1.16)', offset: .5 },
+        { transform: 'scale(1.06,.96)', offset: .75 },
+        { transform: 'scale(1)' }
+      ], { duration: 520, easing: 'ease-out' });
+      const ring = document.createElement('span');
+      ring.setAttribute('aria-hidden', 'true');
+      ring.style.cssText = `position:fixed;left:${to.left + to.width/2 - 22}px;top:${to.top + to.height/2 - 22}px;width:44px;height:44px;border-radius:50%;border:2px solid #f2b8c6;pointer-events:none;z-index:2147483600;`;
+      document.body.appendChild(ring);
+      ring.animate([{ transform: 'scale(.4)', opacity: .9 }, { transform: 'scale(1.9)', opacity: 0 }], { duration: 600, easing: 'ease-out' }).onfinish = () => ring.remove();
+      ['tprCartBadge','tprCartBadgeTab','tprCartBadgeHero'].forEach(id => { const b = $(id); if (b) { b.classList.remove('pulse'); void b.offsetWidth; b.classList.add('pulse'); setTimeout(()=> b.classList.remove('pulse'), 500); } });
+    };
+    return D + 380;
+  }
+
   /* ---------- cart ---------- */
   function badge(id, n){
     const el = $(id); if(!el) return;
@@ -469,7 +558,12 @@
         });
       }
       renderCart();
-      open(cartEl);
+      const line = cart.find(i => String(i.id) === String(product.id)
+        && (i.color || null) === (colorName || null)
+        && (i.size || null) === (sizeName || null));
+      const flight = flyToBag(line && line.img);
+      if (flight) { clearTimeout(flyOpenTimer); flyOpenTimer = setTimeout(()=> open(cartEl), flight); }
+      else open(cartEl);
     },
     openCart(){ renderCart(); open(cartEl); },
     openSearch(){ open(searchEl); setTimeout(()=> $('tprSearchInput').focus(), 350); },
