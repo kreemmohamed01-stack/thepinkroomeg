@@ -1,5 +1,8 @@
 {
   "cleanUrls": true,
+  "crons": [
+    { "path": "/api/orders?action=cart-reminders", "schedule": "0 8 * * *" }
+  ],
   "trailingSlash": false,
   "headers": [
     {

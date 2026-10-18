@@ -14,6 +14,7 @@
   const CART_KEY     = 'tpr_cart_v1';      // shared with shared-ui.js
   const CHECKOUT_KEY = 'tpr_checkout_v1';  // in-progress checkout answers
   const ORDERS_KEY    = 'tpr_orders_v1';    // placed orders (order history)
+  const CART_TOKEN_KEY = 'tpr_cart_token';  // abandoned-cart row this checkout is saved under
 
   const STEPS = ['information', 'shipping', 'payment', 'review'];
 
@@ -305,7 +306,9 @@
       paymentStatus: paymentResult.status,       // pending | processing | paid | failed | cancelled
       paymentNote: paymentResult.note || '',
       orderStatus: provider.id === 'cash_on_delivery' ? 'confirmed' : 'confirmed',
-      delivery: deliveryEstimate(shippingMethod, Date.now())
+      delivery: deliveryEstimate(shippingMethod, Date.now()),
+      // lets the server stop this exact cart's abandoned-cart reminders
+      cartToken: (function(){ try { return localStorage.getItem(CART_TOKEN_KEY) || null; } catch(e){ return null; } })()
     };
 
     // Save to the real database + fire shop/customer email + shop WhatsApp
@@ -330,8 +333,43 @@
     // order placed — clear the working checkout answers and the cart
     clearCheckoutState();
     try { localStorage.setItem(CART_KEY, JSON.stringify([])); } catch(e){}
+    // only forget the cart token once the server has the order — a local-only
+    // fallback order keeps it, so the shop still sees this cart in the dashboard
+    if (order._synced) { try { localStorage.removeItem(CART_TOKEN_KEY); } catch(e){} }
 
     return { ok:true, order };
+  }
+
+  /* ---------- abandoned cart capture ----------
+     As soon as the Information step has a valid email OR phone, the bag
+     and contact details are saved server-side (api/_lib/abandoned.js) —
+     no waiting for Place Order — so reminders can bring the shopper back.
+     Debounced, and skipped when nothing changed since the last send.
+     Fire-and-forget: it can never block or slow down checkout. */
+  let captureTimer = null, lastCaptured = '';
+  function captureCart(customer){
+    clearTimeout(captureTimer);
+    captureTimer = setTimeout(async ()=>{
+      const c = customer || (loadCheckoutState().customer || {});
+      const cart = loadCart();
+      const hasContact = isEmail(c.email) || String(c.phone || '').replace(/\D/g, '').length >= 8;
+      if (!hasContact || !cart.length) return;
+      const payload = {
+        token: (function(){ try { return localStorage.getItem(CART_TOKEN_KEY); } catch(e){ return null; } })(),
+        name: c.name || '', email: isEmail(c.email) ? c.email.trim() : '', phone: c.phone || '',
+        items: cart
+      };
+      const key = JSON.stringify(payload);
+      if (key === lastCaptured) return;
+      lastCaptured = key;
+      try {
+        const resp = await fetch('/api/orders?action=cart-capture', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' }, body: key, keepalive: true
+        });
+        const data = await resp.json().catch(() => ({}));
+        if (data.ok && data.token) localStorage.setItem(CART_TOKEN_KEY, data.token);
+      } catch(e){ lastCaptured = ''; }
+    }, 900);
   }
 
   async function syncOrder(order){
@@ -387,6 +425,6 @@
     money, isEmail, isPhone, isFilled,
     checkPromo, calculatePricing, deliveryEstimate, fmtDate,
     generateOrderId, furthestAllowedStep, stepAllowed, stepIndex,
-    placeOrder
+    placeOrder, captureCart
   };
 })();

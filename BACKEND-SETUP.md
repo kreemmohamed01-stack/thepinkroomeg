@@ -874,3 +874,41 @@ in this order:
 11. **Admin roles**, **Activity log** — roughly in that order.
 12. **Paymob** (actual gateway wiring) and **Domain + SEO** — deliberately
     last, per the customer's own stated priority.
+
+---
+
+## Abandoned Cart Recovery
+
+**What it does:** the moment a shopper types a valid email or phone on checkout, their bag + contact details are saved to `abandoned_carts` (no waiting for Place Order). If no order follows, reminders go out automatically:
+
+| # | When (after last checkout activity) | Content |
+|---|---|---|
+| 1 | ~1 hour | simple nudge + "Return to my bag" link |
+| 2 | ~24 hours | second nudge |
+| 3 | ~48 hours | one-time discount code (default 10%, valid 3 days, single use — created in `coupons`) |
+
+The link (`/api/orders?action=cart-restore&t=TOKEN`) rebuilds that exact bag in any browser and opens checkout; reminder 3's code is applied automatically. Placing an order marks the cart `recovered` immediately (by cart token, and by email/phone so a different device counts too), and every reminder run re-checks `orders` before sending — a buyer is never messaged again. Each email has a "Stop these reminders" link.
+
+**Files:** `api/_lib/abandoned.js` (all logic), routes in `api/orders.js` (`cart-capture`, `cart-restore`, `cart-unsubscribe`, `cart-reminders`) and `api/admin/orders.js?action=abandoned`, capture in `checkout.js` → `captureCart()`, dashboard page `dashboard-abandoned-carts.html`. No new serverless function (Hobby cap).
+
+**Settings:** `settings` row `abandoned_cart` — `enabled`, `delay1Hours`, `delay2Hours`, `delay3Hours`, `discountPercent`, `discountValidDays`, `channels.email`, `channels.whatsapp`.
+
+### One-time setup
+1. `node db/migrate.js` (adds the table + settings row; idempotent).
+2. Env var **`CRON_SECRET`** — any long random string.
+3. Optional env var `SITE_URL` (e.g. `https://thepinkroom.com`) so links in reminders always use the real domain.
+4. **Scheduler.** `vercel.json` has a Vercel Cron, but Hobby only allows **once a day**, which is too slow for the 1-hour reminder. Add a free job at **cron-job.org** every 15 minutes calling:
+   `https://<domain>/api/orders?action=cart-reminders&key=<CRON_SECRET>`
+   (On Vercel Pro, change the `vercel.json` schedule to `*/15 * * * *` instead.)
+
+### WhatsApp reminders (optional, official Meta Cloud API)
+CallMeBot can't be used — it only messages the shop's own number. WhatsApp sending stays *skipped* (email still goes) until these env vars exist:
+- `WHATSAPP_TOKEN` — permanent System User token (Business Manager → System Users → generate token with `whatsapp_business_messaging`)
+- `WHATSAPP_PHONE_NUMBER_ID` — from WhatsApp → API Setup
+- optional `WHATSAPP_TEMPLATE_LANG` (default `ar`), `WHATSAPP_TPL_CART_1/2/3` (default `cart_reminder_1/2/3`)
+
+Create 3 **Marketing** templates in WhatsApp Manager with body variables in this order:
+`{{1}}` first name · `{{2}}` bag total · `{{3}}` return-to-bag link — and template 3 adds `{{4}}` discount code · `{{5}}` percent.
+Example (cart_reminder_1, ar): `أهلاً {{1}} 🌸 شنطتك في The Pink Room لسه مستنياكي بقيمة {{2}}. كمّلي طلبك من هنا: {{3}}`
+
+Meta bills per delivered Marketing message (Egypt ≈ $0.10 each — check Meta's current rate card). Billed to the business's Meta account, not this project.

@@ -12,6 +12,11 @@
                         InstaPay transfer screenshot before placing the order
    POST /api/orders?action=paymob-webhook   — Paymob calls this (see "Payments" —
                         integration pending, returns 501 until configured)
+   ---- Abandoned Cart Recovery (logic in api/_lib/abandoned.js) ----
+   POST /api/orders?action=cart-capture     — public, checkout saves bag + contact
+   GET  /api/orders?action=cart-restore&t=  — the "return to my bag" link
+   GET  /api/orders?action=cart-unsubscribe&t= — stop reminders for that cart
+   GET  /api/orders?action=cart-reminders   — cron only (CRON_SECRET, or the derived key shown on the dashboard)
    ============================================================ */
 
 const { sql } = require('./_lib/db');
@@ -21,6 +26,7 @@ const { getSetting } = require('./_lib/settings');
 const { getActivePromotions, effectivePrice } = require('./_lib/promotions');
 const { sendPurchaseCAPI } = require('./_lib/capi');
 const { uploadToCloudinary } = require('./_lib/cloudinary');
+const abandoned = require('./_lib/abandoned');
 
 // same shape/values as the seed row in db/schema.sql — used only if the
 // settings table row is ever missing, so checkout never hard-fails.
@@ -433,6 +439,10 @@ async function createOrder(req, res) {
     try { await sql`UPDATE coupons SET usage_count = usage_count + 1 WHERE code = ${order.promo.code}`; } catch (e) { console.error('[orders] coupon usage increment failed:', e); }
   }
 
+  // the order exists — stop any abandoned-cart reminders for this shopper
+  // right now. Never allowed to fail the order itself.
+  try { await abandoned.markRecovered(order); } catch (e) { console.error('[orders] abandoned-cart recovery mark failed:', e); }
+
   // never lets a Meta outage/misconfiguration delay or fail order creation —
   // logged, not thrown; fires exactly once per saved order (see capi.js)
   const capi = await sendPurchaseCAPI(order, req).catch(e => ({ ok: false, error: e.message }));
@@ -452,7 +462,67 @@ async function getOrder(req, res) {
   return res.status(200).json({ ok: true, order: rowToOrder(rows[0]) });
 }
 
+function siteBaseUrl(req) {
+  if (process.env.SITE_URL) return process.env.SITE_URL.replace(/\/+$/, '');
+  const proto = req.headers['x-forwarded-proto'] || 'https';
+  return `${proto}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+}
+
+function parseBody(req) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return null; } }
+  return body && typeof body === 'object' ? body : null;
+}
+
+async function abandonedCartRoute(req, res, action) {
+  if (!sql) return res.status(500).json({ ok: false, error: 'Database is not configured.' });
+
+  if (action === 'cart-capture') {
+    if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    const body = parseBody(req);
+    if (!body) return res.status(400).json({ ok: false, error: 'Invalid JSON body.' });
+    const result = await abandoned.captureCart(body);
+    if (result.error) return res.status(400).json({ ok: false, error: result.error });
+    return res.status(200).json({ ok: true, token: result.token });
+  }
+
+  if (action === 'cart-restore') {
+    const result = await abandoned.restorePage(String(req.query.t || ''), req.query.s);
+    if (result.redirect) { res.setHeader('Location', result.redirect); return res.status(302).end(); }
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send(result.html);
+  }
+
+  if (action === 'cart-unsubscribe') {
+    await abandoned.unsubscribe(String(req.query.t || ''));
+    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+    return res.status(200).send('<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Pink Room</title></head><body style="font-family:Arial,sans-serif;background:#f8f4ee;color:#1c1a17;text-align:center;padding-top:30vh"><p style="letter-spacing:3px;font-size:13px">THE PINK ROOM</p><p style="font-size:14px">You will not receive any more reminders about this bag.</p><p><a href="/" style="color:#c9a97c">Back to the store</a></p></body></html>');
+  }
+
+  if (action === 'cart-reminders') {
+    // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>"; an external
+    // cron (cron-job.org etc.) can pass ?key=<CRON_SECRET> instead
+    const secret = abandoned.cronKey();
+    const given = (req.headers.authorization || '').replace(/^Bearer\s+/i, '') || String(req.query.key || '');
+    const a = Buffer.from(given), b = Buffer.from(secret || '');
+    if (!secret || a.length !== b.length || !crypto.timingSafeEqual(a, b)) return res.status(401).json({ ok: false, error: 'Unauthorized.' });
+    const summary = await abandoned.runReminders(siteBaseUrl(req));
+    return res.status(200).json({ ok: true, ...summary });
+  }
+  return null;
+}
+
 module.exports = async (req, res) => {
+  const action = req.query.action;
+  if (action && action.startsWith('cart-')) {
+    try {
+      const handled = await abandonedCartRoute(req, res, action);
+      if (handled !== null) return handled;
+    } catch (e) {
+      console.error('[orders] ' + action + ' error:', e);
+      return res.status(500).json({ ok: false, error: 'Something went wrong.' });
+    }
+  }
   if (req.query.action === 'paymob-webhook') {
     if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
     return paymobWebhook(req, res);

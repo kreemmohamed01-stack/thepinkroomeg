@@ -4,12 +4,16 @@
                                             (?status=, ?payment=, ?method=)
    GET  /api/admin/orders?id=PR-XXXXXX    — full detail of one order
    GET  /api/admin/orders?action=payments — payment-focused summary (see "Payments")
+   POST /api/admin/orders?action=abandoned-run — send any reminders that are due right now
+   GET  /api/admin/orders?action=abandoned — abandoned carts list + recovery stats
+                                            (?status=, ?q=, ?page=) — see api/_lib/abandoned.js
    PATCH  /api/admin/orders               — { id, orderStatus?, paymentStatus? }
    DELETE /api/admin/orders?id=PR-XXXXXX  — permanently remove an order (test/mistaken orders)
    ============================================================ */
 
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
+const { listForAdmin: listAbandonedCarts, runReminders } = require('../_lib/abandoned');
 
 const ORDER_STATUSES = ['confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'cancelled'];
@@ -226,6 +230,12 @@ module.exports = async (req, res) => {
 
   try {
     if (req.method === 'GET' && req.query.action === 'payments') return await paymentsSummary(req, res);
+    if (req.method === 'GET' && req.query.action === 'abandoned') return res.status(200).json({ ok: true, ...(await listAbandonedCarts(req.query)) });
+    // "Send due reminders now" button — same job the cron runs
+    if (req.method === 'POST' && req.query.action === 'abandoned-run') {
+      const base = process.env.SITE_URL ? process.env.SITE_URL.replace(/\/+$/, '') : `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+      return res.status(200).json({ ok: true, ...(await runReminders(base)) });
+    }
     if (req.method === 'GET') return req.query.id ? await getOrderDetail(req, res) : await listOrders(req, res);
     if (req.method === 'PATCH') return await updateOrder(req, res);
     if (req.method === 'DELETE') return await deleteOrder(req, res);

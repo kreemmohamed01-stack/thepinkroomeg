@@ -805,8 +805,8 @@ function phoneIsValid(){
 
 /* keep the two notes fields + name/email/phone in sync as the user types */
 function syncField(el, fn){ el.addEventListener('input', fn); }
-syncField(inName, ()=>{ state.customer.name = inName.value; persist(); });
-syncField(inEmail, ()=>{ state.customer.email = inEmail.value; persist(); });
+syncField(inName, ()=>{ state.customer.name = inName.value; persist(); CO.captureCart(state.customer); });
+syncField(inEmail, ()=>{ state.customer.email = inEmail.value; persist(); CO.captureCart(state.customer); });
 // The field only ever shows the local number; the dial code prefix
 // (kept in sync with Country by applyCountry()) is prepended here so
 // state.customer.phone — what actually gets saved to the order — is
@@ -816,6 +816,7 @@ syncField(inPhone, ()=>{
   if (inPhone.value !== n.display) inPhone.value = n.display;
   state.customer.phone = n.national ? (phoneDialCode.textContent + ' ' + n.national) : '';
   persist();
+  CO.captureCart(state.customer);
 });
 syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
 syncField(inApt, ()=>{ state.shippingAddress.apt = inApt.value; persist(); });
@@ -1380,6 +1381,17 @@ renderSummary();
 // once the real shipping settings arrive (near-instant, but never
 // blocks first render), refresh anything showing a price/label from them
 CO.SHIPPING_METHODS_READY.then(()=>{ renderShipOptions(); renderSummary(); });
+
+/* Abandoned Cart Recovery: a returning shopper (or one who came back
+   through a reminder link) already has contact details saved — capture
+   right away so the latest bag is what the reminders show. A reminder-3
+   discount code arrives via the restore link and is applied here once. */
+CO.captureCart(state.customer);
+(function(){
+  let code = null;
+  try { code = localStorage.getItem('tpr_pending_promo'); localStorage.removeItem('tpr_pending_promo'); } catch(e){}
+  if (code) applyPromo(code);
+})();
 </script>
 </body>
 </html>

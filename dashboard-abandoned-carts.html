@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16.png">
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<title>Abandoned Carts | The Pink Room Dashboard</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="dashboard-ui.css">
+<style>
+  .ac-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  @media (max-width:860px){ .ac-kpis{grid-template-columns:1fr 1fr;} }
+  .ac-kpi{background:#fff;border:1px solid var(--line);border-radius:5px;padding:14px 18px;}
+  .ac-kpi p{font-size:9.5px;letter-spacing:1.2px;color:var(--ink-soft);margin-bottom:6px;}
+  .ac-kpi h3{font-family:'Playfair Display',serif;font-weight:400;font-size:21px;}
+  .ac-kpi span{display:block;font-size:11px;color:var(--ink-soft);margin-top:3px;}
+  .ac-note{background:var(--beige-soft);border-radius:4px;padding:11px 14px;font-size:12px;color:var(--ink-soft);margin-bottom:16px;line-height:1.7;}
+  .ac-filter{height:38px;border:1px solid var(--line);border-radius:3px;padding:0 10px;font-size:12px;background:#fff;}
+  .ac-name b{display:block;font-size:13px;}
+  .ac-name span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
+  .ac-items{font-size:11.5px;color:var(--ink-soft);max-width:240px;}
+  .ac-dots{display:inline-flex;gap:4px;vertical-align:middle;}
+  .ac-dots i{width:8px;height:8px;border-radius:50%;background:var(--line);}
+  .ac-dots i.on{background:var(--gold);}
+  .badge.st-recovered{background:rgba(90,122,82,.14);color:var(--ok);} .badge.st-recovered i{background:var(--ok);}
+  .badge.st-expired{background:var(--beige-soft);color:var(--ink-soft);} .badge.st-expired i{background:var(--ink-soft);}
+  .badge.st-unsubscribed{background:rgba(176,71,63,.1);color:var(--err);} .badge.st-unsubscribed i{background:var(--err);}
+  .ac-item-row{display:flex;gap:12px;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px;}
+  .ac-item-row:last-child{border-bottom:none;}
+  .ac-item-row img{width:46px;height:46px;object-fit:cover;border-radius:3px;background:var(--beige-soft);}
+  .ac-item-row .n{flex:1;}
+  .ac-item-row .n span{display:block;font-size:11px;color:var(--ink-soft);}
+  .ac-log{font-size:12px;padding:8px 0;border-bottom:1px solid var(--line);}
+  .ac-log:last-child{border-bottom:none;}
+  .ac-log span{color:var(--ink-soft);}
+  .ok-t{color:var(--ok);} .bad-t{color:var(--err);} .skip-t{color:var(--ink-soft);}
+</style>
+</head>
+<body>
+
+  <div class="db-shell">
+    <div data-dash-sidebar></div>
+    <main class="db-main">
+      <div data-dash-mobile-topbar></div>
+      <div class="db-wrap">
+        <div class="db-page-head">
+          <div><h1>Abandoned Carts</h1><p>Shoppers who entered their email or phone at checkout but didn't place the order — and whether they came back.</p></div>
+        </div>
+
+        <div class="ac-kpis">
+          <div class="ac-kpi"><p>ABANDONED (30 DAYS)</p><h3 id="kTotal">&mdash;</h3><span id="kPending">&nbsp;</span></div>
+          <div class="ac-kpi"><p>CAME BACK &amp; BOUGHT</p><h3 id="kRecovered">&mdash;</h3><span id="kRate">&nbsp;</span></div>
+          <div class="ac-kpi"><p>RECOVERED SALES</p><h3 id="kRecValue">&mdash;</h3><span id="kAfterReminder">&nbsp;</span></div>
+          <div class="ac-kpi"><p>STILL IN ABANDONED CARTS</p><h3 id="kLost">&mdash;</h3><span>value not yet recovered</span></div>
+        </div>
+
+        <div class="ac-note" id="waNote" style="display:none"></div>
+        <div class="ac-note" id="cronNote" style="display:none"></div>
+
+        <div class="db-toolbar">
+          <div class="db-search">
+            <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="acSearch" placeholder="Search by name, email or phone...">
+          </div>
+          <select class="ac-filter" id="acStatus">
+            <option value="">All</option>
+            <option value="pending">Not purchased (reminders active)</option>
+            <option value="recovered">Came back &amp; bought</option>
+            <option value="expired">Closed — didn't buy</option>
+            <option value="unsubscribed">Stopped reminders</option>
+          </select>
+          <button class="db-refresh" id="acRunNow" title="Sends every reminder that is already due — the same job the scheduler runs">SEND DUE REMINDERS</button>
+          <button class="db-refresh" id="acRefresh">
+            <svg viewBox="0 0 24 24"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10"/><path d="M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            REFRESH
+          </button>
+        </div>
+
+        <div class="db-table-wrap">
+          <table>
+            <thead>
+              <tr><th>CUSTOMER</th><th>PHONE</th><th>PRODUCTS</th><th>VALUE</th><th>REMINDERS</th><th>STATUS</th><th>STARTED</th></tr>
+            </thead>
+            <tbody id="acBody"></tbody>
+          </table>
+          <div class="db-empty" id="acEmpty" style="display:none">
+            <svg viewBox="0 0 24 24"><path d="M6.5 8h11l.9 12.1a2 2 0 0 1-2 2.15H7.6a2 2 0 0 1-2-2.15L6.5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg>
+            <p>No abandoned carts yet.</p>
+          </div>
+          <div class="db-pagination" id="acPagination"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <div class="db-overlay" id="acOverlay"></div>
+  <aside class="db-drawer" id="acDrawer">
+    <div class="db-drawer-head">
+      <h2>Abandoned Cart</h2>
+      <button class="db-drawer-close" id="acDrawerClose">&times;</button>
+    </div>
+    <div class="db-drawer-body" id="acDrawerBody"></div>
+  </aside>
+
+  <div class="db-toast-wrap" id="dbToastWrap"></div>
+
+<script src="dashboard-ui.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const { money, fmtDate, fmtDateShort, escHtml } = DashUI;
+const state = { page: 1, q: '', status: '', timer: null, carts: [] };
+
+const STATUS_LABEL = { pending: 'NOT PURCHASED', recovered: 'BOUGHT', expired: 'CLOSED', unsubscribed: 'STOPPED' };
+const statusBadge = s => `<span class="badge st-${s}"><i></i>${STATUS_LABEL[s] || s.toUpperCase()}</span>`;
+const dots = n => `<span class="ac-dots">${[1,2,3].map(i => `<i class="${i <= n ? 'on' : ''}"></i>`).join('')}</span> ${n}/3`;
+const imgSrc = src => !src ? '' : (/^https?:\/\//.test(src) ? src : '/' + String(src).replace(/^\/+/, ''));
+
+function renderStats(s, waConfigured){
+  $('kTotal').textContent = s.total;
+  $('kPending').textContent = s.pending + ' still receiving reminders';
+  $('kRecovered').textContent = s.recovered;
+  $('kRate').textContent = s.recoveryRate + '% recovery rate';
+  $('kRecValue').textContent = money(s.recoveredValue);
+  $('kAfterReminder').textContent = s.recoveredAfterReminder + ' bought after a reminder';
+  $('kLost').textContent = money(s.lostValue);
+  const note = $('waNote');
+  if (!waConfigured){
+    note.style.display = 'block';
+    note.innerHTML = 'Reminders are currently sent by <b>email</b>. WhatsApp reminders switch on automatically once the WhatsApp Cloud API keys are added (see BACKEND-SETUP.md → Abandoned Cart Recovery).';
+  } else note.style.display = 'none';
+}
+
+function renderTable(carts){
+  state.carts = carts;
+  $('acEmpty').style.display = carts.length ? 'none' : 'block';
+  $('acBody').innerHTML = carts.map(c => `
+    <tr data-id="${c.id}">
+      <td class="ac-name"><b>${escHtml(c.name || 'Unnamed')}</b><span>${escHtml(c.email || '—')}</span></td>
+      <td>${escHtml(c.phone || '—')}</td>
+      <td class="ac-items">${escHtml(c.items.map(i => i.name + (i.qty > 1 ? ' ×' + i.qty : '')).join(', '))}</td>
+      <td class="td-total">${money(c.subtotal)}</td>
+      <td>${dots(c.remindersSent)}</td>
+      <td>${statusBadge(c.status)}${c.recoveredOrderId ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:3px">#${escHtml(c.recoveredOrderId)}</div>` : ''}</td>
+      <td class="td-date">${fmtDateShort(c.createdAt)}</td>
+    </tr>`).join('');
+  document.querySelectorAll('#acBody tr').forEach(tr => tr.addEventListener('click', () => openCart(Number(tr.dataset.id))));
+}
+
+function renderPagination(total, page, pageSize){
+  const pages = Math.max(1, Math.ceil(total / pageSize));
+  const from = total ? (page-1)*pageSize + 1 : 0, to = Math.min(total, page*pageSize);
+  $('acPagination').innerHTML = `
+    <span>${from}&ndash;${to} of ${total} cart${total===1?'':'s'}</span>
+    <div class="db-pagination-btns">
+      <button id="acPrev" ${page<=1?'disabled':''}>&larr; Previous</button>
+      <button id="acNext" ${page>=pages?'disabled':''}>Next &rarr;</button>
+    </div>`;
+  $('acPrev').addEventListener('click', ()=>{ if (state.page > 1){ state.page--; load(); } });
+  $('acNext').addEventListener('click', ()=>{ if (state.page < pages){ state.page++; load(); } });
+}
+
+async function load(){
+  const btn = $('acRefresh'); btn.classList.add('spin');
+  const params = new URLSearchParams({ action: 'abandoned', page: state.page, q: state.q, status: state.status });
+  try {
+    const r = await fetch('/api/admin/orders?' + params.toString());
+    if (r.status === 401){ location.href = 'dashboard-login.html'; return; }
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Failed to load abandoned carts.');
+    renderStats(d.stats, d.whatsappConfigured);
+    if (d.cronKey){
+      const url = location.origin + '/api/orders?action=cart-reminders&key=' + d.cronKey;
+      $('cronNote').style.display = 'block';
+      $('cronNote').innerHTML = 'Automatic sending: add a job at <b>cron-job.org</b> that opens this URL <b>every 15 minutes</b> (keep it private):<br><code style="word-break:break-all;font-size:11px">' + escHtml(url) + '</code>';
+    }
+    renderTable(d.carts);
+    renderPagination(d.total, d.page, d.pageSize);
+  } catch(e){
+    $('acBody').innerHTML = '';
+    $('acEmpty').style.display = 'block';
+    $('acEmpty').querySelector('p').textContent = e.message || 'Could not load abandoned carts.';
+  } finally { btn.classList.remove('spin'); }
+}
+
+const channel = r => !r ? '' : r.ok ? '<b class="ok-t">sent</b>' : r.skipped ? `<span class="skip-t">skipped (${escHtml(r.reason || '')})</span>` : `<b class="bad-t">failed</b> <span>${escHtml(r.error || '')}</span>`;
+
+function openCart(id){
+  const c = state.carts.find(x => x.id === id); if (!c) return;
+  const phoneDigits = (c.phone || '').replace(/[^0-9]/g, '').replace(/^0/, '20');
+  $('acDrawerBody').innerHTML = `
+    <div class="db-section">
+      <h4>CUSTOMER</h4>
+      <div class="db-row"><span>Name</span><span>${escHtml(c.name || '—')}</span></div>
+      <div class="db-row"><span>Email</span><span>${escHtml(c.email || '—')}</span></div>
+      <div class="db-row"><span>Phone</span><span>${escHtml(c.phone || '—')}</span></div>
+      <div class="db-row"><span>Status</span><span>${statusBadge(c.status)}</span></div>
+      ${c.recoveredOrderId ? `<div class="db-row"><span>Order</span><span><a href="receipt.html?order=${encodeURIComponent(c.recoveredOrderId)}" target="_blank" style="color:var(--gold)">#${escHtml(c.recoveredOrderId)}</a> · ${fmtDate(c.recoveredAt)}</span></div>` : ''}
+      <div class="db-row"><span>Started</span><span>${fmtDate(c.createdAt)}</span></div>
+      <div class="db-row"><span>Last activity</span><span>${fmtDate(c.updatedAt)}</span></div>
+      <div class="db-row"><span>Reminder link opened</span><span>${c.linkClicks}×</span></div>
+      ${c.discountCode ? `<div class="db-row"><span>Discount code</span><span>${escHtml(c.discountCode)}</span></div>` : ''}
+    </div>
+    <div class="db-section">
+      <h4>PRODUCTS · ${money(c.subtotal)}</h4>
+      ${c.items.map(i => `
+        <div class="ac-item-row">
+          ${i.img ? `<img src="${escHtml(imgSrc(i.img))}" alt="">` : '<img alt="">'}
+          <div class="n">${escHtml(i.name)}<span>${escHtml(i.variant || '')} Qty ${i.qty}</span></div>
+          <b>${money(i.price * i.qty)}</b>
+        </div>`).join('')}
+    </div>
+    <div class="db-section">
+      <h4>REMINDERS SENT</h4>
+      ${c.reminderLog.length ? c.reminderLog.map(l => `
+        <div class="ac-log"><b>Reminder ${l.step}</b> <span>· ${fmtDate(l.at)}</span><br>
+          Email: ${channel(l.email)} &nbsp;·&nbsp; WhatsApp: ${channel(l.whatsapp)}</div>`).join('')
+        : '<p style="font-size:12px;color:var(--ink-soft)">None yet.</p>'}
+    </div>
+    <div class="db-section db-links">
+      ${c.phone ? `<a href="https://wa.me/${phoneDigits}" target="_blank">
+        <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Z"/></svg>
+        WhatsApp Customer</a>` : ''}
+      ${c.email ? `<a href="mailto:${escHtml(c.email)}"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg> Email Customer</a>` : ''}
+    </div>`;
+  $('acDrawer').classList.add('open'); $('acOverlay').classList.add('open');
+}
+function closeDrawer(){ $('acDrawer').classList.remove('open'); $('acOverlay').classList.remove('open'); }
+$('acOverlay').addEventListener('click', closeDrawer);
+$('acDrawerClose').addEventListener('click', closeDrawer);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDrawer(); });
+
+$('acSearch').addEventListener('input', e => {
+  clearTimeout(state.timer);
+  state.timer = setTimeout(() => { state.q = e.target.value.trim(); state.page = 1; load(); }, 350);
+});
+$('acStatus').addEventListener('change', e => { state.status = e.target.value; state.page = 1; load(); });
+$('acRefresh').addEventListener('click', load);
+$('acRunNow').addEventListener('click', async ()=>{
+  const btn = $('acRunNow'); btn.disabled = true;
+  try {
+    const r = await fetch('/api/admin/orders?action=abandoned-run', { method: 'POST' });
+    const d = await r.json();
+    if (!d.ok) throw new Error(d.error || 'Failed.');
+    const failed = d.sent.filter(x => x.email === 'failed').length;
+    DashUI.toast(d.sent.length ? `Sent ${d.sent.length} reminder${d.sent.length===1?'':'s'}${failed ? ` (${failed} email failed)` : ''}.` : 'Nothing is due yet.', failed ? 'bad' : 'ok');
+    load();
+  } catch(e){ DashUI.toast(e.message || 'Could not send reminders.', 'bad'); }
+  finally { btn.disabled = false; }
+});
+
+DashUI.requireAuth(load);
+</script>
+</body>
+</html>

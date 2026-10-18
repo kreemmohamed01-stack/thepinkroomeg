@@ -293,3 +293,45 @@ CREATE TABLE IF NOT EXISTS newsletter_subscribers (
   unsubscribed_at   timestamptz
 );
 CREATE INDEX IF NOT EXISTS idx_newsletter_unsubscribed ON newsletter_subscribers (unsubscribed);
+
+
+-- ------------------------------------------------------------
+-- abandoned_carts — Abandoned Cart Recovery. A row is written the moment
+-- a shopper types a valid email or phone on the checkout Information
+-- step (api/orders.js?action=cart-capture), before Place Order, and kept
+-- up to date as they edit their bag. A reminder job
+-- (?action=cart-reminders, run by a cron) sends up to three reminders:
+-- ~1h, ~24h, and ~48-72h with a one-time discount code. Placing an order
+-- (api/orders.js createOrder) flips the row to 'recovered' immediately so
+-- no further reminder is ever sent. `token` is the unguessable id in the
+-- "return to your cart" link — never the numeric id.
+-- ------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS abandoned_carts (
+  id                bigserial PRIMARY KEY,
+  token             text UNIQUE NOT NULL,
+  name              text,
+  email             text,
+  phone             text,
+  items             jsonb NOT NULL DEFAULT '[]'::jsonb,
+  subtotal          numeric NOT NULL DEFAULT 0,
+  status            text NOT NULL DEFAULT 'pending',   -- pending | recovered | expired | unsubscribed
+  reminders_sent    integer NOT NULL DEFAULT 0,          -- 0..3
+  last_reminder_at  timestamptz,
+  reminder_log      jsonb NOT NULL DEFAULT '[]'::jsonb,  -- [{step, at, email:{ok}, whatsapp:{ok}}]
+  discount_code     text,                                -- generated for reminder 3
+  recovered_order_id text,
+  recovered_at      timestamptz,
+  link_clicks       integer NOT NULL DEFAULT 0,
+  created_at        timestamptz NOT NULL DEFAULT now(),
+  updated_at        timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_abandoned_status  ON abandoned_carts (status, updated_at);
+CREATE INDEX IF NOT EXISTS idx_abandoned_email   ON abandoned_carts (lower(email));
+CREATE INDEX IF NOT EXISTS idx_abandoned_phone   ON abandoned_carts (phone);
+
+-- Dashboard-editable knobs for the reminders (delays, discount %), read
+-- by api/_lib/abandoned.js with these same values as its fallback.
+INSERT INTO settings (key, value) VALUES (
+  'abandoned_cart',
+  '{"enabled":true,"delay1Hours":0.5,"delay2Hours":24,"delay3Hours":72,"discountPercent":10,"discountValidDays":3,"channels":{"email":true,"whatsapp":true}}'::jsonb
+) ON CONFLICT (key) DO NOTHING;
