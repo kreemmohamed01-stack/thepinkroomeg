@@ -298,7 +298,61 @@ async function sendEmail(cart, step, links, vars, baseUrl) {
      {{1}} first name   {{2}} bag total   {{3}} return-to-bag link
    and reminder 3's template adds {{4}} the discount code, {{5}} the percent.
    Egyptian numbers typed as "+20 1XXXXXXXXX" become "201XXXXXXXXX". */
+/* GREEN-API (green-api.com) — links a normal WhatsApp number the same way
+   WhatsApp Web does (QR scan), so plain text can be sent with no Meta
+   templates. Preferred over the Cloud API below whenever its keys exist:
+     GREEN_API_INSTANCE   idInstance from the green-api console
+     GREEN_API_TOKEN      apiTokenInstance
+     GREEN_API_URL        optional apiUrl shown in the console (default https://api.green-api.com)
+     SHOP_WHATSAPP_PUBLIC optional number shown for questions (default store_settings.whatsapp) */
+const WA_TEXT = {
+  1: 'أهلاً {name} 🌸
+شنطتك في The Pink Room لسه محفوظة ومستنياكي بقيمة {total}.
+تقدري تكمّلي طلبك من هنا:
+{link}',
+  2: '{name}، القطع اللي اخترتيها لسه موجودة في شنطتك بقيمة {total} ✨
+الكميات محدودة، كمّلي طلبك قبل ما تخلص:
+{link}',
+  3: '{name}، ده آخر تذكير من The Pink Room 🌸
+شنطتك بقيمة {total} لسه محفوظة، بس مش هنقدر نحجزها كتير.
+كمّلي طلبك من هنا:
+{link}'
+};
+async function sendGreenApi(cart, step, links, to) {
+  const id = process.env.GREEN_API_INSTANCE, token = process.env.GREEN_API_TOKEN;
+  const base = (process.env.GREEN_API_URL || 'https://api.green-api.com').replace(/[/]+$/, '');
+  const store = await getSetting('store_settings', {}).catch(() => ({}));
+  const contact = process.env.SHOP_WHATSAPP_PUBLIC || store.whatsapp || '';
+  let message = fill(WA_TEXT[step], {
+    name: cart.name ? String(cart.name).split(' ')[0] : 'أهلاً بيكي',
+    total: money(cart.subtotal),
+    link: links.restore
+  });
+  if (contact) message += `
+
+للاستفسار كلمينا واتساب: ${contact}`;
+  message += '
+لو مش حابة تستقبلي تذكيرات تاني ابعتي STOP';
+  try {
+    const resp = await fetch(`${base}/waInstance${id}/sendMessage/${token}`, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ chatId: to + '@c.us', message })
+    });
+    const data = await resp.json().catch(() => ({}));
+    if (!resp.ok || !data.idMessage) return { ok: false, error: data.message || ('GREEN-API responded ' + resp.status) };
+    return { ok: true, via: 'green-api' };
+  } catch (e) {
+    return { ok: false, error: e.message };
+  }
+}
+
 async function sendWhatsapp(cart, step, links, vars) {
+  if (process.env.GREEN_API_INSTANCE && process.env.GREEN_API_TOKEN) {
+    let to = phoneDigits(cart.phone);
+    if (!to) return { skipped: true, reason: 'no phone' };
+    if (to.startsWith('0')) to = '20' + to.slice(1);
+    return sendGreenApi(cart, step, links, to);
+  }
   const token = process.env.WHATSAPP_TOKEN, phoneId = process.env.WHATSAPP_PHONE_NUMBER_ID;
   if (!token || !phoneId) return { skipped: true, reason: 'WhatsApp Cloud API not configured' };
   let to = phoneDigits(cart.phone);
@@ -562,7 +616,7 @@ async function listForAdmin(query) {
       recoveryRate: s.total ? Math.round((s.recovered / s.total) * 1000) / 10 : 0,
       lostValue: Number(s.lost_value), recoveredValue: Number(s.recovered_value)
     },
-    whatsappConfigured: !!(process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID),
+    whatsappConfigured: !!((process.env.WHATSAPP_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID) || (process.env.GREEN_API_INSTANCE && process.env.GREEN_API_TOKEN)),
     cronKey: cronKey()
   };
 }
