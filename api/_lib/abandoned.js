@@ -306,17 +306,9 @@ async function sendEmail(cart, step, links, vars, baseUrl) {
      GREEN_API_URL        optional apiUrl shown in the console (default https://api.green-api.com)
      SHOP_WHATSAPP_PUBLIC optional number shown for questions (default store_settings.whatsapp) */
 const WA_TEXT = {
-  1: 'أهلاً {name} 🌸
-شنطتك في The Pink Room لسه محفوظة ومستنياكي بقيمة {total}.
-تقدري تكمّلي طلبك من هنا:
-{link}',
-  2: '{name}، القطع اللي اخترتيها لسه موجودة في شنطتك بقيمة {total} ✨
-الكميات محدودة، كمّلي طلبك قبل ما تخلص:
-{link}',
-  3: '{name}، ده آخر تذكير من The Pink Room 🌸
-شنطتك بقيمة {total} لسه محفوظة، بس مش هنقدر نحجزها كتير.
-كمّلي طلبك من هنا:
-{link}'
+  1: 'أهلاً {name} 🌸\nشنطتك في The Pink Room لسه محفوظة ومستنياكي بقيمة {total}.\nتقدري تكمّلي طلبك من هنا:\n{link}',
+  2: '{name}، القطع اللي اخترتيها لسه موجودة في شنطتك بقيمة {total} ✨\nالكميات محدودة، كمّلي طلبك قبل ما تخلص:\n{link}',
+  3: '{name}، ده آخر تذكير من The Pink Room 🌸\nشنطتك بقيمة {total} لسه محفوظة، بس مش هنقدر نحجزها كتير.\nكمّلي طلبك من هنا:\n{link}'
 };
 async function sendGreenApi(cart, step, links, to) {
   const id = process.env.GREEN_API_INSTANCE, token = process.env.GREEN_API_TOKEN;
@@ -328,11 +320,8 @@ async function sendGreenApi(cart, step, links, to) {
     total: money(cart.subtotal),
     link: links.restore
   });
-  if (contact) message += `
-
-للاستفسار كلمينا واتساب: ${contact}`;
-  message += '
-لو مش حابة تستقبلي تذكيرات تاني ابعتي STOP';
+  if (contact) message += `\n\nللاستفسار كلمينا واتساب: ${contact}`;
+  message += '\nلو مش حابة تستقبلي تذكيرات تاني ابعتي STOP';
   try {
     const resp = await fetch(`${base}/waInstance${id}/sendMessage/${token}`, {
       method: 'POST', headers: { 'Content-Type': 'application/json' },
