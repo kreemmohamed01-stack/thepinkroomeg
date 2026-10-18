@@ -2462,7 +2462,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   <style>
     #tprIntro{position:fixed;inset:0;z-index:2147483000;background:#0d0b0a;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;transition:opacity .7s ease,transform .9s cubic-bezier(.7,0,.2,1);}
     #tprIntro.out{opacity:0;transform:scale(1.04);pointer-events:none;}
-    #tprIntro .bg{position:absolute;inset:-40px;width:calc(100% + 80px);height:calc(100% + 80px);object-fit:cover;filter:blur(38px) brightness(.55) saturate(1.2);}
+    /* Blurred backdrop drawn at quarter size and scaled up 4x: looks the same as a full-size 38px blur, but costs the GPU ~16x less per frame, so the intro stays smooth on mid-range phones/laptops. */
+    #tprIntro .bg{position:absolute;left:-20px;top:-20px;width:calc(25% + 10px);height:calc(25% + 10px);transform:scale(4);transform-origin:0 0;object-fit:cover;filter:blur(9px) brightness(.55) saturate(1.2);will-change:transform;}
     #tprIntro .main{position:relative;height:100%;width:100%;object-fit:contain;animation:tprIntroIn 1s ease both;}
     @media (orientation:portrait){#tprIntro .main{object-fit:cover;}#tprIntro .bg{display:none;}}
     @media (min-aspect-ratio:1/1){#tprIntro .main{height:92%;width:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55);}}
@@ -2483,6 +2484,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     if(/bot|crawl|spider|lighthouse|headless/i.test(navigator.userAgent)) return;
     try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+    // tells the hero video loader below to wait until the intro is gone, so the two videos never fight for bandwidth
+    window.__tprIntroActive=true;
 
     var root=document.createElement('div'); root.id='tprIntro'; root.setAttribute('aria-label','The Pink Room intro');
     root.innerHTML='<div class="bar"></div>'+
@@ -2500,6 +2503,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       if(done) return; done=true;
       root.classList.add('out');
       document.documentElement.classList.remove('tpr-intro-lock');
+      window.__tprIntroActive=false;
+      try{ window.dispatchEvent(new Event('tpr-intro-done')); }catch(e){}
       setTimeout(function(){ v.pause(); bg.pause(); v.removeAttribute('src'); bg.removeAttribute('src'); v.load(); bg.load(); root.remove(); },900);
     }
     root.querySelector('.skip').onclick=close;
@@ -2616,8 +2621,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       var p = v.play();
       if (p && p.catch) p.catch(function(){});  // autoplay blocked: poster stays
     }
-    if (document.readyState === 'complete') start();
-    else window.addEventListener('load', start, { once: true });
+    /* ...and, on a first visit, only after the intro video has finished, so
+       the intro plays smoothly instead of sharing the connection with this one. */
+    function startWhenFree(){
+      if (window.__tprIntroActive) window.addEventListener('tpr-intro-done', start, { once: true });
+      else start();
+    }
+    if (document.readyState === 'complete') startWhenFree();
+    else window.addEventListener('load', startWhenFree, { once: true });
 
     /* Don't keep decoding (or buffering) the loop while the hero is scrolled
        out of view or the tab is hidden — saves battery and re-fetches.

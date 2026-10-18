@@ -15,7 +15,7 @@
       ]
     },
     {
-      "source": "/api/(.*)",
+      "source": "/api/((?!products).*)",
       "headers": [
         {
           "key": "Cache-Control",
