@@ -13,7 +13,7 @@
 
 const { sql } = require('../_lib/db');
 const { requireAuth } = require('../_lib/auth');
-const { listForAdmin: listAbandonedCarts, runReminders } = require('../_lib/abandoned');
+const { listForAdmin: listAbandonedCarts, runReminders, deleteCart } = require('../_lib/abandoned');
 
 const ORDER_STATUSES = ['confirmed', 'processing', 'shipped', 'delivered', 'cancelled'];
 const PAYMENT_STATUSES = ['pending', 'processing', 'paid', 'failed', 'cancelled'];
@@ -231,6 +231,10 @@ module.exports = async (req, res) => {
   try {
     if (req.method === 'GET' && req.query.action === 'payments') return await paymentsSummary(req, res);
     if (req.method === 'GET' && req.query.action === 'abandoned') return res.status(200).json({ ok: true, ...(await listAbandonedCarts(req.query)) });
+    if (req.method === 'DELETE' && req.query.action === 'abandoned') {
+      const deleted = await deleteCart({ id: req.query.id });
+      return deleted ? res.status(200).json({ ok: true }) : res.status(404).json({ ok: false, error: 'Cart not found.' });
+    }
     // "Send due reminders now" button — same job the cron runs
     if (req.method === 'POST' && req.query.action === 'abandoned-run') {
       const base = process.env.SITE_URL ? process.env.SITE_URL.replace(/\/+$/, '') : `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers['x-forwarded-host'] || req.headers.host}`;

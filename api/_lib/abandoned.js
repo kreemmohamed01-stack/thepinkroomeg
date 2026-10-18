@@ -485,6 +485,16 @@ async function unsubscribe(token) {
   return true;
 }
 
+/* Permanently removes one cart — by id from the dashboard's Delete
+   button, or by its secret token. */
+async function deleteCart({ id, token }) {
+  await ensureSchema();
+  const rows = id
+    ? await sql`DELETE FROM abandoned_carts WHERE id = ${Number(id)} RETURNING id`
+    : await sql`DELETE FROM abandoned_carts WHERE token = ${String(token || '')} RETURNING id`;
+  return rows.length > 0;
+}
+
 /* ---------- dashboard ---------- */
 function rowToCart(r) {
   const parse = v => (v == null ? v : (typeof v === 'string' ? JSON.parse(v) : v));
@@ -555,5 +565,5 @@ async function listForAdmin(query) {
 
 module.exports = {
   captureCart, markRecovered, runReminders, restorePage, unsubscribe,
-  listForAdmin, loadSettings, cronKey, runRemindersIfDue, DEFAULT_SETTINGS
+  listForAdmin, deleteCart, loadSettings, cronKey, runRemindersIfDue, DEFAULT_SETTINGS
 };

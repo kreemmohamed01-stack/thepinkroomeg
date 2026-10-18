@@ -503,6 +503,12 @@ async function abandonedCartRoute(req, res, action) {
   // Safe without a secret: it can only send reminders that are already due,
   // and runs at most once every 5 minutes no matter how often it's called —
   // exactly what any visitor's analytics heartbeat already triggers.
+  if (action === 'cart-delete') {
+    if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+    const deleted = await abandoned.deleteCart({ token: String(req.query.t || '') });
+    return res.status(200).json({ ok: true, deleted });
+  }
+
   if (action === 'cart-tick') {
     const summary = await abandoned.runRemindersIfDue(siteBaseUrl(req));
     return res.status(200).json({ ok: true, ran: !!summary, sent: summary ? summary.sent.length : 0 });

@@ -226,7 +226,15 @@ function openCart(id){
         <svg viewBox="0 0 32 32" fill="currentColor" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Z"/></svg>
         WhatsApp Customer</a>` : ''}
       ${c.email ? `<a href="mailto:${escHtml(c.email)}"><svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg> Email Customer</a>` : ''}
-    </div>`;
+    </div>
+    <div class="db-section"><button class="db-refresh" id="acDelete" style="color:var(--err);border-color:var(--err)">DELETE THIS CART</button></div>`;
+  $('acDelete').addEventListener('click', async ()=>{
+    if (!confirm('Delete this abandoned cart permanently?')) return;
+    const r = await fetch('/api/admin/orders?action=abandoned&id=' + c.id, { method: 'DELETE' });
+    const d = await r.json().catch(() => ({}));
+    if (!d.ok){ DashUI.toast(d.error || 'Could not delete.', 'bad'); return; }
+    DashUI.toast('Cart deleted.', 'ok'); closeDrawer(); load();
+  });
   $('acDrawer').classList.add('open'); $('acOverlay').classList.add('open');
 }
 function closeDrawer(){ $('acDrawer').classList.remove('open'); $('acOverlay').classList.remove('open'); }
