@@ -5,6 +5,7 @@
    stored as events — see db/schema.sql for why. */
 const { sql } = require('./_lib/db');
 const { describeVisitor } = require('./_lib/visitor');
+const { runRemindersIfDue } = require('./_lib/abandoned');
 
 const VALID_TYPES = ['pageview', 'product_view', 'category_view', 'add_to_cart', 'heartbeat'];
 const clip = (s, n) => (s == null ? null : String(s).slice(0, n));
@@ -48,6 +49,18 @@ module.exports = async (req, res) => {
     }
   } catch (e) {
     console.error('[track] error:', e); // analytics failures are logged but never surfaced to the visitor
+  }
+
+  // Abandoned-cart reminders ride on site traffic: open tabs send a
+  // heartbeat every ~25s, so this checks for due reminders at most once
+  // every few minutes (throttled in the DB) without any external cron.
+  // The beacon is fire-and-forget, so the visitor never waits on it.
+  try {
+    const proto = req.headers['x-forwarded-proto'] || 'https';
+    const base = process.env.SITE_URL ? process.env.SITE_URL.replace(/[/]+$/, '') : `${proto}://${req.headers['x-forwarded-host'] || req.headers.host}`;
+    await runRemindersIfDue(base);
+  } catch (e) {
+    console.error('[track] abandoned-cart reminder run failed:', e);
   }
 
   return res.status(200).json({ ok: true });

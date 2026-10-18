@@ -420,6 +420,21 @@ async function runReminders(baseUrl) {
   return summary;
 }
 
+/* Runs the reminder job only if nobody has in the last few minutes —
+   the claim is one atomic upsert on the settings table, so many
+   concurrent visitors still trigger exactly one run. */
+const RUN_EVERY_MINUTES = 5;
+async function runRemindersIfDue(baseUrl) {
+  const claimed = await sql`
+    INSERT INTO settings (key, value, updated_at) VALUES ('abandoned_cart_last_run', '{}'::jsonb, now())
+    ON CONFLICT (key) DO UPDATE SET updated_at = now()
+      WHERE settings.updated_at < now() - ${RUN_EVERY_MINUTES}::float8 * interval '1 minute'
+    RETURNING key
+  `;
+  if (!claimed.length) return null;
+  return runReminders(baseUrl);
+}
+
 /* ---------- the "return to my bag" link ----------
    Answers with a tiny page that writes the saved bag (and the contact
    details, and reminder 3's code) back into this browser's localStorage
@@ -540,5 +555,5 @@ async function listForAdmin(query) {
 
 module.exports = {
   captureCart, markRecovered, runReminders, restorePage, unsubscribe,
-  listForAdmin, loadSettings, cronKey, DEFAULT_SETTINGS
+  listForAdmin, loadSettings, cronKey, runRemindersIfDue, DEFAULT_SETTINGS
 };

@@ -173,7 +173,7 @@ async function load(){
     const d = await r.json();
     if (!d.ok) throw new Error(d.error || 'Failed to load abandoned carts.');
     renderStats(d.stats, d.whatsappConfigured);
-    if (d.cronKey){
+    if (false && d.cronKey){ // reminders now run automatically from site traffic (api/track.js); external cron optional
       const url = location.origin + '/api/orders?action=cart-reminders&key=' + d.cronKey;
       $('cronNote').style.display = 'block';
       $('cronNote').innerHTML = 'Automatic sending: add a job at <b>cron-job.org</b> that opens this URL <b>every 15 minutes</b> (keep it private):<br><code style="word-break:break-all;font-size:11px">' + escHtml(url) + '</code>';
