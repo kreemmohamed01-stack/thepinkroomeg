@@ -499,6 +499,15 @@ async function abandonedCartRoute(req, res, action) {
     return res.status(200).send('<!DOCTYPE html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>The Pink Room</title></head><body style="font-family:Arial,sans-serif;background:#f8f4ee;color:#1c1a17;text-align:center;padding-top:30vh"><p style="letter-spacing:3px;font-size:13px">THE PINK ROOM</p><p style="font-size:14px">You will not receive any more reminders about this bag.</p><p><a href="/" style="color:#c9a97c">Back to the store</a></p></body></html>');
   }
 
+  // Public "tick" for the scheduled GitHub Action (.github/workflows/cart-reminders.yml).
+  // Safe without a secret: it can only send reminders that are already due,
+  // and runs at most once every 5 minutes no matter how often it's called —
+  // exactly what any visitor's analytics heartbeat already triggers.
+  if (action === 'cart-tick') {
+    const summary = await abandoned.runRemindersIfDue(siteBaseUrl(req));
+    return res.status(200).json({ ok: true, ran: !!summary, sent: summary ? summary.sent.length : 0 });
+  }
+
   if (action === 'cart-reminders') {
     // Vercel Cron sends "Authorization: Bearer <CRON_SECRET>"; an external
     // cron (cron-job.org etc.) can pass ?key=<CRON_SECRET> instead

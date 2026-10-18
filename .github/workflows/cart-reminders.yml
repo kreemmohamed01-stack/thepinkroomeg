@@ -1,0 +1,14 @@
+# Abandoned Cart Recovery scheduler — pings the site so due reminders
+# (30 min / 24 h / 72 h) go out even when nobody is browsing. Vercel Hobby
+# only allows a daily cron, GitHub's scheduler is free. GitHub may delay
+# scheduled runs by a few minutes; that's fine for these reminders.
+name: Abandoned cart reminders
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+jobs:
+  tick:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl -fsS "https://thepinkroomeg.com/api/orders?action=cart-tick"
