@@ -883,9 +883,9 @@ in this order:
 
 | # | When (after last checkout activity) | Content |
 |---|---|---|
-| 1 | ~1 hour | simple nudge + "Return to my bag" link |
+| 1 | ~30 minutes | simple nudge + "Return to my bag" link |
 | 2 | ~24 hours | second nudge |
-| 3 | ~48 hours | one-time discount code (default 10%, valid 3 days, single use — created in `coupons`) |
+| 3 | ~72 hours | last plain reminder (no discount). Setting `discountPercent` > 0 adds a single-use code here instead |
 
 The link (`/api/orders?action=cart-restore&t=TOKEN`) rebuilds that exact bag in any browser and opens checkout; reminder 3's code is applied automatically. Placing an order marks the cart `recovered` immediately (by cart token, and by email/phone so a different device counts too), and every reminder run re-checks `orders` before sending — a buyer is never messaged again. Each email has a "Stop these reminders" link.
 
@@ -908,7 +908,7 @@ CallMeBot can't be used — it only messages the shop's own number. WhatsApp sen
 - optional `WHATSAPP_TEMPLATE_LANG` (default `ar`), `WHATSAPP_TPL_CART_1/2/3` (default `cart_reminder_1/2/3`)
 
 Create 3 **Marketing** templates in WhatsApp Manager with body variables in this order:
-`{{1}}` first name · `{{2}}` bag total · `{{3}}` return-to-bag link — and template 3 adds `{{4}}` discount code · `{{5}}` percent.
+`{{1}}` first name · `{{2}}` bag total · `{{3}}` return-to-bag link — the same three for all templates (only if a discount is switched on does template 3 take `{{4}}` code · `{{5}}` percent).
 Example (cart_reminder_1, ar): `أهلاً {{1}} 🌸 شنطتك في The Pink Room لسه مستنياكي بقيمة {{2}}. كمّلي طلبك من هنا: {{3}}`
 
 Meta bills per delivered Marketing message (Egypt ≈ $0.10 each — check Meta's current rate card). Billed to the business's Meta account, not this project.

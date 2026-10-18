@@ -45,7 +45,7 @@ const DEFAULT_SETTINGS = {
   delay1Hours: 0.5,
   delay2Hours: 24,
   delay3Hours: 72,
-  discountPercent: 10,
+  discountPercent: 0, // 0 = all three reminders are plain (no code); set e.g. 10 to add a code to reminder 3
   discountValidDays: 3,
   channels: { email: true, whatsapp: true }
 };
@@ -191,7 +191,7 @@ async function markRecovered(order) {
 
 /* ---------- discount code for reminder 3 ---------- */
 async function createDiscountCode(cart, settings) {
-  const pct = Math.max(1, Math.min(90, Number(settings.discountPercent) || 10));
+  const pct = Math.max(1, Math.min(90, Number(settings.discountPercent) || 0));
   const days = Math.max(1, Number(settings.discountValidDays) || 3);
   for (let attempt = 0; attempt < 5; attempt++) {
     const code = 'BACK' + crypto.randomBytes(3).toString('hex').toUpperCase();
@@ -214,9 +214,13 @@ const COPY = {
        body: 'Your bag at The Pink Room is saved and waiting for you — pick up right where you left off.' },
   2: { subject: 'Your bag is still waiting at The Pink Room', heading: 'Your pieces are still here',
        body: 'We kept your bag exactly as you left it. Popular pieces can sell out, so complete your order while they are still available.' },
-  3: { subject: 'A little something to bring you back — {pct}% off', heading: 'A gift to complete your order',
-       body: 'Here is {pct}% off your bag with a one-time code, valid for {days} days.' }
+  3: { subject: 'Last chance to complete your order', heading: 'Your bag is about to expire',
+       body: 'This is our last reminder — your selected pieces are still saved, but we can only hold your bag a little longer. Complete your order before they are gone.' }
 };
+// reminder 3 when a discount is switched on in settings (discountPercent > 0)
+const COPY_DISCOUNT = { subject: 'A little something to bring you back — {pct}% off', heading: 'A gift to complete your order',
+  body: 'Here is {pct}% off your bag with a one-time code, valid for {days} days.' };
+const copyFor = (step, vars) => (step === 3 && vars.code ? COPY_DISCOUNT : COPY[step]);
 function fill(str, vars) { return str.replace(/\{(\w+)\}/g, (_, k) => (vars[k] != null ? vars[k] : '')); }
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 function absImg(src, baseUrl) {
@@ -225,7 +229,7 @@ function absImg(src, baseUrl) {
 }
 
 function emailHtml(cart, step, links, vars, baseUrl) {
-  const c = COPY[step];
+  const c = copyFor(step, vars);
   const items = (typeof cart.items === 'string' ? JSON.parse(cart.items) : cart.items) || [];
   const rows = items.slice(0, 6).map(i => `
     <tr>
@@ -279,7 +283,7 @@ async function sendEmail(cart, step, links, vars, baseUrl) {
     await tr.t.sendMail({
       from: `"The Pink Room" <${tr.user}>`,
       to: cart.email,
-      subject: fill(COPY[step].subject, vars),
+      subject: fill(copyFor(step, vars).subject, vars),
       html: emailHtml(cart, step, links, vars, baseUrl),
       headers: { 'List-Unsubscribe': `<${links.unsubscribe}>` }
     });
@@ -306,7 +310,7 @@ async function sendWhatsapp(cart, step, links, vars) {
     money(cart.subtotal),
     links.restore
   ];
-  if (step === 3) params.push(vars.code || '', String(vars.pct || ''));
+  if (step === 3 && vars.code) params.push(vars.code, String(vars.pct || ''));
 
   const template = process.env['WHATSAPP_TPL_CART_' + step] || ('cart_reminder_' + step);
   try {
@@ -395,7 +399,7 @@ async function runReminders(baseUrl) {
       if (!claimed.length) continue;
 
       const vars = {};
-      if (step === 3) {
+      if (step === 3 && (cart.discount_code || Number(settings.discountPercent) > 0)) {
         const d = cart.discount_code ? { code: cart.discount_code, pct: settings.discountPercent, days: settings.discountValidDays } : await createDiscountCode(cart, settings);
         Object.assign(vars, d);
         if (!cart.discount_code) await sql`UPDATE abandoned_carts SET discount_code = ${d.code} WHERE id = ${cart.id}`;

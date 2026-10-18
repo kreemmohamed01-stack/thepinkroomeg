@@ -333,5 +333,5 @@ CREATE INDEX IF NOT EXISTS idx_abandoned_phone   ON abandoned_carts (phone);
 -- by api/_lib/abandoned.js with these same values as its fallback.
 INSERT INTO settings (key, value) VALUES (
   'abandoned_cart',
-  '{"enabled":true,"delay1Hours":0.5,"delay2Hours":24,"delay3Hours":72,"discountPercent":10,"discountValidDays":3,"channels":{"email":true,"whatsapp":true}}'::jsonb
+  '{"enabled":true,"delay1Hours":0.5,"delay2Hours":24,"delay3Hours":72,"discountPercent":0,"discountValidDays":3,"channels":{"email":true,"whatsapp":true}}'::jsonb
 ) ON CONFLICT (key) DO NOTHING;
