@@ -113,13 +113,22 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 }
 </script>
 
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<!-- loaded non-render-blocking: same fonts, same display:swap fallback,
-     just doesn't hold up first paint waiting on the Google Fonts round-trip -->
-<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap"></noscript>
+<!-- Fonts are served from this site (fonts/) instead of Google: no extra
+     DNS/CSS round-trips, and the preloaded files arrive with the page, so the
+     hero title paints once in its real font rather than repainting late. -->
+<link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
+<link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
+<link rel="preload" as="image" href="sec 7/hero-poster.webp" fetchpriority="high">
+<style>
+@font-face {font-family: 'Playfair Display';font-style: italic;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay-italic.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 500;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Poppins';font-style: normal;font-weight: 300;font-display: swap;src: url(/fonts/Poppins-300.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Poppins';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/Poppins-400.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Poppins';font-style: normal;font-weight: 500;font-display: swap;src: url(/fonts/Poppins-500.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+@font-face {font-family: 'Poppins';font-style: normal;font-weight: 600;font-display: swap;src: url(/fonts/Poppins-600.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
+</style>
 <link rel="stylesheet" href="shared-ui.css">
 <style>
   :root{
@@ -2566,7 +2575,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       </button>
     </div>
     <a class="logo-wrap" href="index.html" aria-label="The Pink Room">
-      <img src="logo-beige.png" alt="The Pink Room">
+      <img src="logo-beige.png" alt="The Pink Room" width="860" height="204">
     </a>
     <div class="side">
       <a class="mobile-icon" href="wishlist.html" aria-label="Wishlist">
