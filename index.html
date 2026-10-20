@@ -2629,7 +2629,10 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
        cannot decode AV1 never downloads it. */
     var w = window.innerWidth;
     var tier = w <= 640 ? 'phone' : w <= 960 ? 'mobile' : 'desktop';
-    var av1 = v.canPlayType('video/mp4; codecs="av01.0.05M.08"') === 'probably';
+    /* H.264 on purpose: AV1 saves only 2-18% here, but most phones decode AV1
+       in software, which costs a second or more of CPU right as the page loads.
+       H.264 is hardware-decoded almost everywhere. */
+    var av1 = false;
     var src = v.getAttribute('data-src-' + tier + (av1 ? '-av1' : ''));
     if (!src) src = v.getAttribute('data-src-' + tier);
     if (!src) return;
@@ -3325,7 +3328,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         // nothing; picking differently here would download a second copy.
         const w = window.innerWidth;
         const tier = w <= 640 ? '480' : w <= 960 ? '720' : '1080';
-        const av1 = journalVideo.canPlayType('video/mp4; codecs="av01.0.05M.08"') === 'probably';
+        const av1 = false; // same choice as the hero, so this is a cache hit
         journalVideo.src = 'sec 7/hero-' + tier + (av1 ? '.av1' : '') + '.mp4';
         journalVideo.play().catch(()=>{});
       }
