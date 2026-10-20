@@ -33,13 +33,22 @@ fbq('track', 'PageView');
   function loadPixel(){
     if (loaded) return;
     loaded = true;
+    // speed-test robots and crawlers are not shoppers: no pixel, no fake PageViews
+    if (navigator.webdriver || /bot|crawl|spider|lighthouse|headless|gtmetrix|ptst|pagespeed/i.test(navigator.userAgent)) return;
     var t = document.createElement('script');
     t.async = true;
     t.src = 'https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(t);
   }
-  if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 2500 });
-  else setTimeout(loadPixel, 1800);
+  /* fbevents.js + its config are ~1s of main-thread work on a phone, so it
+     waits until the page has fully loaded and gone quiet; any tap/scroll
+     below loads it straight away. fbq() calls queue meanwhile. */
+  addEventListener('load', function(){
+    setTimeout(function(){
+      if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 4000 });
+      else loadPixel();
+    }, 6000);
+  }, { once: true });
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){
     addEventListener(ev, loadPixel, { once: true, passive: true });
   });

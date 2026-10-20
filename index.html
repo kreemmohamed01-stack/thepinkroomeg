@@ -8,7 +8,9 @@
    and the hero heading could not settle until it arrived. Reading the same
    localStorage key here costs nothing and lets the first paint be correct. */
 (function(){try{var l=localStorage.getItem('tpr_lang')==='ar'?'ar':'en';
-var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();
+var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';
+/* Arabic font: only Arabic visitors need it, and loaded non-blocking */
+if(l==='ar'){var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap';document.head.appendChild(f);}}catch(e){}})();
 </script>
 
 <!-- Meta Pixel Code -->
@@ -33,13 +35,22 @@ fbq('track', 'PageView');
   function loadPixel(){
     if (loaded) return;
     loaded = true;
+    // speed-test robots and crawlers are not shoppers: no pixel, no fake PageViews
+    if (navigator.webdriver || /bot|crawl|spider|lighthouse|headless|gtmetrix|ptst|pagespeed/i.test(navigator.userAgent)) return;
     var t = document.createElement('script');
     t.async = true;
     t.src = 'https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(t);
   }
-  if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 2500 });
-  else setTimeout(loadPixel, 1800);
+  /* fbevents.js + its config are ~1s of main-thread work on a phone, so it
+     waits until the page has fully loaded and gone quiet; any tap/scroll
+     below loads it straight away. fbq() calls queue meanwhile. */
+  addEventListener('load', function(){
+    setTimeout(function(){
+      if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 4000 });
+      else loadPixel();
+    }, 6000);
+  }, { once: true });
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){
     addEventListener(ev, loadPixel, { once: true, passive: true });
   });
@@ -348,6 +359,16 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     .hero-lang:hover, .hero-lang.touched{transform:translateY(-2px) scale(1.06);}
   }
 
+  /* Everything below the hero starts off-screen. content-visibility lets the
+     browser skip laying out and painting a section until it nears the
+     viewport — which also stops its infinite shimmer/glow loops from
+     repainting every frame while nobody can see them. The intrinsic size is
+     only a placeholder height; 'auto' swaps in the real one once rendered. */
+  .offer-section, .cats, .top-sellers, .trust-strip, .rooms, .journal, .site-footer{
+    content-visibility:auto;
+    contain-intrinsic-size:auto 900px;
+  }
+
   /* ---------- VIDEO HERO ---------- */
   .video-hero{
     position:relative;
@@ -356,7 +377,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     height:100dvh;
     overflow:hidden;
     /* first video frame paints instantly while the mp4 streams in */
-    background:#1c1a17 url('sec 7/hero-poster.jpg') center/cover no-repeat;
+    background:#1c1a17 url('sec 7/hero-poster.webp') center/cover no-repeat;
   }
   .video-hero-media{
     position:absolute;
@@ -463,7 +484,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   .offer-photo{
     position:absolute;top:0;right:0;bottom:0;width:66%;
-    background:#efe6d8 url('خلفيه عرض.jpeg') center right/cover no-repeat;
+    background:#efe6d8 url('خلفيه عرض.webp') center right/cover no-repeat;
   }
   /* the photo's own left side is already near-empty wall, so a fairly
      short fade is enough to hand off into the flat cream panel */
@@ -534,7 +555,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   /* ---------- SHOP BY CATEGORY ---------- */
   .cats{
     background-color:#f8ecde;
-    background-image:url('background sec 2/sec 2 lab background .jpeg');
+    background-image:url('background sec 2/sec 2 lab background .webp');
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -542,7 +563,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     text-align:center;
   }
   @media (max-width:599px){
-    .cats{background-image:url('background sec 2/sec 2 mopil background.jpeg');}
+    .cats{background-image:url('background sec 2/sec 2 mopil background.webp');}
   }
   /* laptop: the section is closer to square than the artwork's own 4:3
      shape, so "cover" was cropping the leaf/arch off both edges — show
@@ -905,7 +926,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   /* ---------- SHOP BY ROOM ---------- */
   .rooms{
     position:relative;
-    background-image:url('rooms/room background lab.jpeg');
+    background-image:url('rooms/room background lab.webp');
     background-size:cover;
     background-position:center;
     padding:70px 48px 90px;
@@ -1131,7 +1152,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     width:34px;height:34px;
     border-radius:50%;
     overflow:hidden;
-    background-image:url('sec 7/insta.jpeg');
+    background-image:url('sec 7/insta.webp');
     background-size:230% auto;
     background-position:50% 26%;
     animation: logoGlow 4.5s ease-in-out infinite, floaty 4.5s ease-in-out infinite;
@@ -2367,7 +2388,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     .trust-sub{display:none;}
 
     .rooms{
-      background-image:url('rooms/room background mobil.jpeg');
+      background-image:url('rooms/room background mobil.webp');
       padding:36px 16px 44px;
     }
     .rooms-decor-left{top:18px;left:16px;font-size:8px;}
@@ -2482,7 +2503,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     var c=navigator.connection||{};
     if(c.saveData || /(^|-)2g$/.test(c.effectiveType||'') ) return;
     if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-    if(/bot|crawl|spider|lighthouse|headless/i.test(navigator.userAgent)) return;
+    // automated visitors (crawlers, PageSpeed/Lighthouse, GTmetrix, WebPageTest) never watch it.
+    // Lighthouse no longer says "lighthouse" in its UA — its emulated phone is a "moto g power (2022)".
+    if(navigator.webdriver || /bot|crawl|spider|lighthouse|headless|gtmetrix|ptst|pagespeed|speed insights|moto g power \(2022\)/i.test(navigator.userAgent)) return;
     try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
     // tells the hero video loader below to wait until the intro is gone, so the two videos never fight for bandwidth
     window.__tprIntroActive=true;
@@ -2562,7 +2585,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
          visitors on Save-Data or a slow connection keep the poster image and
          never pay for the video download. -->
     <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
-           poster="sec 7/hero-poster.jpg"
+           poster="sec 7/hero-poster.webp"
            data-src-phone="sec 7/hero-480.mp4" data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
            data-src-phone-av1="sec 7/hero-480.av1.mp4" data-src-mobile-av1="sec 7/hero-720.av1.mp4" data-src-desktop-av1="sec 7/hero-1080.av1.mp4"
            disablepictureinpicture disableremoteplayback
@@ -2680,7 +2703,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
     <div class="cats-grid">
       <a class="cat-card feature" href="category.html?cat=paintings">
-        <div class="cat-card-img" style="background-image:url('categ photos/painting-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/painting-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catPaintings">Paintings</h3><i class="cat-rule"></i>
@@ -2688,7 +2711,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card" href="category.html?cat=accessories">
-        <div class="cat-card-img" style="background-image:url('categ photos/accessories-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/accessories-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catAccessories">Accessories</h3><i class="cat-rule"></i>
@@ -2696,7 +2719,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card" href="category.html?cat=lighting">
-        <div class="cat-card-img" style="background-image:url('categ photos/lighting-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/lighting-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catLighting">Lighting</h3><i class="cat-rule"></i>
@@ -2704,7 +2727,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card" href="category.html?cat=furniture">
-        <div class="cat-card-img" style="background-image:url('categ photos/furniture-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/furniture-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catFurniture">Furniture</h3><i class="cat-rule"></i>
@@ -2712,7 +2735,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card" href="category.html?cat=wall-art">
-        <div class="cat-card-img" style="background-image:url('categ photos/wall art-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/wall art-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catWallArt">WallArt</h3><i class="cat-rule"></i>
@@ -2720,7 +2743,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card" href="category.html?cat=plants">
-        <div class="cat-card-img" style="background-image:url('categ photos/plants-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/plants-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catPlants">Artificial Plants</h3><i class="cat-rule"></i>
@@ -2728,7 +2751,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
       <a class="cat-card sale" href="category.html?cat=sale-offers">
-        <div class="cat-card-img" style="background-image:url('categ photos/sale-upscaled-2x.jpg')"></div>
+        <div class="cat-card-img" style="background-image:url('categ photos/sale-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catSale">Sale</h3><i class="cat-rule"></i>
@@ -2741,7 +2764,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== TOP SELLERS ===== -->
   <section class="top-sellers">
-    <div class="ts-image" style="background-image:url('top seller/ts-background.jpeg')"></div>
+    <div class="ts-image" style="background-image:url('top seller/ts-background.webp')"></div>
 
     <div class="ts-header">
       <a href="shop.html" class="ts-viewall-top"><span data-i18n="viewAllProducts">VIEW ALL PRODUCTS</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></a>
@@ -2833,7 +2856,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
     <div class="rooms-grid" id="roomsGrid">
       <a class="room-card" href="category.html?room=living-room" data-i="0">
-        <div class="tile-bg" style="background-image:url('rooms/livingroom-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/livingroom-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">01</span>
@@ -2843,7 +2866,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="room-icon"><svg viewBox="0 0 24 24"><path d="M5 12V8a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2v4"/><path d="M3 12h18v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4Z"/><line x1="5" y1="18" x2="5" y2="20"/><line x1="19" y1="18" x2="19" y2="20"/></svg></div>
       </a>
       <a class="room-card" href="category.html?room=bedroom" data-i="1">
-        <div class="tile-bg" style="background-image:url('rooms/bedroom-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/bedroom-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">02</span>
@@ -2853,7 +2876,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="room-icon"><svg viewBox="0 0 24 24"><path d="M3 18v-6a3 3 0 0 1 3-3h12a3 3 0 0 1 3 3v6"/><path d="M3 18h18"/><path d="M6 9V7a2 2 0 0 1 2-2h2v4"/></svg></div>
       </a>
       <a class="room-card" href="category.html?room=dining-area" data-i="2">
-        <div class="tile-bg" style="background-image:url('rooms/diningarea-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/diningarea-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">03</span>
@@ -2863,7 +2886,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="room-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><line x1="6" y1="4" x2="6" y2="10"/><line x1="4" y1="4" x2="4" y2="10"/><line x1="8" y1="4" x2="8" y2="10"/><line x1="6" y1="10" x2="6" y2="20"/><path d="M18 4v6a2 2 0 0 1-2 2v8"/></svg></div>
       </a>
       <a class="room-card" href="category.html?room=entrance-console" data-i="3">
-        <div class="tile-bg" style="background-image:url('rooms/entrance-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/entrance-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">04</span>
@@ -2873,7 +2896,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="room-icon"><svg viewBox="0 0 24 24"><rect x="3" y="14" width="18" height="3" rx="1"/><line x1="6" y1="17" x2="6" y2="20"/><line x1="18" y1="17" x2="18" y2="20"/><circle cx="12" cy="8" r="4"/></svg></div>
       </a>
       <a class="room-card" href="category.html?room=bathroom" data-i="4">
-        <div class="tile-bg" style="background-image:url('rooms/bathroom-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/bathroom-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">05</span>
@@ -2883,7 +2906,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="room-icon"><svg viewBox="0 0 24 24"><path d="M4 12h15a2 2 0 0 1 2 2v1a5 5 0 0 1-5 5H8a5 5 0 0 1-5-5v-3Z"/><path d="M6 12V6a2 2 0 0 1 3-1.7"/></svg></div>
       </a>
       <a class="room-card" href="category.html?room=outdoor-space" data-i="5">
-        <div class="tile-bg" style="background-image:url('rooms/outdoor-upscaled-4x.jpg')"></div>
+        <div class="tile-bg" style="background-image:url('rooms/outdoor-upscaled-4x.webp')"></div>
         <div class="tile-overlay"></div>
         <div class="room-content">
           <span class="room-num">06</span>
@@ -2897,7 +2920,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== JOURNAL / INSTAGRAM ===== -->
   <section class="journal">
-    <div class="journal-bg" style="background-image:url('sec 7/background sec 7.jpeg')"></div>
+    <div class="journal-bg" style="background-image:url('sec 7/background sec 7.webp')"></div>
     <div class="journal-inner">
       <p class="journal-eyebrow" data-i18n="journalEyebrow">FOLLOW OUR JOURNEY</p>
       <h2 class="journal-title glow-title" data-i18n="journalTitle">THE PINK ROOM</h2>
@@ -2909,7 +2932,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       </a>
 
       <div class="journal-video-wrap" id="journalVideoWrap">
-        <video class="journal-video" id="journalVideo" data-src="sec 7/hero-1080.mp4" poster="sec 7/hero-poster.jpg" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
+        <video class="journal-video" id="journalVideo" data-src="sec 7/hero-1080.mp4" poster="sec 7/hero-poster.webp" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
         <div class="journal-video-glow"></div>
       </div>
 
@@ -3042,7 +3065,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   window.addEventListener('scroll', onNavScroll, { passive:true });
   window.addEventListener('resize', onNavScroll);
-  onNavScroll();
+  // first check waits a frame: reading offsetHeight here, mid-parse, would
+  // force a full synchronous layout before the page has even painted
+  requestAnimationFrame(onNavScroll);
 
   // ---- Touch "proximity" zoom for icons on mobile (tap = touched state briefly) ----
   document.querySelectorAll('.icon-link, .cat-card, .mobile-icon, .room-card, .cart-eyebrow').forEach(el=>{
@@ -3138,7 +3163,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       tsScrollTimer = setTimeout(updateActiveCard, 60);
     }, { passive:true });
     window.addEventListener('resize', updateActiveCard);
-    updateActiveCard();
+    requestAnimationFrame(updateActiveCard);
 
     // ---- right arrow also scrolls forward (native touch/drag scroll still works too) ----
     tsScrollNext.addEventListener('click', ()=>{

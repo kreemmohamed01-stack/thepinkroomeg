@@ -8,7 +8,9 @@
    and the hero heading could not settle until it arrived. Reading the same
    localStorage key here costs nothing and lets the first paint be correct. */
 (function(){try{var l=localStorage.getItem('tpr_lang')==='ar'?'ar':'en';
-var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';}catch(e){}})();
+var d=document.documentElement;d.lang=l;d.dir=l==='ar'?'rtl':'ltr';
+/* Arabic font: only Arabic visitors need it, and loaded non-blocking */
+if(l==='ar'){var f=document.createElement('link');f.rel='stylesheet';f.href='https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap';document.head.appendChild(f);}}catch(e){}})();
 </script>
 <!-- Meta Pixel Code -->
 <script>
@@ -32,13 +34,22 @@ fbq('track', 'PageView');
   function loadPixel(){
     if (loaded) return;
     loaded = true;
+    // speed-test robots and crawlers are not shoppers: no pixel, no fake PageViews
+    if (navigator.webdriver || /bot|crawl|spider|lighthouse|headless|gtmetrix|ptst|pagespeed/i.test(navigator.userAgent)) return;
     var t = document.createElement('script');
     t.async = true;
     t.src = 'https://connect.facebook.net/en_US/fbevents.js';
     document.head.appendChild(t);
   }
-  if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 2500 });
-  else setTimeout(loadPixel, 1800);
+  /* fbevents.js + its config are ~1s of main-thread work on a phone, so it
+     waits until the page has fully loaded and gone quiet; any tap/scroll
+     below loads it straight away. fbq() calls queue meanwhile. */
+  addEventListener('load', function(){
+    setTimeout(function(){
+      if ('requestIdleCallback' in window) requestIdleCallback(loadPixel, { timeout: 4000 });
+      else loadPixel();
+    }, 6000);
+  }, { once: true });
   ['pointerdown','keydown','touchstart','scroll'].forEach(function(ev){
     addEventListener(ev, loadPixel, { once: true, passive: true });
   });

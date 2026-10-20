@@ -30,12 +30,22 @@
    re-upload, no separate asset) — this is used only for card-grid
    thumbnails; the full-resolution URL is left untouched everywhere
    else (product page gallery, structured data, etc). Non-Cloudinary
-   URLs (e.g. local fallback images) pass through unchanged. */
+   URLs (e.g. local fallback images) pass through unchanged, except the
+   local product photos listed in LOCAL_THUMBS: those have pre-resized
+   WebP copies under thumbs/ (200/500/900px wide), so a card no longer
+   downloads e.g. a 500KB PNG to show it 250px wide. */
+const LOCAL_THUMBS = new Set(["Sale/sale1-upscaled-2x.png","Sale/sale1-v2.png","Sale/sale2-upscaled-2x.png","Sale/sale2-v2.png","Sale/sale3-upscaled-2x.png","Sale/sale3-v2.png","paint/paint1.jpeg","paint/paint11.jpeg","paint/paint2.jpeg","paint/paint22.jpeg","paint/paint3.jpeg","paint/paint33.jpeg","paint/paint4.jpeg","paint/paint44.jpeg","paint/paint5.jpeg","paint/paint55.jpeg","Furn/furn1.jpeg","Furn/furn11.jpeg","Furn/furn2.jpeg","Furn/furn22.jpeg","Furn/furn3.jpeg","Furn/furn33.jpeg","Light/light1.jpeg","Light/light11.jpeg","Light/light2.jpeg","Light/light22.jpeg","Light/light3.jpeg","Light/light33.jpeg","Light/light4.jpeg","Light/light44.jpeg","Light/light5.jpeg","Light/light55.jpeg","Access/access1.png","Access/access11.jpeg","Access/access2.png","Access/access22.jpeg","Access/access3.jpeg","Access/access33.jpeg","Access/access4.jpeg","Access/access44.jpeg","Access/access5.jpeg","Access/access55.jpeg","wall art/wallart1.jpeg","wall art/wallart11.jpeg","wall art/wallart2.jpeg","wall art/wallart22.jpeg","wall art/wallart3.jpeg","wall art/wallart33.jpeg","wall art/wallart4.jpeg","wall art/wallart44.jpeg"]);
+const LOCAL_THUMB_TIERS = [200, 500, 900];
 function tprThumb(url, width){
   if (!url || typeof url !== 'string') return url;
   const marker = '/image/upload/';
   const i = url.indexOf(marker);
-  if (i === -1) return url;
+  if (i === -1) {
+    let rel = url.replace(/^\.?\//, '');
+    try { rel = decodeURI(rel); } catch (e) {}
+    const tier = LOCAL_THUMB_TIERS.find(t => t >= (width || 400));
+    return (tier && LOCAL_THUMBS.has(rel)) ? encodeURI('thumbs/' + rel + '.w' + tier + '.webp') : url;
+  }
   const w = width || 400;
   return url.slice(0, i + marker.length) + `f_auto,q_auto,c_limit,w_${w}/` + url.slice(i + marker.length);
 }

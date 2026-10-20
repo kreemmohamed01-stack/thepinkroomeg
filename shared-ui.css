@@ -1,4 +1,5 @@
-@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700&display=swap');
+/* Cairo (Arabic) is loaded from each page's <head> only when Arabic is active,
+   instead of an @import here that held up first paint for every visitor. */
 
 /* ============================================================
    THE PINK ROOM — shared chrome
@@ -285,6 +286,9 @@
   padding:30px 34px 0;
 }
 .tpr-drawer.open{transform:translateX(0);}
+/* closed drawers/menu sit off-canvas, so their shimmer/glow loops would only
+   burn a repaint every frame for nothing; they resume the moment it opens */
+.tpr-drawer:not(.open) *, .tpr-menu:not(.open) *{animation-play-state:paused;}
 .tpr-drawer-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;flex-shrink:0;}
 .tpr-eyebrow{
   display:inline-block;font-size:11.5px;letter-spacing:4px;font-weight:600;margin-bottom:10px;
