@@ -119,8 +119,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
-<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
-<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high">
+<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp">
 <style>
 @font-face {font-family: 'Playfair Display';font-style: italic;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay-italic.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
@@ -399,19 +399,16 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     /* first video frame paints instantly while the mp4 streams in */
     background:#1c1a17 url('sec 7/hero-xmas-poster.webp') center/cover no-repeat;
   }
-  /* The Christmas hero is filmed vertically (9:16). On wide screens it sits
-     whole in the middle over a pre-blurred 2KB still of itself, instead of
-     being cropped to a thin band (no CSS blur filter, so no GPU cost). */
-  @media (min-aspect-ratio:1/1){
-    .video-hero{background-image:url('sec 7/hero-xmas-backdrop.webp');}
-    .video-hero-media{object-fit:contain;}
-  }
+  /* The Christmas hero is filmed vertically (9:16) and is always shown
+     whole — never cropped — on every screen, over a pre-blurred still of
+     itself that fills the spare space (no CSS blur filter, so no GPU cost). */
+  .video-hero{background-image:url('sec 7/hero-xmas-backdrop.webp');}
   .video-hero-media{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
-    object-fit:cover;
+    object-fit:contain;
   }
   .video-hero-overlay{
     position:absolute;
@@ -2576,7 +2573,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     window.addEventListener('pageshow',function(e){ if(e.persisted) close(); });
     v.addEventListener('ended',close);
     v.addEventListener('error',close);
-    setTimeout(function(){ if(v.readyState<3) close(); },4000);   // slow network: never hold the shop hostage
+    setTimeout(function(){ if(v.readyState<2) close(); },8000);   // nothing at all after 8s (very slow network): never hold the shop hostage
     setTimeout(close,12000);                                      // hard safety cap
 
     // Sound on by default. Browsers refuse unmuted autoplay until the visitor has interacted
