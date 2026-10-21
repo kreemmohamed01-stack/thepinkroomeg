@@ -660,6 +660,10 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .cat-card:hover .cat-cta{gap:14px;color:var(--gold);}
 
   /* the sale card reads a touch richer than the rest */
+  /* Christmas card: the title is already part of the artwork, so the
+     heading is kept for screen readers only and the veil stays light */
+  .cat-card.xmas .cat-card-veil{background:linear-gradient(180deg, rgba(20,17,12,0) 0%, rgba(20,17,12,0) 70%, rgba(20,17,12,.55) 100%);}
+  .cat-card.xmas .cat-card-body h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
   .cat-card.sale .cat-card-veil{
     background:linear-gradient(180deg, rgba(20,17,12,.5) 0%, rgba(20,17,12,.62) 45%, rgba(20,17,12,.86) 100%);
   }
@@ -2770,6 +2774,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
           <span class="cat-cta"><span data-i18n="catCta">Explore Collection</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
+      <a class="cat-card xmas" href="category.html?cat=christmas-decor" aria-label="Christmas Decor">
+        <div class="cat-card-img" style="background-image:url('categ photos/christmas-decor.webp')"></div>
+        <div class="cat-card-veil"></div>
+        <div class="cat-card-body">
+          <h3 data-i18n="catChristmas">Christmas Decor</h3>
+          <span class="cat-cta"><span data-i18n="catCta">Explore Collection</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
       <a class="cat-card sale" href="category.html?cat=sale-offers">
         <div class="cat-card-img" style="background-image:url('categ photos/sale-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
@@ -2994,6 +3006,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
           <li><a href="category.html?cat=furniture" class="footer-glow" data-i18n="catFurniture">Furniture</a></li>
           <li><a href="category.html?cat=wall-art" class="footer-glow" data-i18n="catWallArt">WallArt</a></li>
           <li><a href="category.html?cat=plants" class="footer-glow" data-i18n="catPlants">Artificial Plants</a></li>
+          <li><a href="category.html?cat=christmas-decor" class="footer-glow" data-i18n="catChristmas">Christmas Decor</a></li>
           <li><a href="category.html?cat=sale-offers" class="footer-glow" data-i18n="catSale">Sale</a></li>
           <li><a href="category.html?cat=all" class="footer-glow" data-i18n="footerAllProducts">All Products</a></li>
         </ul>

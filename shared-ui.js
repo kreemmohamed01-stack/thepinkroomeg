@@ -126,6 +126,7 @@
         <a href="category.html?cat=furniture">${t('furniture')}</a>
         <a href="category.html?cat=wall-art">${t('wallArt')}</a>
         <a href="category.html?cat=plants">${t('plants')}</a>
+        <a href="category.html?cat=christmas-decor">${t('christmas')}</a>
         <a href="category.html?cat=sale-offers">${t('sale')}</a>
         <a href="${WA}" target="_blank" rel="noopener" id="tprMenuContact">${t('contact')}</a>
       </nav>

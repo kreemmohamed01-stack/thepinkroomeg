@@ -104,6 +104,7 @@ async function sitemap(req, res) {
     { loc: '/category?cat=furniture', priority: '0.8', changefreq: 'weekly' },
     { loc: '/category?cat=wall-art', priority: '0.8', changefreq: 'weekly' },
     { loc: '/category?cat=plants', priority: '0.8', changefreq: 'weekly' },
+    { loc: '/category?cat=christmas-decor', priority: '0.8', changefreq: 'weekly' },
     { loc: '/category?cat=sale-offers', priority: '0.8', changefreq: 'weekly' },
     { loc: '/refund-return-policy', priority: '0.3', changefreq: 'monthly' }
   ];

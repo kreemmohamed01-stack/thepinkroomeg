@@ -103,6 +103,12 @@ const CATEGORIES = {
     description: 'Living greenery and botanical pieces, chosen to bring life and texture into every room.',
     hero: 'categ photos/plants-upscaled-2x.jpg',
     subcategories: []
+  },
+  'christmas-decor': {
+    name: 'Christmas Decor',
+    description: 'Festive ornaments, glowing accents and seasonal pieces to dress your home for the holidays.',
+    hero: 'categ photos/christmas-decor.jpg',
+    subcategories: []
   }
 };
 
