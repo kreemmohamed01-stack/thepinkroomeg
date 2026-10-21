@@ -119,7 +119,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
-<link rel="preload" as="image" href="sec 7/hero-poster.webp" fetchpriority="high">
+<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
 <style>
 @font-face {font-family: 'Playfair Display';font-style: italic;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay-italic.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
@@ -396,7 +397,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     height:100dvh;
     overflow:hidden;
     /* first video frame paints instantly while the mp4 streams in */
-    background:#1c1a17 url('sec 7/hero-poster.webp') center/cover no-repeat;
+    background:#1c1a17 url('sec 7/hero-xmas-poster.webp') center/cover no-repeat;
+  }
+  /* The Christmas hero is filmed vertically (9:16). On wide screens it sits
+     whole in the middle over a pre-blurred 2KB still of itself, instead of
+     being cropped to a thin band (no CSS blur filter, so no GPU cost). */
+  @media (min-aspect-ratio:1/1){
+    .video-hero{background-image:url('sec 7/hero-xmas-backdrop.webp');}
+    .video-hero-media{object-fit:contain;}
   }
   .video-hero-media{
     position:absolute;
@@ -2618,13 +2626,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== HERO ===== -->
   <section class="video-hero">
-    <!-- Sources are attached by script (see hero video loader below) so that
+    <!-- Christmas hero. The previous showroom hero is still in sec 7/
+         (hero-480/720/1080.mp4 + hero-poster.webp) — swap the paths back to restore it.
+         Sources are attached by script (see hero video loader below) so that
          visitors on Save-Data or a slow connection keep the poster image and
          never pay for the video download. -->
     <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
-           poster="sec 7/hero-poster.webp"
-           data-src-phone="sec 7/hero-480.mp4" data-src-mobile="sec 7/hero-720.mp4" data-src-desktop="sec 7/hero-1080.mp4"
-           data-src-phone-av1="sec 7/hero-480.av1.mp4" data-src-mobile-av1="sec 7/hero-720.av1.mp4" data-src-desktop-av1="sec 7/hero-1080.av1.mp4"
+           poster="sec 7/hero-xmas-poster.webp"
+           data-src-phone="sec 7/hero-xmas-480.mp4" data-src-mobile="sec 7/hero-xmas-720.mp4" data-src-desktop="sec 7/hero-xmas-720.mp4"
            disablepictureinpicture disableremoteplayback
            controlslist="nodownload noplaybackrate noremoteplayback nofullscreen">
     </video>
