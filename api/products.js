@@ -228,9 +228,10 @@ module.exports = async (req, res) => {
       getActivePromotions()
     ]);
     const products = applyPromotions(rows.map(rowToProduct), activePromotions);
-    // cache at the edge for a minute — product data doesn't change every
-    // second, and this cuts DB load on a page that every visitor loads
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    // short edge cache: still cuts DB load from every visitor, but a product
+    // hidden/edited in the dashboard disappears from the site within ~30s
+    // (the old 60s + 5min stale window kept it showing for several minutes)
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=15');
     return res.status(200).json({ ok: true, products });
   } catch (e) {
     console.error('[products] error:', e);
