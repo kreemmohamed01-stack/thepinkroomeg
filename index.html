@@ -2561,8 +2561,19 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     document.body.insertBefore(root, document.body.firstChild);
 
     var done=false;
-    function unmute(){ v.muted=false; v.volume=1; off(); }
-    function off(){ ['pointerdown','touchstart','keydown','click'].forEach(function(t){ window.removeEventListener(t,unmute,true); }); }
+    /* Only events that count as a real user activation (pointerup/touchend/click/keydown).
+       touchstart/pointerdown on a phone do NOT, and unmuting there makes the browser
+       pause the video — that was the "freezes when I tap" bug. If the browser still
+       refuses sound, fall back to muted and keep playing so it never stops. */
+    var GESTURES=['pointerup','touchend','click','keydown'];
+    function unmute(){
+      off();
+      v.muted=false; v.volume=1;
+      var q=v.play();
+      if(q && q.catch) q.catch(function(){ v.muted=true; v.play().catch(function(){}); });
+      setTimeout(function(){ if(v.paused && !done){ v.muted=true; v.play().catch(function(){}); } },120);
+    }
+    function off(){ GESTURES.forEach(function(t){ window.removeEventListener(t,unmute,true); }); }
     function close(){
       if(done) return; done=true; off();
       root.classList.add('out');
@@ -2585,7 +2596,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     var p=v.play();
     if(p && p.catch){ p.catch(function(){
       v.muted=true;
-      ['pointerdown','touchstart','keydown','click'].forEach(function(t){ window.addEventListener(t,unmute,true); });
+      GESTURES.forEach(function(t){ window.addEventListener(t,unmute,true); });
       v.play().catch(close);
     }); }
   })();
