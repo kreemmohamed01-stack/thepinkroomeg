@@ -2509,6 +2509,11 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   (function(){
     var SRC='/intro/pinkroom-intro.mp4?v=4', KEY='tpr_intro_seen';
     try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
+    // never on back/forward or when arriving from another page of the site — the intro is for the first landing only
+    try{ var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
+      if(nav && (nav.type==='back_forward' || nav.type==='reload')) return; }catch(e){}
+    try{ if(document.referrer && new URL(document.referrer).hostname.replace(/^www\./,'')===location.hostname.replace(/^www\./,'')) return; }catch(e){}
+    try{ var ls=localStorage.getItem(KEY); if(ls && Date.now()-(+ls)<6*3600*1000) return; }catch(e){}
     var c=navigator.connection||{};
     if(c.saveData || /(^|-)2g$/.test(c.effectiveType||'') ) return;
     if(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
@@ -2516,6 +2521,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     // Lighthouse no longer says "lighthouse" in its UA — its emulated phone is a "moto g power (2022)".
     if(navigator.webdriver || /bot|crawl|spider|lighthouse|headless|gtmetrix|ptst|pagespeed|speed insights|moto g power \(2022\)/i.test(navigator.userAgent)) return;
     try{ sessionStorage.setItem(KEY,'1'); }catch(e){}
+    try{ localStorage.setItem(KEY,String(Date.now())); }catch(e){}
     // tells the hero video loader below to wait until the intro is gone, so the two videos never fight for bandwidth
     window.__tprIntroActive=true;
 
@@ -2540,6 +2546,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       setTimeout(function(){ v.pause(); bg.pause(); v.removeAttribute('src'); bg.removeAttribute('src'); v.load(); bg.load(); root.remove(); },900);
     }
     root.querySelector('.skip').onclick=close;
+    // page restored from the back/forward cache while the intro was up → drop it
+    window.addEventListener('pageshow',function(e){ if(e.persisted) close(); });
     snd.onclick=function(){ v.muted=false; v.volume=1; snd.hidden=true; };
     v.addEventListener('ended',close);
     v.addEventListener('error',close);
