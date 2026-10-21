@@ -2496,22 +2496,18 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   <style>
     #tprIntro{position:fixed;inset:0;z-index:2147483000;background:#0d0b0a;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;transition:opacity .7s ease,transform .9s cubic-bezier(.7,0,.2,1);}
     #tprIntro.out{opacity:0;transform:scale(1.04);pointer-events:none;}
-    /* Blurred backdrop drawn at quarter size and scaled up 4x: looks the same as a full-size 38px blur, but costs the GPU ~16x less per frame, so the intro stays smooth on mid-range phones/laptops. */
-    #tprIntro .bg{position:absolute;left:-20px;top:-20px;width:calc(25% + 10px);height:calc(25% + 10px);transform:scale(4);transform-origin:0 0;object-fit:cover;filter:blur(9px) brightness(.55) saturate(1.2);will-change:transform;}
+    /* Landscape backdrop is a tiny blurred still (5KB) instead of a second
+       decoding video — one video decoder only, so the intro never stutters. */
+    #tprIntro .bg{position:absolute;inset:-40px;background:url('/intro/pinkroom-christmas-intro-bg.jpg') center/cover;filter:blur(24px) brightness(.6);}
     #tprIntro .main{position:relative;height:100%;width:100%;object-fit:contain;animation:tprIntroIn 1s ease both;}
     @media (orientation:portrait){#tprIntro .main{object-fit:cover;}#tprIntro .bg{display:none;}}
     @media (min-aspect-ratio:1/1){#tprIntro .main{height:92%;width:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55);}}
     @keyframes tprIntroIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
-    #tprIntro .ctl{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));display:flex;gap:10px;z-index:2;}
-    #tprIntro .ctl.r{right:22px}#tprIntro .ctl.l{left:22px}
-    #tprIntro button{font:600 11px/1 'Poppins',sans-serif;letter-spacing:.18em;text-transform:uppercase;color:#fff;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.35);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);padding:11px 16px;border-radius:999px;cursor:pointer;}
-    #tprIntro button:hover{background:rgba(255,255,255,.26);}
-    #tprIntro .bar{position:absolute;left:0;top:0;height:3px;background:#f2b8c6;width:0;z-index:2;}
     html.tpr-intro-lock,html.tpr-intro-lock body{overflow:hidden;}
   </style>
   <script>
   (function(){
-    var SRC='/intro/pinkroom-intro.mp4?v=4', KEY='tpr_intro_seen';
+    var SRC='/intro/pinkroom-christmas-intro.mp4?v=1', KEY='tpr_intro_seen';
     try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
     // never on back/forward or when arriving from another page of the site — the intro is for the first landing only
     try{ var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
@@ -2530,41 +2526,39 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     window.__tprIntroActive=true;
 
     var root=document.createElement('div'); root.id='tprIntro'; root.setAttribute('aria-label','The Pink Room intro');
-    root.innerHTML='<div class="bar"></div>'+
-      '<video class="bg" muted playsinline preload="auto" aria-hidden="true"></video>'+
-      '<video class="main" playsinline preload="auto"></video>'+
-      '<div class="ctl l"><button type="button" class="snd" hidden>🔊 Sound</button></div>'+
-      '<div class="ctl r"><button type="button" class="skip">Skip</button></div>';
-    var v=root.querySelector('.main'), bg=root.querySelector('.bg'), bar=root.querySelector('.bar'), snd=root.querySelector('.snd');
-    v.src=SRC; bg.src=SRC;
+    root.innerHTML='<div class="bg" aria-hidden="true"></div><video class="main" playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>';
+    var v=root.querySelector('.main');
+    v.src=SRC;
     document.documentElement.classList.add('tpr-intro-lock');
     document.body.insertBefore(root, document.body.firstChild);
 
     var done=false;
+    function unmute(){ v.muted=false; v.volume=1; off(); }
+    function off(){ ['pointerdown','touchstart','keydown','click'].forEach(function(t){ window.removeEventListener(t,unmute,true); }); }
     function close(){
-      if(done) return; done=true;
+      if(done) return; done=true; off();
       root.classList.add('out');
       document.documentElement.classList.remove('tpr-intro-lock');
       window.__tprIntroActive=false;
       try{ window.dispatchEvent(new Event('tpr-intro-done')); }catch(e){}
-      setTimeout(function(){ v.pause(); bg.pause(); v.removeAttribute('src'); bg.removeAttribute('src'); v.load(); bg.load(); root.remove(); },900);
+      setTimeout(function(){ v.pause(); v.removeAttribute('src'); v.load(); root.remove(); },900);
     }
-    root.querySelector('.skip').onclick=close;
     // page restored from the back/forward cache while the intro was up → drop it
     window.addEventListener('pageshow',function(e){ if(e.persisted) close(); });
-    snd.onclick=function(){ v.muted=false; v.volume=1; snd.hidden=true; };
     v.addEventListener('ended',close);
     v.addEventListener('error',close);
-    v.addEventListener('timeupdate',function(){ if(v.duration){ bar.style.width=(v.currentTime/v.duration*100)+'%'; if(Math.abs(bg.currentTime-v.currentTime)>.3) bg.currentTime=v.currentTime; } });
     setTimeout(function(){ if(v.readyState<3) close(); },4000);   // slow network: never hold the shop hostage
-    setTimeout(close,15000);                                      // hard safety cap
+    setTimeout(close,12000);                                      // hard safety cap
 
-    // Browsers only allow autoplay WITH sound after the user has interacted; try it, fall back to muted + a sound button.
+    // Sound on by default. Browsers refuse unmuted autoplay until the visitor has interacted
+    // with the site, so in that case it starts muted and the sound switches on by itself
+    // at the visitor's first tap/click/key — no buttons on the video.
     v.muted=false;
     var p=v.play();
-    if(p && p.catch){ p.then(function(){ bg.play().catch(function(){}); }).catch(function(){
-      v.muted=true; snd.hidden=false;
-      v.play().then(function(){ bg.play().catch(function(){}); }).catch(close);
+    if(p && p.catch){ p.catch(function(){
+      v.muted=true;
+      ['pointerdown','touchstart','keydown','click'].forEach(function(t){ window.addEventListener(t,unmute,true); });
+      v.play().catch(close);
     }); }
   })();
   </script>
