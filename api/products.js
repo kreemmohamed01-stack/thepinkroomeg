@@ -36,7 +36,7 @@ async function siteStructure(req, res) {
     ]);
     // the banner only needs label/value, not the product id list
     const bannerPromotions = activePromotions.map(p => ({ id: p.id, label: p.label, value: p.value }));
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=86400');
     return res.status(200).json({ ok: true, categories, rooms, topSellers, homepageContent, storeSettings, activePromotions: bannerPromotions });
   } catch (e) {
     console.error('[products] site-structure error:', e);
@@ -228,10 +228,11 @@ module.exports = async (req, res) => {
       getActivePromotions()
     ]);
     const products = applyPromotions(rows.map(rowToProduct), activePromotions);
-    // short edge cache: still cuts DB load from every visitor, but a product
-    // hidden/edited in the dashboard disappears from the site within ~30s
-    // (the old 60s + 5min stale window kept it showing for several minutes)
-    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=15');
+    // fresh for 15s, then visitors keep getting the cached copy instantly
+    // while the edge refetches in the background — so nobody waits on the
+    // database, and a dashboard hide/edit reaches the site within seconds
+    // of the next visit
+    res.setHeader('Cache-Control', 's-maxage=15, stale-while-revalidate=86400');
     return res.status(200).json({ ok: true, products });
   } catch (e) {
     console.error('[products] error:', e);
