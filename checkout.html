@@ -447,6 +447,59 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .co-promo input:focus{outline:none;border-color:var(--gold);}
   .co-promo button{background:var(--ink);color:#fff;padding:0 18px;font-size:11px;letter-spacing:1.4px;border-radius:2px;transition:opacity .25s ease;}
   .co-promo button:hover{opacity:.88;}
+
+  /* ---------- FABRIC BUTTON ANIMATION ----------
+     woven texture (::before) + a soft silk sheen that drapes across on
+     hover (::after) + a gentle billow; pseudos sit at z-index:-1 inside an
+     isolated stacking context so text, icons and the spinner stay on top. */
+  .co-btn-primary, .co-promo button, .ip-copy-btn{
+    position:relative;overflow:hidden;isolation:isolate;
+    will-change:transform;
+  }
+  .co-btn-primary::before, .co-promo button::before, .ip-copy-btn::before{
+    content:"";position:absolute;inset:0;z-index:-1;pointer-events:none;
+    background:
+      repeating-linear-gradient(45deg, rgba(255,255,255,.05) 0 1px, transparent 1px 4px),
+      repeating-linear-gradient(-45deg, rgba(0,0,0,.06) 0 1px, transparent 1px 4px);
+    opacity:.7;transition:opacity .4s ease;
+  }
+  .ip-copy-btn::before{opacity:0;}
+  .co-btn-primary::after, .co-promo button::after, .ip-copy-btn::after{
+    content:"";position:absolute;top:-30%;bottom:-30%;left:0;width:60%;z-index:-1;pointer-events:none;
+    background:linear-gradient(100deg, transparent 0%, rgba(255,255,255,.15) 30%, rgba(255,255,255,.55) 50%, rgba(255,255,255,.15) 70%, transparent 100%);
+    border-radius:45%;
+    transform:translateX(-170%) skewX(-18deg);
+    animation:fabricSheen 3.2s cubic-bezier(.45,.05,.3,1) infinite;
+  }
+  .ip-copy-btn::after{background:linear-gradient(100deg, transparent, rgba(183,110,130,.25), transparent);}
+  .co-btn-primary:not(:disabled):hover, .co-promo button:not(:disabled):hover, .ip-copy-btn:hover{
+    animation:fabricBillow .9s cubic-bezier(.3,.7,.4,1);
+  }
+  .co-btn-primary:not(:disabled):hover::before, .co-promo button:not(:disabled):hover::before{opacity:1;}
+  .ip-copy-btn:hover::before{opacity:.5;}
+  .co-btn-primary:not(:disabled):hover::after, .co-promo button:not(:disabled):hover::after, .ip-copy-btn:hover::after{
+    animation:fabricSheen 1.1s cubic-bezier(.45,.05,.3,1) infinite;
+  }
+  .co-btn-primary:not(:disabled):active, .co-promo button:not(:disabled):active{
+    animation:fabricBillow .6s cubic-bezier(.3,.7,.4,1);
+  }
+  .co-btn-primary.loading::after{display:none;}
+  @keyframes fabricSheen{
+    0%  {transform:translateX(-170%) skewX(-18deg) scaleY(1);}
+    30% {transform:translateX(40%) skewX(-8deg) scaleY(1.08);}
+    60%,100%{transform:translateX(260%) skewX(-18deg) scaleY(1);}
+  }
+  @keyframes fabricBillow{
+    0%  {transform:scale(1,1);}
+    25% {transform:scale(1.015,.975);}
+    50% {transform:scale(.995,1.02);}
+    75% {transform:scale(1.005,.995);}
+    100%{transform:scale(1,1);}
+  }
+  @media (prefers-reduced-motion:reduce){
+    .co-btn-primary, .co-promo button, .ip-copy-btn,
+    .co-btn-primary::after, .co-promo button::after, .ip-copy-btn::after{animation:none !important;}
+  }
   .co-promo-msg{font-size:11.5px;margin:-10px 0 14px;display:none;}
   .co-promo-msg.show{display:block;}
   .co-promo-msg.ok{color:#5a7a52;}
