@@ -2505,6 +2505,11 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   @media (max-width:520px){
     .video-hero{height:100vh;height:100dvh;}
   }
+  /* Portrait screens: the hero box takes the video's own 9:16 shape, so only
+     the video shows — no backdrop bands above or below it. */
+  @media (max-aspect-ratio:1/1){
+    .video-hero{height:auto;aspect-ratio:9/16;background-image:url('sec 7/hero-xmas-poster.webp');background-size:cover;}
+  }
 </style>
 </head>
 <body data-tpr-chrome="drawers-only">
@@ -3108,6 +3113,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <script src="catalog.js"></script>
 <script src="i18n.js"></script>
 <script src="shared-ui.js"></script>
+<script src="snow.js" defer></script>
 <script>
   if (window.TPR_I18N) window.TPR_I18N.applyStaticTranslations();
 

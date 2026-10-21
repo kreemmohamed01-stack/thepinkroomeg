@@ -787,6 +787,8 @@ const COLOR_HEX = {
 const params   = new URLSearchParams(location.search);
 const roomSlug = params.get('room') || null;
 let   catSlug  = params.get('cat') || 'all';
+// seasonal snowfall on the Christmas category only
+if (catSlug === 'christmas-decor') { const sn = document.createElement('script'); sn.src = 'snow.js'; sn.defer = true; document.body.appendChild(sn); }
 const subSlug  = params.get('sub') || null;
 const room     = roomSlug && typeof ROOMS !== 'undefined' ? ROOMS[roomSlug] : null;
 // ?promo=<id> — the homepage offer section's "Shop the Offer" button
