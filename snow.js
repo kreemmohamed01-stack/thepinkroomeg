@@ -36,11 +36,13 @@
     if (started) return;
     if (window.__tprIntroActive) { window.addEventListener('tpr-intro-done', start, { once:true }); return; }
     started = true;
-    document.documentElement.classList.add('fx');   // let page animations (paused until engagement) run too
     var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
     var box = document.createElement('div');
     box.className = 'tpr-snow'; box.setAttribute('aria-hidden', 'true');
-    box.innerHTML = '<div class="w"><i class="s3"></i><i class="s2"></i><i class="s1"></i></div>';
+    // inline !important: the page pauses its own decorative loops until the
+    // visitor engages (index.html, html:not(.fx)); the snow must not wait
+    var run = ' style="animation-play-state:running!important"';
+    box.innerHTML = '<div class="w"' + run + '><i class="s3"' + run + '></i><i class="s2"' + run + '></i><i class="s1"' + run + '></i></div>';
     document.body.appendChild(box);
     requestAnimationFrame(function(){ requestAnimationFrame(function(){ box.classList.add('on'); }); });
   }
