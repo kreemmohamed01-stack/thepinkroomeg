@@ -157,6 +157,13 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   img{display:block;max-width:100%;}
 
   /* ---------- TOPBAR (identical on every screen size) ---------- */
+  /* Decorative loops (shine, glow, float) stay frozen on their first frame
+     until the visitor first moves/scrolls/taps (or 8s after load), so the
+     page's first seconds go entirely to loading and becoming interactive.
+     The intro overlay is excluded so it always plays. */
+  html:not(.fx) :not(#tprIntro):not(#tprIntro *),
+  html:not(.fx) :not(#tprIntro):not(#tprIntro *)::before,
+  html:not(.fx) :not(#tprIntro):not(#tprIntro *)::after{animation-play-state:paused !important;}
   @keyframes floaty{
     0%,100%{transform:translateY(0);}
     50%{transform:translateY(-3px);}
@@ -199,6 +206,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     position:absolute;
     top:0;left:-140%;
     width:60%;height:100%;
+    --sweep:467%;
     background:linear-gradient(115deg, transparent 0%, rgba(255,255,255,0) 35%, var(--shine) 50%, rgba(255,255,255,0) 65%, transparent 100%);
     transform:skewX(-20deg);
     pointer-events:none;
@@ -211,9 +219,12 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .dropdown.open .dropdown-menu::before{
     animation: menuShine .9s ease .05s;
   }
+  /* every shine sweep moves with transform (GPU only) instead of `left`,
+     which forced a full layout on every frame; --sweep = travel distance
+     in the element's own width, set on each element */
   @keyframes menuShine{
-    from{left:-140%;}
-    to{left:140%;}
+    from{transform:translateX(0) skewX(-20deg);}
+    to{transform:translateX(var(--sweep)) skewX(-20deg);}
   }
   .dropdown-menu li{
     position:relative;
@@ -289,9 +300,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   .logo-wrap img{width:100%;height:auto;display:block;}
   @keyframes logoShineSweep{
-    0%{left:-170%;}
-    55%{left:170%;}
-    100%{left:170%;}
+    0%{transform:translateX(0) skewX(-20deg);}
+    55%,100%{transform:translateX(var(--sweep)) skewX(-20deg);}
   }
   .mobile-icon{
     display:flex;align-items:center;justify-content:center;
@@ -696,8 +706,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .ts-image::after{
     content:'';
     position:absolute;
-    top:0;left:-150%;
+    top:0;left:-170%;
     width:45%;height:100%;
+    --sweep:756%;
     background:linear-gradient(115deg, transparent 0%, transparent 35%, rgba(255,255,255,.35) 50%, transparent 65%, transparent 100%);
     transform:skewX(-20deg);
     animation: logoShineSweep 6s ease-in-out infinite;
@@ -1174,8 +1185,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .insta-icon-wrap::after{
     content:'';
     position:absolute;
-    top:0;left:-150%;
+    top:0;left:-170%;
     width:60%;height:100%;
+    --sweep:567%;
     background:linear-gradient(115deg, transparent 0%, transparent 35%, rgba(255,255,255,.8) 50%, transparent 65%, transparent 100%);
     transform:skewX(-20deg);
     animation: logoShineSweep 4s ease-in-out infinite;
@@ -1365,8 +1377,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .footer-about-box::before{
     content:'';
     position:absolute;
-    top:0;left:-160%;
+    top:0;left:-140%;
     width:55%;height:100%;
+    --sweep:509%;
     background:linear-gradient(115deg, transparent 0%, transparent 35%, rgba(255,255,255,.16) 50%, transparent 65%, transparent 100%);
     transform:skewX(-20deg);
     animation: menuShine 3.6s ease-in-out infinite;
@@ -1495,6 +1508,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     content:'';
     position:absolute;top:0;left:-150%;
     width:60%;height:100%;
+    --sweep:500%;
     background:linear-gradient(115deg,transparent 0%,transparent 35%,rgba(255,255,255,.35) 50%,transparent 65%,transparent 100%);
     transform:skewX(-20deg);
     pointer-events:none;
@@ -1505,9 +1519,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     50%{box-shadow:0 0 20px rgba(201,169,124,.45);border-color:rgba(201,169,124,.9);}
   }
   @keyframes footerCreditShine{
-    0%{left:-150%;}
-    55%{left:150%;}
-    100%{left:150%;}
+    0%{transform:translateX(0) skewX(-20deg);}
+    55%,100%{transform:translateX(var(--sweep)) skewX(-20deg);}
   }
   .footer-credit-name{
     position:relative;
@@ -2492,6 +2505,15 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 </head>
 <body data-tpr-chrome="drawers-only">
 
+  <script>
+  (function(){
+    var h=document.documentElement, ev=['pointermove','pointerdown','touchstart','keydown','wheel','scroll'];
+    function on(){ h.classList.add('fx'); ev.forEach(function(t){ removeEventListener(t,on,true); }); }
+    ev.forEach(function(t){ addEventListener(t,on,{capture:true,passive:true}); });
+    addEventListener('load',function(){ setTimeout(on,8000); },{once:true});
+  })();
+  </script>
+
   <!-- ===== INTRO VIDEO (once per visitor session; built by JS only when shown, so it costs nothing otherwise) ===== -->
   <style>
     #tprIntro{position:fixed;inset:0;z-index:2147483000;background:#0d0b0a;display:flex;align-items:center;justify-content:center;overflow:hidden;opacity:1;transition:opacity .7s ease,transform .9s cubic-bezier(.7,0,.2,1);}
@@ -2668,8 +2690,15 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       if (window.__tprIntroActive) window.addEventListener('tpr-intro-done', start, { once: true });
       else start();
     }
-    if (document.readyState === 'complete') startWhenFree();
-    else window.addEventListener('load', startWhenFree, { once: true });
+    /* Wait a beat after load (or the visitor's first interaction, whichever
+       comes first) so decoding the loop never overlaps the page becoming
+       interactive. The poster is already showing meanwhile. */
+    var kicked=false;
+    function kick(){ if(kicked) return; kicked=true; startWhenFree(); }
+    ['pointermove','pointerdown','touchstart','keydown','wheel','scroll'].forEach(function(t){ window.addEventListener(t, function(){ if(document.readyState==='complete') kick(); }, { once:true, passive:true, capture:true }); });
+    function afterLoad(){ setTimeout(kick, 2500); }
+    if (document.readyState === 'complete') afterLoad();
+    else window.addEventListener('load', afterLoad, { once: true });
 
     /* Don't keep decoding (or buffering) the loop while the hero is scrolled
        out of view or the tab is hidden — saves battery and re-fetches.
