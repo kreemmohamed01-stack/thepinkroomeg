@@ -119,8 +119,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
-<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high">
-<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp">
+<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
 <style>
 @font-face {font-family: 'Playfair Display';font-style: italic;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay-italic.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
@@ -3005,7 +3005,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       </a>
 
       <div class="journal-video-wrap" id="journalVideoWrap">
-        <video class="journal-video" id="journalVideo" data-src="sec 7/hero-1080.mp4" poster="sec 7/hero-poster.webp" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
+        <video class="journal-video" id="journalVideo" data-src="sec 7/hero-1080.mp4" data-poster="sec 7/hero-poster.webp" muted loop playsinline preload="none" disablepictureinpicture disableremoteplayback controlslist="nodownload noplaybackrate noremoteplayback nofullscreen"></video>
         <div class="journal-video-glow"></div>
       </div>
 
@@ -3394,6 +3394,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     entries.forEach(entry=>{
       if (!entry.isIntersecting) return;
       if (!journalVideo.src){
+        if (journalVideo.dataset.poster) journalVideo.poster = journalVideo.dataset.poster;
         // Same clip as the hero, so mirror the hero's tier AND codec choice
         // exactly. Matching both means this is the identical URL the hero
         // already fetched, so it comes from the browser cache and costs
