@@ -5,6 +5,7 @@
    POST   /api/admin/products                     — create
    PATCH  /api/admin/products                     — update (id in body)
    DELETE /api/admin/products?id=...              — delete
+   POST   /api/admin/products?action=visibility   — { id, hidden } hide/show on the site
 
    POST   /api/admin/products?action=upload       — image upload (Blob)
 
@@ -275,6 +276,16 @@ async function updateProduct(req, res) {
   return res.status(200).json({ ok: true, product, notify });
 }
 
+async function setVisibility(req, res) {
+  let body = req.body;
+  if (typeof body === 'string') { try { body = JSON.parse(body); } catch (e) { return res.status(400).json({ ok: false, error: 'Invalid JSON body.' }); } }
+  const { id, hidden } = body || {};
+  if (!id) return res.status(400).json({ ok: false, error: 'Missing product id.' });
+  const rows = await sql`UPDATE products SET is_hidden = ${hidden === true}, updated_at = now() WHERE id = ${id} RETURNING id, is_hidden`;
+  if (!rows.length) return res.status(404).json({ ok: false, error: 'Product not found.' });
+  return res.status(200).json({ ok: true, hidden: rows[0].is_hidden });
+}
+
 async function deleteProduct(req, res) {
   const id = req.query.id;
   if (!id) return res.status(400).json({ ok: false, error: 'Missing product id.' });
@@ -294,6 +305,10 @@ module.exports = async (req, res) => {
     if (action === 'upload') {
       if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
       return await uploadImage(req, res);
+    }
+    if (action === 'visibility') {
+      if (req.method !== 'POST') { res.setHeader('Allow', 'POST'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }
+      return await setVisibility(req, res);
     }
     if (action === 'inventory') {
       if (req.method !== 'GET') { res.setHeader('Allow', 'GET'); return res.status(405).json({ ok: false, error: 'Method not allowed.' }); }

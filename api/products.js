@@ -75,7 +75,7 @@ async function submitReview(req, res) {
   if (!text || !String(text).trim()) return res.status(400).json({ ok: false, error: 'Review text is required.' });
   if (String(text).length > 3000) return res.status(400).json({ ok: false, error: 'Review is too long.' });
 
-  const check = await sql`SELECT id FROM products WHERE id = ${productId}`;
+  const check = await sql`SELECT id FROM products WHERE id = ${productId} AND is_hidden = false`;
   if (!check.length) return res.status(404).json({ ok: false, error: 'Product not found.' });
 
   await sql`
@@ -112,7 +112,7 @@ async function sitemap(req, res) {
   let roomUrls = [];
   try {
     if (sql) {
-      const rows = await sql`SELECT slug, updated_at FROM products ORDER BY updated_at DESC`;
+      const rows = await sql`SELECT slug, updated_at FROM products WHERE is_hidden = false ORDER BY updated_at DESC`;
       productUrls = rows.map(r => ({ loc: '/product?slug=' + r.slug, priority: '0.7', changefreq: 'weekly', lastmod: new Date(r.updated_at).toISOString().slice(0, 10) }));
       const rooms = await getSetting('rooms', null);
       if (rooms) roomUrls = Object.keys(rooms).map(k => ({ loc: '/category?room=' + k, priority: '0.6', changefreq: 'weekly' }));
@@ -223,7 +223,7 @@ module.exports = async (req, res) => {
 
   try {
     const [rows, activePromotions] = await Promise.all([
-      sql`SELECT * FROM products ORDER BY sort_order ASC, created_at DESC`,
+      sql`SELECT * FROM products WHERE is_hidden = false ORDER BY sort_order ASC, created_at DESC`,
       getActivePromotions()
     ]);
     const products = applyPromotions(rows.map(rowToProduct), activePromotions);

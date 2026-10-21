@@ -77,6 +77,9 @@ CREATE INDEX IF NOT EXISTS idx_products_slug     ON products (slug);
 ALTER TABLE products ADD COLUMN IF NOT EXISTS track_inventory     boolean NOT NULL DEFAULT false;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS stock_quantity      integer NOT NULL DEFAULT 0;
 ALTER TABLE products ADD COLUMN IF NOT EXISTS low_stock_threshold integer NOT NULL DEFAULT 5;
+-- hidden products stay in the dashboard but are left out of the public
+-- /api/products feed (e.g. sold out for now, to be re-enabled later)
+ALTER TABLE products ADD COLUMN IF NOT EXISTS is_hidden boolean NOT NULL DEFAULT false;
 
 -- ------------------------------------------------------------
 -- inventory_log — every stock change, whether from an order being

@@ -36,6 +36,7 @@ function rowToProduct(row){
     material: row.material,
     color: row.color,
     availability: row.availability,
+    hidden: row.is_hidden === true,
     sku: row.sku,
     collection: extra.collection || [],
     _provisional: extra._provisional || [],

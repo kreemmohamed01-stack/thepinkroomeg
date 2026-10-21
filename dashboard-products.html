@@ -118,15 +118,18 @@ function productRow(p){
   // primary one — show those under it so the table tells the whole story
   const extras = (p.extraCategories || [])
     .map(e => e.categoryName + (e.subcategoryName ? ' — ' + e.subcategoryName : ''));
-  return `<tr>
+  return `<tr${p.hidden ? ' style="opacity:.5"' : ''}>
     <td><div class="td-img"><img src="${escAttr(img)}" alt=""></div></td>
     <td class="td-name">${escHtml(p.name)}<span>${escHtml(p.slug)}</span></td>
     <td>${escHtml(p.categoryName)}${p.subcategoryName ? ' &mdash; ' + escHtml(p.subcategoryName) : ''}${extras.length ? `<span class="td-extracats">+ ${escHtml(extras.join(', '))}</span>` : ''}</td>
     <td>${p.price != null ? money(p.price) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.salePrice != null ? money(p.salePrice) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.trackInventory ? `<span style="color:${p.stockQuantity <= 0 ? 'var(--err)' : (p.stockQuantity <= p.lowStockThreshold ? 'var(--warn)' : 'inherit')}">${p.stockQuantity}</span>` : '<span class="no-price">&mdash;</span>'}</td>
-    <td>${escHtml(p.availability || '')}</td>
+    <td>${escHtml(p.availability || '')}${p.hidden ? '<span class="td-extracats">Hidden from site</span>' : ''}</td>
     <td class="td-actions">
+      <button class="btnToggleVis" data-id="${escAttr(p.id)}" data-hidden="${p.hidden ? '1' : ''}" title="${p.hidden ? 'Hidden — click to show on site' : 'Visible — click to hide from site'}">${p.hidden
+        ? '<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
+        : '<svg viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>'}</button>
       <button class="btnEditProd" data-id="${escAttr(p.id)}" title="Edit"><svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></button>
       <button class="btnDeleteProd danger" data-id="${escAttr(p.id)}" data-name="${escAttr(p.name)}" title="Delete"><svg viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg></button>
     </td>
@@ -163,7 +166,20 @@ $('btnAddProduct').addEventListener('click', ()=> openProductDrawer(null));
 $('prodTableBody').addEventListener('click', async (e)=>{
   const editBtn = e.target.closest('.btnEditProd');
   const delBtn = e.target.closest('.btnDeleteProd');
+  const visBtn = e.target.closest('.btnToggleVis');
   if (editBtn){ openProductDrawer(editBtn.dataset.id); return; }
+  if (visBtn){
+    const hide = !visBtn.dataset.hidden;
+    visBtn.disabled = true;
+    try {
+      const r = await fetch('/api/admin/products?action=visibility', { method:'POST', headers:{ 'Content-Type':'application/json' }, body: JSON.stringify({ id: visBtn.dataset.id, hidden: hide }) });
+      const d = await r.json();
+      if (!d.ok) throw new Error(d.error || 'Could not update visibility.');
+      toast(hide ? 'Product hidden from the site.' : 'Product is visible on the site again.', 'ok');
+      loadProducts();
+    } catch(err){ toast(err.message, 'bad'); visBtn.disabled = false; }
+    return;
+  }
   if (delBtn){
     if (!confirm(`Delete "${delBtn.dataset.name}"? This can't be undone.`)) return;
     try {
