@@ -679,8 +679,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   /* the sale card reads a touch richer than the rest */
   /* Christmas card: the title is already part of the artwork, so the
-     heading is kept for screen readers only and the veil stays light */
-  .cat-card.xmas .cat-card-veil{background:linear-gradient(180deg, rgba(20,17,12,0) 0%, rgba(20,17,12,0) 70%, rgba(20,17,12,.55) 100%);}
+     heading is kept for screen readers only */
   .cat-card.xmas .cat-card-body h3{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);}
   .cat-card.sale .cat-card-veil{
     background:linear-gradient(180deg, rgba(20,17,12,.5) 0%, rgba(20,17,12,.62) 45%, rgba(20,17,12,.86) 100%);
@@ -2758,6 +2757,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     <p class="cats-sub" data-i18n="catsSub">Curated pieces for every corner of your home.</p>
 
     <div class="cats-grid">
+      <a class="cat-card xmas" href="category.html?cat=christmas-decor" aria-label="Christmas Decor">
+        <div class="cat-card-img" style="background-image:url('categ photos/christmas-decor.webp')"></div>
+        <div class="cat-card-veil"></div>
+        <div class="cat-card-body">
+          <h3 data-i18n="catChristmas">Christmas Decor</h3>
+          <span class="cat-cta"><span data-i18n="catCta">Explore Collection</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
       <a class="cat-card feature" href="category.html?cat=paintings">
         <div class="cat-card-img" style="background-image:url('categ photos/painting-upscaled-2x.webp')"></div>
         <div class="cat-card-veil"></div>
@@ -2803,14 +2810,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         <div class="cat-card-veil"></div>
         <div class="cat-card-body">
           <h3 data-i18n="catPlants">Artificial Plants</h3><i class="cat-rule"></i>
-          <span class="cat-cta"><span data-i18n="catCta">Explore Collection</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
-        </div>
-      </a>
-      <a class="cat-card xmas" href="category.html?cat=christmas-decor" aria-label="Christmas Decor">
-        <div class="cat-card-img" style="background-image:url('categ photos/christmas-decor.webp')"></div>
-        <div class="cat-card-veil"></div>
-        <div class="cat-card-body">
-          <h3 data-i18n="catChristmas">Christmas Decor</h3>
           <span class="cat-cta"><span data-i18n="catCta">Explore Collection</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
