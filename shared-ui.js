@@ -245,6 +245,38 @@
   document.body.insertAdjacentHTML('beforeend', chromeMarkup(drawersOnly));
   if (!drawersOnly) document.body.classList.add('tpr-has-tabbar');
 
+  /* Smoke reveal for the menu (see .smk in shared-ui.css): split each item's
+     text into letters, each with its own delay and drift. Arabic is split by
+     word instead, since splitting letters would break the joined script. */
+  (function smokeMenu(){
+    const nav = document.querySelector('#tprMenu .tpr-menu-nav');
+    if (!nav) return;
+    const ar = !!(window.TPR_I18N && window.TPR_I18N.getLang && window.TPR_I18N.getLang() === 'ar');
+    let item = 0;
+    nav.querySelectorAll(':scope > a').forEach(a => {
+      const target = a.classList.contains('tpr-menu-xmas') ? a.querySelector('.tpr-menu-xmas-txt b') : a;
+      if (!target) { item++; return; }
+      const node = [...target.childNodes].find(n => n.nodeType === 3 && n.textContent.trim());
+      if (!node) { item++; return; }
+      const text = node.textContent.replace(/\s+$/, ' ');
+      const parts = ar ? text.split(/(\s+)/) : [...text];
+      const frag = document.createDocumentFragment();
+      parts.forEach((ch, k) => {
+        if (!ch) return;
+        const sp = document.createElement('span');
+        sp.className = 'smk';
+        sp.textContent = ch;
+        sp.style.setProperty('--d', (180 + item * 110 + k * (ar ? 120 : 45)) + 'ms');
+        sp.style.setProperty('--dx', ((Math.random() * 2 - 1) * 14).toFixed(1) + 'px');
+        sp.style.setProperty('--rot', ((Math.random() * 2 - 1) * 12).toFixed(1) + 'deg');
+        frag.appendChild(sp);
+      });
+      a.setAttribute('aria-label', a.textContent.replace(/\s+/g, ' ').trim());
+      node.replaceWith(frag);
+      item++;
+    });
+  })();
+
   const $ = id => document.getElementById(id);
   const overlay = $('tprOverlay');
   const menu    = $('tprMenu');
