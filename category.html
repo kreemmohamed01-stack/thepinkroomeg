@@ -151,6 +151,20 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
   .cat-desc{font-size:15px;line-height:1.85;color:var(--ink-soft);max-width:420px;}
   .cat-head-img{flex:1 1 48%;background-size:cover;background-position:center;min-height:300px;}
+  /* Christmas Decor: full-bleed festive red banner behind the header text */
+  .cat-head.is-xmas{
+    position:relative;justify-content:center;text-align:center;min-height:300px;
+    background:#6e0f16 url('categ photos/christmas-red.webp') center/cover no-repeat;
+  }
+  .cat-head.is-xmas::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 55% 75% at 50% 50%, rgba(70,6,12,.55), transparent 75%);}
+  .cat-head.is-xmas .cat-head-img{display:none;}
+  .cat-head.is-xmas .cat-head-text{position:relative;flex:0 1 640px;align-items:center;text-align:center;}
+  .cat-head.is-xmas .cat-title{color:#fbeedb;text-transform:uppercase;letter-spacing:2px;text-shadow:0 2px 14px rgba(0,0,0,.35);}
+  .cat-head.is-xmas .cat-eyebrow{color:#e8c98e;}
+  .cat-head.is-xmas .cat-desc{color:rgba(251,238,219,.85);}
+  .cat-head.is-xmas .crumb, .cat-head.is-xmas .crumb a, .cat-head.is-xmas .tpr-back{color:rgba(251,238,219,.8);}
+  .cat-head.is-xmas .tpr-back{align-self:center;}
+  @media (max-width:640px){ .cat-head.is-xmas{min-height:0;} .cat-head.is-xmas .cat-head-text{padding:22px 18px 30px;} }
 
   /* ---------- SUBCATEGORY TABS ---------- */
   .subnav-wrap{
@@ -865,6 +879,8 @@ if ((params.get('q') || '').trim()){
   document.querySelector('.cat-eyebrow').textContent = t('catLimitedOfferEyebrow');
 }
 document.getElementById('catHeroImg').style.backgroundImage = `url('${category.hero}')`;
+// Christmas: the whole header becomes the festive red banner (same art as the menu card)
+if (catSlug === 'christmas-decor') document.querySelector('.cat-head').classList.add('is-xmas');
 
 /* ---------- SEO: keep meta description/canonical/OG in sync with whatever's actually showing ---------- */
 (function(){

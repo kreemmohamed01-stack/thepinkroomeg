@@ -120,8 +120,7 @@
       <nav class="tpr-menu-nav">
         <a href="index.html">${t('home')}</a>
         <a href="category.html?cat=christmas-decor" class="tpr-menu-xmas">
-          <span class="tpr-menu-xmas-txt"><em>${t('specialCollection')}</em><b>${t('christmas')} <i>&rsaquo;</i></b></span>
-          <span class="tpr-menu-xmas-img" aria-hidden="true"></span>
+          <span class="tpr-menu-xmas-txt"><b>${t('christmas')}</b><em>${t('shopTheCollection')} <i>&rsaquo;</i></em></span>
         </a>
         <a href="category.html?cat=all">${t('shopAll')}</a>
         <a href="category.html?cat=paintings">${t('paintings')}</a>
