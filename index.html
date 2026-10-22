@@ -389,6 +389,37 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     contain-intrinsic-size:auto 900px;
   }
 
+  /* ---------- CHRISTMAS EVENT RIBBON ----------
+     Deep red velvet strip with gold lettering scrolling past. Two identical
+     groups slide by exactly one group width, so the loop is seamless; it is
+     a transform animation only (GPU), so it costs nothing on the main thread. */
+  .xmas-bar{
+    position:relative;display:block;overflow:hidden;
+    background:linear-gradient(180deg,#9b1c23 0%,#7d1218 100%);
+    border-top:1px solid #c9a97c;border-bottom:1px solid #c9a97c;
+    box-shadow:inset 0 1px 0 rgba(255,255,255,.12), inset 0 -1px 0 rgba(0,0,0,.25);
+    padding:13px 0;
+  }
+  .xmas-bar::before,.xmas-bar::after{
+    content:'';position:absolute;top:0;bottom:0;width:60px;z-index:1;pointer-events:none;
+  }
+  .xmas-bar::before{left:0;background:linear-gradient(90deg,#8a161c,transparent);}
+  .xmas-bar::after{right:0;background:linear-gradient(270deg,#8a161c,transparent);}
+  .xmas-bar-track{display:flex;width:max-content;animation:xmasBar 32s linear infinite;will-change:transform;}
+  .xmas-bar:hover .xmas-bar-track{animation-play-state:paused;}
+  .xmas-bar-group{display:flex;align-items:center;flex-shrink:0;}
+  .xmas-bar-group span{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:17px;letter-spacing:.4px;
+    color:#f3dfb8;white-space:nowrap;padding:0 22px;
+  }
+  .xmas-bar-group svg{width:12px;height:12px;fill:#d8b77e;flex-shrink:0;}
+  @keyframes xmasBar{from{transform:translate3d(0,0,0)}to{transform:translate3d(-50%,0,0)}}
+  html[dir="rtl"] .xmas-bar-track{animation-direction:reverse;}
+  @media (max-width:640px){
+    .xmas-bar{padding:11px 0;}
+    .xmas-bar-group span{font-size:14.5px;padding:0 16px;}
+  }
+
   /* ---------- VIDEO HERO ---------- */
   .video-hero{
     position:relative;
@@ -2758,6 +2789,11 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       </div>
     </div>
   </section>
+
+  <!-- ===== CHRISTMAS EVENT RIBBON (seasonal — delete this block to remove) ===== -->
+  <a class="xmas-bar" href="category.html?cat=christmas-decor" aria-label="Shop the Christmas Collection">
+    <div class="xmas-bar-track"><div class="xmas-bar-group"><span data-i18n="xmasBar1">The Christmas Collection Is Here</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar2">Festive Decor to Light Up Your Home</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar3">New Seasonal Pieces — Limited Stock</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar4">Shop Christmas Decor</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg></div><div class="xmas-bar-group" aria-hidden="true"><span data-i18n="xmasBar1">The Christmas Collection Is Here</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar2">Festive Decor to Light Up Your Home</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar3">New Seasonal Pieces — Limited Stock</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg><span data-i18n="xmasBar4">Shop Christmas Decor</span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2l2.4 7.2H22l-6 4.6 2.3 7.2-6.3-4.5-6.3 4.5 2.3-7.2-6-4.6h7.6z"/></svg></div></div>
+  </a>
 
   <!-- ===== SHOP BY CATEGORY ===== -->
   <section class="cats">
