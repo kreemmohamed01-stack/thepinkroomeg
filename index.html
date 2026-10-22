@@ -390,33 +390,53 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
 
   /* ---------- CHRISTMAS ANNOUNCEMENT STRIP ----------
-     Slim burgundy band with gold lettering above the navbar. The navbar is
-     absolutely positioned over the hero, so it is pushed down by the strip's
+     Black-velvet band with a faint warm glow, gold hairlines top and bottom
+     and gold-foil lettering. On load the letters fall in from above and
+     settle one by one (transitions, not animations, so the page's
+     "pause decorative loops until interaction" rule doesn't hold them).
+     The navbar sits over the hero, so it is pushed down by the strip's
      height until it becomes the fixed (stuck) bar on scroll. */
-  :root{--xmas-strip-h:40px;}
+  :root{--xmas-strip-h:44px;}
   .xmas-strip{
     position:relative;z-index:60;height:var(--xmas-strip-h);
-    display:flex;align-items:center;justify-content:center;gap:12px;padding:0 14px;
-    background:linear-gradient(180deg,#6a0f17 0%,#510b11 100%);
-    border-bottom:1px solid rgba(216,187,134,.55);
-    color:#f3e6cf;white-space:nowrap;overflow:hidden;
+    display:flex;align-items:center;justify-content:center;gap:16px;padding:0 16px;
+    background:
+      radial-gradient(ellipse 45% 160% at 50% 50%, rgba(201,160,92,.16), transparent 70%),
+      linear-gradient(180deg,#14110e 0%,#0b0907 100%);
+    white-space:nowrap;overflow:hidden;
   }
-  .xmas-strip-text{
-    font-family:'Playfair Display',serif;font-size:15px;letter-spacing:.4px;
-    background:linear-gradient(180deg,#fbeccb 0%,#e3c58d 55%,#c39a5a 100%);
+  .xmas-strip::before,.xmas-strip::after{
+    content:'';position:absolute;left:0;right:0;height:1px;
+    background:linear-gradient(90deg,transparent 0%,#b8915a 20%,#f1d9a6 50%,#b8915a 80%,transparent 100%);
+  }
+  .xmas-strip::before{top:0;opacity:.55;}
+  .xmas-strip::after{bottom:0;}
+  .xmas-strip-rule{width:42px;height:1px;background:linear-gradient(90deg,transparent,#c9a46a);}
+  .xmas-strip-rule:last-child{background:linear-gradient(270deg,transparent,#c9a46a);}
+  .xmas-strip-dot{width:5px;height:5px;transform:rotate(45deg);background:#c9a46a;flex-shrink:0;}
+  .xmas-strip-title{
+    font-family:'Playfair Display',serif;font-style:italic;font-size:17px;letter-spacing:.5px;color:#ecd3a0;
+  }
+  .xmas-strip-cta{font:500 10.5px/1 'Poppins',sans-serif;letter-spacing:2.6px;text-transform:uppercase;color:#d9bd88;}
+  .xmas-strip:hover .xmas-strip-cta{color:#fff3da;}
+  /* falling letters */
+  .xmas-strip [data-drop] .ch{
+    display:inline-block;white-space:pre;
+    background:linear-gradient(180deg,#fff1cf 0%,#e6c78c 50%,#b88a4a 100%);
     -webkit-background-clip:text;background-clip:text;color:transparent;
+    opacity:0;transform:translateY(-120%);filter:blur(3px);
+    transition:opacity .5s ease, transform .7s cubic-bezier(.2,1.4,.4,1), filter .5s ease;
+    transition-delay:calc(var(--i) * 45ms);
   }
-  .xmas-strip-sep{width:1px;height:14px;background:rgba(216,187,134,.6);}
-  .xmas-strip-cta{font:500 10.5px/1 'Poppins',sans-serif;letter-spacing:2.2px;text-transform:uppercase;color:#e6cd9c;}
-  .xmas-strip-star{font-size:10px;color:#d8bb86;}
-  .xmas-strip:hover .xmas-strip-cta{color:#fff;}
+  .xmas-strip.in [data-drop] .ch{opacity:1;transform:none;filter:none;}
   .topbar-mobile:not(.is-stuck){top:var(--xmas-strip-h) !important;}
-  @media (max-width:420px){
-    .xmas-strip{gap:9px;}
-    .xmas-strip-text{font-size:13.5px;}
-    .xmas-strip-cta{font-size:9.5px;letter-spacing:1.6px;}
-    .xmas-strip-star{display:none;}
+  @media (max-width:520px){
+    .xmas-strip{gap:10px;padding:0 10px;}
+    .xmas-strip-rule{display:none;}
+    .xmas-strip-title{font-size:13.5px;letter-spacing:.2px;}
+    .xmas-strip-cta{font-size:8.5px;letter-spacing:1.3px;}
   }
+  @media (max-width:360px){ .xmas-strip-dot,.xmas-strip-cta{display:none;} }
 
   /* ---------- VIDEO HERO ---------- */
   .video-hero{
@@ -2633,14 +2653,34 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   })();
   </script>
 
-  <!-- ===== CHRISTMAS ANNOUNCEMENT STRIP (seasonal — delete this block + .xmas-strip CSS to remove) ===== -->
-  <a class="xmas-strip" href="category.html?cat=christmas-decor">
-    <span class="xmas-strip-star" aria-hidden="true">&#10022;</span>
-    <span class="xmas-strip-text" data-i18n="xmasTitle">The Christmas Collection</span>
-    <span class="xmas-strip-sep" aria-hidden="true"></span>
-    <span class="xmas-strip-cta"><span data-i18n="xmasStripCta">Now Open — Discover</span> &rsaquo;</span>
-    <span class="xmas-strip-star" aria-hidden="true">&#10022;</span>
+  <!-- ===== CHRISTMAS ANNOUNCEMENT STRIP (seasonal — delete this block + .xmas-strip CSS/JS to remove) ===== -->
+  <a class="xmas-strip" href="category.html?cat=christmas-decor" aria-label="Christmas at The Pink Room — discover the holiday collection">
+    <span class="xmas-strip-rule" aria-hidden="true"></span>
+    <span class="xmas-strip-title" data-drop="xmasStripTitle">Christmas at The Pink Room</span>
+    <span class="xmas-strip-dot" aria-hidden="true"></span>
+    <span class="xmas-strip-cta" data-drop="xmasStripCta2">Discover the Holiday Edit</span>
+    <span class="xmas-strip-rule" aria-hidden="true"></span>
   </a>
+
+  <script>
+  (function(){
+    var bar=document.querySelector('.xmas-strip'); if(!bar) return;
+    function split(){
+      var n=0;
+      bar.querySelectorAll('[data-drop]').forEach(function(el){
+        // text comes from i18n here (not data-i18n, which would overwrite the letter spans)
+        var I=window.TPR_I18N, key=el.getAttribute('data-drop');
+        var t=(I && I.t && I.t(key)) || el.textContent; if(t===key) t=el.textContent;
+        el.setAttribute('aria-label',t); el.textContent='';
+        for(var k=0;k<t.length;k++){ var c=document.createElement('span'); c.className='ch'; c.setAttribute('aria-hidden','true'); c.style.setProperty('--i',n++); c.textContent=t[k]; el.appendChild(c); }
+      });
+    }
+    function drop(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.classList.add('in'); }); }); }
+    // i18n swaps the text in after load, so (re)split once the final language is in
+    function go(){ split(); if(window.__tprIntroActive) addEventListener('tpr-intro-done',function(){ setTimeout(drop,400); },{once:true}); else drop(); }
+    if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(go,0); }); else go();
+  })();
+  </script>
 
   <!-- ===== TOPBAR (same on every screen size) ===== -->
   <header class="topbar-mobile">
