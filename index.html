@@ -119,8 +119,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
-<link rel="preload" as="image" href="sec 7/hero-xmas-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
-<link rel="preload" as="image" href="sec 7/hero-xmas-backdrop.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="sec 7/hero-night-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
+<link rel="preload" as="image" href="sec 7/hero-trees-poster.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
 <style>
 @font-face {font-family: 'Playfair Display';font-style: italic;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay-italic.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
 @font-face {font-family: 'Playfair Display';font-style: normal;font-weight: 400;font-display: swap;src: url(/fonts/PlayfairDisplay.woff2) format('woff2');unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;}
@@ -401,6 +401,22 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       radial-gradient(ellipse 50% 70% at 50% 120%, rgba(0,0,0,.35), transparent 70%),
       linear-gradient(180deg,#5e0d14 0%,#470a10 100%);
   }
+  /* festive still (from the Christmas category art) set into the band: on wide
+     screens it fills the left half and melts into the velvet; on phones it
+     sits as a soft-edged picture above the text */
+  .xmas-bar-img{
+    position:absolute;left:0;top:0;bottom:0;width:48%;
+    background:url('categ photos/christmas-banner.webp') center/cover no-repeat;
+    -webkit-mask-image:linear-gradient(90deg,#000 55%,transparent 100%);mask-image:linear-gradient(90deg,#000 55%,transparent 100%);
+  }
+  .xmas-bar > :not(.xmas-bar-img):not(.xmas-bar-frame){position:relative;z-index:1;}
+  @media (min-width:900px){
+    .xmas-bar{padding:56px 6% 52px 48%;}
+  }
+  @media (max-width:899px){
+    .xmas-bar-img{position:relative;display:block;width:calc(100% + 44px);height:200px;margin:-40px -22px 20px;
+      -webkit-mask-image:linear-gradient(180deg,#000 55%,transparent 100%);mask-image:linear-gradient(180deg,#000 55%,transparent 100%);}
+  }
   .xmas-bar-frame{
     position:absolute;inset:12px;pointer-events:none;
     border:1px solid rgba(214,182,124,.55);
@@ -448,18 +464,20 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     height:100dvh;
     overflow:hidden;
     /* first video frame paints instantly while the mp4 streams in */
-    background:#1c1a17 url('sec 7/hero-xmas-poster.webp') center/cover no-repeat;
+    background:#1c1a17 url('sec 7/hero-trees-poster.webp') center/cover no-repeat;
   }
-  /* The Christmas hero is filmed vertically (9:16) and is always shown
-     whole — never cropped — on every screen, over a pre-blurred still of
-     itself that fills the spare space (no CSS blur filter, so no GPU cost). */
-  .video-hero{background-image:url('sec 7/hero-xmas-backdrop.webp');}
+  /* Two Christmas hero films: a 16:9 one for wide screens and a 9:16 one for
+     phones. The hero box takes the exact shape of the film it shows, so the
+     whole video is visible with nothing around it (no backdrop, no crop). */
+  @media (min-aspect-ratio:1/1){
+    .video-hero{height:auto;aspect-ratio:16/9;}
+  }
   .video-hero-media{
     position:absolute;
     inset:0;
     width:100%;
     height:100%;
-    object-fit:contain;
+    object-fit:cover;
   }
   .video-hero-overlay{
     position:absolute;
@@ -2559,7 +2577,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   /* Portrait screens: the hero box takes the video's own 9:16 shape, so only
      the video shows — no backdrop bands above or below it. */
   @media (max-aspect-ratio:1/1){
-    .video-hero{height:auto;aspect-ratio:9/16;background-image:url('sec 7/hero-xmas-poster.webp');background-size:cover;}
+    .video-hero{height:auto;aspect-ratio:9/16;background-image:url('sec 7/hero-night-poster.webp');}
   }
 </style>
 </head>
@@ -2686,14 +2704,14 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== HERO ===== -->
   <section class="video-hero">
-    <!-- Christmas hero. The previous showroom hero is still in sec 7/
-         (hero-480/720/1080.mp4 + hero-poster.webp) — swap the paths back to restore it.
+    <!-- Christmas hero: hero-night-* (portrait, phones) + hero-trees-720p (landscape, laptops).
+         Older heroes are still in sec 7/ (hero-xmas-*, and the showroom hero-480/720/1080.mp4
+         + hero-poster.webp) — swap the paths back to restore one.
          Sources are attached by script (see hero video loader below) so that
          visitors on Save-Data or a slow connection keep the poster image and
          never pay for the video download. -->
     <video class="video-hero-media" id="heroVideo" autoplay muted loop playsinline preload="none"
-           poster="sec 7/hero-xmas-poster.webp"
-           data-src-phone="sec 7/hero-xmas-480.mp4" data-src-mobile="sec 7/hero-xmas-720.mp4" data-src-desktop="sec 7/hero-xmas-720.mp4"
+           data-src-phone="sec 7/hero-night-480.mp4" data-src-mobile="sec 7/hero-night-720.mp4" data-src-desktop="sec 7/hero-trees-720p.mp4"
            disablepictureinpicture disableremoteplayback
            controlslist="nodownload noplaybackrate noremoteplayback nofullscreen">
     </video>
@@ -2733,8 +2751,11 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
        stays as the fallback for older phones (iPhone before the 15, older
        Android). canPlayType is the browser's own answer, so a device that
        cannot decode AV1 never downloads it. */
+    /* portrait screens get the vertical film (small or large), landscape
+       screens the wide one — matching the hero box's CSS aspect-ratio */
     var w = window.innerWidth;
-    var tier = w <= 640 ? 'phone' : w <= 960 ? 'mobile' : 'desktop';
+    var portrait = window.innerHeight >= w;
+    var tier = !portrait ? 'desktop' : (w <= 480 ? 'phone' : 'mobile');
     /* H.264 on purpose: AV1 saves only 2-18% here, but most phones decode AV1
        in software, which costs a second or more of CPU right as the page loads.
        H.264 is hardware-decoded almost everywhere. */
@@ -2812,6 +2833,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== CHRISTMAS EVENT BANNER (seasonal — delete this block to remove) ===== -->
   <a class="xmas-bar" href="category.html?cat=christmas-decor" aria-label="Discover the Christmas Collection">
+    <span class="xmas-bar-img" aria-hidden="true"></span>
     <span class="xmas-bar-frame" aria-hidden="true"></span>
     <span class="xmas-bar-eyebrow"><i></i><span data-i18n="xmasEyebrow">The Season's Edit &middot; Now Open</span><i></i></span>
     <span class="xmas-bar-title" data-i18n="xmasTitle">The Christmas Collection</span>
