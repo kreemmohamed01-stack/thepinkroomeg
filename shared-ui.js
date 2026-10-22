@@ -119,6 +119,10 @@
       </div>
       <nav class="tpr-menu-nav">
         <a href="index.html">${t('home')}</a>
+        <a href="category.html?cat=christmas-decor" class="tpr-menu-xmas">
+          <span class="tpr-menu-xmas-txt"><em>${t('specialCollection')}</em><b>${t('christmas')} <i>&rsaquo;</i></b></span>
+          <span class="tpr-menu-xmas-img" aria-hidden="true"></span>
+        </a>
         <a href="category.html?cat=all">${t('shopAll')}</a>
         <a href="category.html?cat=paintings">${t('paintings')}</a>
         <a href="category.html?cat=accessories">${t('accessories')}</a>
@@ -126,7 +130,6 @@
         <a href="category.html?cat=furniture">${t('furniture')}</a>
         <a href="category.html?cat=wall-art">${t('wallArt')}</a>
         <a href="category.html?cat=plants">${t('plants')}</a>
-        <a href="category.html?cat=christmas-decor">${t('christmas')}</a>
         <a href="category.html?cat=sale-offers">${t('sale')}</a>
         <a href="${WA}" target="_blank" rel="noopener" id="tprMenuContact">${t('contact')}</a>
       </nav>

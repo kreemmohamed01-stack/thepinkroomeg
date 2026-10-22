@@ -27,7 +27,7 @@
   const DICT = {
     en: {
       shopAll: 'SHOP ALL', paintings: 'PAINTINGS', lighting: 'LIGHTING', furniture: 'FURNITURE',
-      home: 'Home', accessories: 'Accessories', wallArt: 'WallArt', plants: 'Artificial Plants', christmas: 'Christmas Decor', sale: 'Sale', contact: 'Contact',
+      home: 'Home', accessories: 'Accessories', wallArt: 'WallArt', plants: 'Artificial Plants', christmas: 'Christmas Decor', specialCollection: '— Special Collection —', sale: 'Sale', contact: 'Contact',
       shopByRoom: 'SHOP BY ROOM', currency: 'CURRENCY', language: 'LANGUAGE',
       yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECKOUT',
       taxNote: 'Taxes and shipping calculated at checkout.',
@@ -280,7 +280,7 @@
     },
     ar: {
       shopAll: 'تسوقي الكل', paintings: 'لوحات', lighting: 'إضاءة', furniture: 'أثاث',
-      home: 'الرئيسية', accessories: 'إكسسوارات', wallArt: 'لوحات حائط', plants: 'نباتات', christmas: 'ديكور الكريسماس', sale: 'تخفيضات', contact: 'تواصل معنا',
+      home: 'الرئيسية', accessories: 'إكسسوارات', wallArt: 'لوحات حائط', plants: 'نباتات', christmas: 'ديكور الكريسماس', specialCollection: '— مجموعة خاصة —', sale: 'تخفيضات', contact: 'تواصل معنا',
       shopByRoom: 'تسوقي حسب الغرفة', currency: 'العملة', language: 'اللغة',
       yourBag: 'حقيبتك', shoppingBag: 'حقيبة التسوق', subtotal: 'الإجمالي الفرعي', checkout: 'إتمام الشراء',
       taxNote: 'الضرائب والشحن يتم حسابهم عند إتمام الشراء.',
