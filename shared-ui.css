@@ -126,8 +126,9 @@
 
 /* ---------- OVERLAY (shared by all drawers) ---------- */
 .tpr-overlay{
-  position:fixed;inset:0;background:rgba(20,17,12,.5);
-  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px);
+  /* plain dim, no backdrop blur: blurring the page (and the playing hero
+     video) behind it every frame made the menu stutter on phones/tablets */
+  position:fixed;inset:0;background:rgba(20,17,12,.6);
   z-index:98;opacity:0;pointer-events:none;transition:opacity .4s ease;
 }
 .tpr-overlay.active{opacity:1;pointer-events:auto;}
@@ -138,8 +139,8 @@
   width:86%;max-width:380px;height:100%;
   background:radial-gradient(circle at 15% -10%, rgba(201,169,124,.16) 0%, transparent 45%), linear-gradient(165deg,#201d18 0%,#14120f 55%,#1c1a17 100%);
   z-index:99;transform:translateX(-100%);
-  transition:transform .5s cubic-bezier(.16,1,.3,1);
-  padding:30px 28px 34px;overflow-y:auto;
+  transition:transform .5s cubic-bezier(.16,1,.3,1);will-change:transform;
+  padding:30px 28px 34px;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;
   box-shadow:24px 0 60px rgba(0,0,0,.4);
 }
 .tpr-menu.open{transform:translateX(0);}
@@ -160,47 +161,25 @@
   text-transform:uppercase;letter-spacing:.6px;
   color:rgba(255,255,255,.82);
   padding:13px 0;border-bottom:1px solid rgba(255,255,255,.08);
-  opacity:0;
-  transition:opacity .8s ease, color .3s ease, padding-left .3s ease;
+  /* soft "mist" reveal per item: a light blur that clears as it rises in.
+     Whole items, not individual letters, so it stays smooth on phones and
+     tablets (the per-letter version was too heavy and stuttered) */
+  opacity:0;transform:translate3d(0,10px,0);filter:blur(5px);
+  transition:opacity .6s ease, transform .7s cubic-bezier(.16,1,.3,1), filter .6s ease, color .3s ease, padding-left .3s ease;
 }
-.tpr-menu.open .tpr-menu-nav a{opacity:1;}
-/* Smoke reveal: every letter (split by shared-ui.js) starts as a puff of
-   glowing vapour — no solid ink, just a wide soft halo, drifting and
-   enlarged — then condenses into the real letter. --d is each letter's
-   delay (item order + position in the word), so the vapour rolls across
-   each word and down the list. */
-.tpr-menu .smk{
-  display:inline-block;white-space:pre;
-  color:transparent;
-  text-shadow:0 0 14px #fff, 0 0 30px rgba(255,240,220,.9), 0 0 60px rgba(255,236,210,.6);
-  opacity:0;
-  transform:translate3d(var(--dx,0),-14px,0) scale(2.3) rotate(var(--rot,0deg));
-  filter:blur(5px);
-  transition:
-    opacity .9s ease,
-    transform 2s cubic-bezier(.16,1,.3,1),
-    filter 1.8s cubic-bezier(.16,1,.3,1),
-    color 1.6s ease .3s,
-    text-shadow 2.2s ease;
-  transition-delay:var(--d,0ms);
-}
-.tpr-menu.open .smk{
-  color:inherit;opacity:1;filter:none;
-  text-shadow:0 0 0 transparent, 0 0 0 transparent, 0 0 0 transparent;
-  transform:none;
-}
-.tpr-menu:not(.open) .smk{transition-duration:.25s;transition-delay:0ms;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(1){transition-delay:0.10s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(2){transition-delay:0.19s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(3){transition-delay:0.28s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(4){transition-delay:0.37s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(5){transition-delay:0.46s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(6){transition-delay:0.55s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(7){transition-delay:0.64s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(8){transition-delay:0.73s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(9){transition-delay:0.82s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(10){transition-delay:0.91s;}
-.tpr-menu.open .tpr-menu-nav a:nth-child(11){transition-delay:1.00s;}
+.tpr-menu.open .tpr-menu-nav a{opacity:1;transform:none;filter:none;}
+.tpr-menu:not(.open) .tpr-menu-nav a{transition-duration:.15s;transition-delay:0s !important;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(1){transition-delay:0.08s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(2){transition-delay:0.13s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(3){transition-delay:0.18s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(4){transition-delay:0.23s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(5){transition-delay:0.28s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(6){transition-delay:0.33s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(7){transition-delay:0.38s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(8){transition-delay:0.43s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(9){transition-delay:0.48s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(10){transition-delay:0.53s;}
+.tpr-menu.open .tpr-menu-nav a:nth-child(11){transition-delay:0.58s;}
 .tpr-menu-nav a:hover{color:var(--gold);padding-left:8px;}
 /* Featured seasonal collection — the one highlighted card in the menu */
 .tpr-menu-nav a.tpr-menu-xmas{
@@ -220,10 +199,10 @@
 .tpr-menu-xmas-txt em{font:400 13px/1 'Poppins',sans-serif;font-style:normal;letter-spacing:.3px;color:#f6e6cc;}
 .tpr-menu-xmas-txt em i{font-style:normal;font-size:16px;margin-left:6px;}
 .tpr-menu-label, .tpr-menu-rooms{
-  opacity:0;filter:blur(8px);
-  transition:opacity 1.1s ease 1.4s, filter 1.2s ease 1.4s;
+  opacity:0;
+  transition:opacity .6s ease .6s;
 }
-.tpr-menu.open .tpr-menu-label, .tpr-menu.open .tpr-menu-rooms{opacity:1;filter:blur(0);}
+.tpr-menu.open .tpr-menu-label, .tpr-menu.open .tpr-menu-rooms{opacity:1;}
 .tpr-menu-label{
   font-size:10px;letter-spacing:2.4px;color:rgba(255,255,255,.42);
   margin:22px 0 10px;
