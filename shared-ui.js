@@ -182,8 +182,16 @@
       </div>
       <div class="tpr-summary" id="tprCartSummary">
         <div class="tpr-rule"></div>
-        <div class="tpr-subtotal"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
+        <label class="tpr-gov">
+          <span>${t('cartDeliverTo')}</span>
+          <select id="tprGov"><option value="">${t('cartPickGov')}</option></select>
+        </label>
+        <div class="tpr-subtotal sm"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
+        <div class="tpr-subtotal sm"><span>${t('cartShipping')}</span><span id="tprShip">${t('cartShipPending')}</span></div>
+        <div class="tpr-subtotal"><span>${t('cartTotal')}</span><span id="tprTotal">EGP 0.00</span></div>
+        <p class="tpr-cod">${t('codBadge')}</p>
         <button class="tpr-checkout" id="tprCheckout"><span>${t('checkout')}</span> ${ICONS.arrow}</button>
+        <a class="tpr-wa-order" id="tprWaOrder" href="${WA}" target="_blank" rel="noopener">${t('orderViaWhatsapp')}</a>
         <p class="tpr-tax">${t('taxNote')}</p>
         <p class="tpr-policy">${t('policyPrefix')} <a href="#">${t('termsConditions')}</a> ${t('policyAnd')} <a href="refund-return-policy.html">${t('refundPolicy')}</a>.</p>
         <a href="category.html?cat=all" class="tpr-continue">${t('continueShopping')} ${ICONS.arrow}</a>
@@ -417,6 +425,46 @@
     setTimeout(()=> el.classList.remove('pulse'), 500);
   }
 
+  /* Governorate + shipping preview in the bag, so the full price is seen
+     before checkout. Same numbers checkout.js shows: the dashboard's
+     standard method price plus its per-kg surcharge — the server still
+     recomputes everything at order time. The chosen governorate is written
+     into the checkout's saved answers so it arrives there prefilled. */
+  const CHECKOUT_KEY = 'tpr_checkout_v1';
+  const GOVS = [
+    ['Cairo','القاهرة'],['Giza','الجيزة'],['Alexandria','الإسكندرية'],['Qalyubia','القليوبية'],
+    ['Port Said','بورسعيد'],['Suez','السويس'],['Dakahlia','الدقهلية'],['Sharqia','الشرقية'],
+    ['Gharbia','الغربية'],['Monufia','المنوفية'],['Beheira','البحيرة'],['Ismailia','الإسماعيلية'],
+    ['Faiyum','الفيوم'],['Beni Suef','بني سويف'],['Minya','المنيا'],['Asyut','أسيوط'],
+    ['Sohag','سوهاج'],['Qena','قنا'],['Luxor','الأقصر'],['Aswan','أسوان'],['Red Sea','البحر الأحمر'],
+    ['New Valley','الوادي الجديد'],['Matrouh','مطروح'],['North Sinai','شمال سيناء'],
+    ['South Sinai','جنوب سيناء'],['Damietta','دمياط'],['Kafr El Sheikh','كفر الشيخ']
+  ];
+  const govSel = $('tprGov');
+  const isArUI = window.TPR_I18N.getLang && window.TPR_I18N.getLang() === 'ar';
+  GOVS.forEach(([en, ar]) => {
+    const o = document.createElement('option'); o.value = en; o.textContent = isArUI ? ar : en; govSel.appendChild(o);
+  });
+  function loadCheckout(){ try { return JSON.parse(localStorage.getItem(CHECKOUT_KEY)) || {}; } catch(e){ return {}; } }
+  (function(){
+    const a = loadCheckout().shippingAddress;
+    if (a && (!a.country || a.country === 'EG') && a.governorate) govSel.value = a.governorate;
+  })();
+  govSel.addEventListener('change', ()=>{
+    const s = loadCheckout();
+    s.shippingAddress = Object.assign({}, s.shippingAddress, { country:'EG', governorate: govSel.value });
+    try { localStorage.setItem(CHECKOUT_KEY, JSON.stringify(s)); } catch(e){}
+    if (window.TPRAnalytics && govSel.value) window.TPRAnalytics.trackEvent('cart_governorate', { governorate: govSel.value });
+    renderCart();
+  });
+  let shipMethod = null;
+  fetch('/api/orders?action=shipping-methods').then(r => r.ok ? r.json() : null).then(d => {
+    const ms = d && d.ok && d.methods ? Object.values(d.methods) : [];
+    shipMethod = (d && d.methods && d.methods.standard) ||
+      ms.sort((a,b)=> (Number(a.price)||0) - (Number(b.price)||0))[0] || null;
+    renderCart();
+  }).catch(()=>{});
+
   function renderCart(){
     const qty = cart.reduce((s,i)=> s + i.qty, 0);
     badge('tprCartBadge', qty);
@@ -459,6 +507,20 @@
     }).join('');
 
     $('tprSubtotal').textContent = money(subtotal);
+    const gov = govSel.value;
+    let shipping = null;
+    if (gov && shipMethod){
+      const kg = cart.reduce((s,i)=> s + (Number(i.weight) || 0) * i.qty, 0);
+      shipping = (Number(shipMethod.price) || 0) + Math.round(kg * (Number(shipMethod.ratePerKg) || 0) * 100) / 100;
+    }
+    $('tprShip').textContent = shipping == null ? t('cartShipPending') : money(shipping);
+    $('tprTotal').textContent = money(subtotal + (shipping || 0));
+    govSel.closest('.tpr-gov').classList.toggle('need', !gov);
+    const lines = cart.map(i => '• ' + i.name + (i.variant ? ' (' + i.variant + ')' : '') + ' × ' + i.qty + ' — ' + money(i.price * i.qty));
+    const msg = [t('waOrderIntro'), ...lines,
+      gov ? t('waOrderGov') + ': ' + gov : '',
+      t('waOrderTotal') + ': ' + money(subtotal + (shipping || 0))].filter(Boolean).join('\n');
+    $('tprWaOrder').href = WA + '?text=' + encodeURIComponent(msg);
     saveCart(cart);
   }
 
@@ -480,6 +542,12 @@
 
   $('tprCheckout').addEventListener('click', ()=> {
     if (!cart.length) return; // button is hidden with an empty bag, but guard anyway
+    // governorate first, so shipping + total are seen before checkout
+    if (!govSel.value){
+      const box = govSel.closest('.tpr-gov');
+      govSel.focus(); box.classList.add('shake'); setTimeout(()=> box.classList.remove('shake'), 500);
+      return;
+    }
     location.href = 'checkout.html?step=information';
   });
 

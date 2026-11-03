@@ -593,7 +593,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
               <p class="co-field-msg" data-i18n="errEnterName">Please enter your name.</p>
             </div>
             <div class="co-field" id="f-email">
-              <label data-i18n="emailAddress">Email Address</label>
+              <label data-i18n="emailOptional">Email Address (optional)</label>
               <div class="co-input-wrap">
                 <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="m3 7 9 6 9-6"/></svg>
                 <input type="email" id="inEmail" autocomplete="email" placeholder="Email Address" data-i18n-placeholder="emailAddress">
@@ -745,6 +745,9 @@ state.paymentMethod = state.paymentMethod || null;
 if (state.paymentMethod && !(CO.PaymentProviders[state.paymentMethod.id] || {}).enabled){
   state.paymentMethod = null;
 }
+// Cash on Delivery is what most customers pick — preselect it so the
+// order can be placed without hunting for a payment option
+if (!state.paymentMethod) state.paymentMethod = { id:'cash_on_delivery' };
 state.billingAddress = state.billingAddress || { sameAsShipping:true };
 state.notes = state.notes || '';
 state.promo = state.promo || null;
@@ -1375,7 +1378,7 @@ function setFieldError(id, hasErr){ $(id).classList.toggle('err', !!hasErr); }
 function validateInformation(){
   let ok = true;
   const nameOk = CO.isFilled(inName.value); setFieldError('f-name', !nameOk); ok = ok && nameOk;
-  const emailOk = CO.isEmail(inEmail.value); setFieldError('f-email', !emailOk); ok = ok && emailOk;
+  const emailOk = !CO.isFilled(inEmail.value) || CO.isEmail(inEmail.value); setFieldError('f-email', !emailOk); ok = ok && emailOk;
   const phoneOk = phoneIsValid(); setFieldError('f-phone', !phoneOk); ok = ok && phoneOk;
   const streetOk = CO.isFilled(inStreet.value); setFieldError('f-street', !streetOk); ok = ok && streetOk;
   // whichever of Governorate (Egypt) / State-Region (everywhere else) is

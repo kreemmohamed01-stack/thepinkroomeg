@@ -247,7 +247,7 @@
      visitor can't jump ahead by editing the URL ---------- */
   function furthestAllowedStep(state, cart){
     if (!cart.length) return 'information'; // nothing to check out — send back
-    if (!state.customer || !isFilled(state.customer.name) || !isEmail(state.customer.email) ||
+    if (!state.customer || !isFilled(state.customer.name) || (isFilled(state.customer.email) && !isEmail(state.customer.email)) ||
         !isPhone(state.customer.phone) || !state.shippingAddress || !isFilled(state.shippingAddress.street) ||
         !isFilled(state.shippingAddress.governorate)){
       return 'information';

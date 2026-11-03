@@ -422,6 +422,16 @@
 .tpr-checkout:hover{transform:translateY(-2px);box-shadow:0 12px 26px rgba(20,17,12,.28);}
 .tpr-checkout:hover::before{left:120%;}
 .tpr-checkout:hover svg{transform:translateX(4px);}
+.tpr-subtotal.sm{font-size:13px;margin-bottom:8px;}
+.tpr-subtotal.sm span:last-child{font-family:inherit;font-size:13px;}
+.tpr-gov{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px;font-size:13px;color:var(--ink-soft);}
+.tpr-gov select{flex:1;max-width:62%;padding:9px 10px;border:1px solid var(--line);border-radius:3px;background:#fff;color:var(--ink);font:inherit;font-size:13px;}
+.tpr-gov.need select{border-color:var(--gold);}
+.tpr-gov.shake{animation:tprShake .45s ease;}
+@keyframes tprShake{20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
+.tpr-cod{display:flex;align-items:center;justify-content:center;gap:6px;margin:4px 0 14px;padding:9px 10px;border-radius:3px;background:#EAF5EE;color:#2F7E57;font-size:12px;text-align:center;}
+.tpr-cod::before{content:'✓';font-weight:700;}
+.tpr-wa-order{display:block;text-align:center;margin-top:10px;padding:13px;border:1px solid #25D366;border-radius:3px;color:#1c9c4d;font-size:12.5px;letter-spacing:1px;}
 .tpr-tax{text-align:center;font-size:11px;color:var(--ink-soft);margin-top:14px;}
 .tpr-policy{text-align:center;font-size:10px;line-height:1.7;color:var(--ink-soft);opacity:.75;margin-top:8px;}
 .tpr-policy a{color:var(--ink-soft);border-bottom:1px solid var(--line);transition:color .3s ease,border-color .3s ease;}

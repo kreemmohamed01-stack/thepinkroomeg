@@ -343,6 +343,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .btn-bag:disabled{background:#8a8a8a;cursor:not-allowed;}
   .btn-bag:disabled:hover{transform:none;box-shadow:none;}
 
+  .pdp-cod{margin:-4px 0 16px;font-size:12px;color:#2F7E57;text-align:center;}
   .btn-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:28px;}
   .btn-ghost{
     display:flex;align-items:center;justify-content:center;gap:9px;
@@ -919,6 +920,7 @@ function buildPage(p){
       </div>
 
       <button class="btn-bag" id="btnBag" ${oos ? 'disabled' : ''}><span>${oos ? t('pdpSoldOutBtn') : t('pdpAddToBag')}</span></button>
+      <p class="pdp-cod">✓ ${t('pdpCodNote')}</p>
 
       <div class="btn-row">
         <button class="btn-ghost ${window.TPR && window.TPR.isWished(p.id) ? 'liked' : ''}" id="btnWish" data-id="${p.id}">${ICON.heart} ${t('pdpAddToWishlist')}</button>
