@@ -625,13 +625,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
             <select id="inCountry"></select>
           </div>
           <div class="co-field" id="f-street">
-            <label data-i18n="streetAddress">Street Address</label>
-            <input type="text" id="inStreet" autocomplete="address-line1" placeholder="Street Address" data-i18n-placeholder="streetAddress">
+            <label data-i18n="fullAddressLabel">Full Address</label>
+            <textarea id="inStreet" rows="3" autocomplete="street-address" placeholder="Area, street, building no., floor, apartment no., nearby landmark" data-i18n-placeholder="fullAddressPh"></textarea>
             <p class="co-field-msg" data-i18n="errStreet">Please enter your street address.</p>
-          </div>
-          <div class="co-field">
-            <label data-i18n="aptSuiteUnit">Apartment, suite, unit, etc. (optional)</label>
-            <input type="text" id="inApt" autocomplete="address-line2">
           </div>
           <div>
             <div class="co-field" id="f-gov">
@@ -852,7 +848,6 @@ function phoneIsValid(){
   const savedPhone = state.customer.phone || '';
   inPhone.value = normalizePhoneInput(savedPhone, phoneDialCode.textContent).display;
   inStreet.value = state.shippingAddress.street || '';
-  inApt.value = state.shippingAddress.apt || '';
   inGov.value = state.shippingAddress.governorate || '';
   inGovText.value = state.shippingAddress.governorate || '';
   inPostal.value = state.shippingAddress.postal || '';
@@ -884,7 +879,6 @@ syncField(inPhone, ()=>{
   CO.captureCart(state.customer);
 });
 syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
-syncField(inApt, ()=>{ state.shippingAddress.apt = inApt.value; persist(); });
 inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
 syncField(inGovText, ()=>{ state.shippingAddress.governorate = inGovText.value; persist(); });
 inCountry.addEventListener('change', ()=>{
