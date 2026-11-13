@@ -465,6 +465,16 @@
     renderCart();
   }).catch(()=>{});
 
+  // bags saved before slugs were stored fall back to the catalogue by id
+  function cartItemHref(item){
+    let slug = item.slug;
+    if (!slug && typeof PRODUCTS !== 'undefined'){
+      const p = PRODUCTS.find(p => String(p.id) === String(item.id));
+      slug = p && p.slug;
+    }
+    return slug ? 'product.html?slug=' + encodeURIComponent(slug) : 'category.html?cat=all';
+  }
+
   function renderCart(){
     const qty = cart.reduce((s,i)=> s + i.qty, 0);
     badge('tprCartBadge', qty);
@@ -489,7 +499,7 @@
     list.innerHTML = cart.map((item, i) => {
       subtotal += item.price * item.qty;
       return `<div class="tpr-cart-item" data-id="${item.id}" style="animation-delay:${i*0.06}s">
-        <div class="tpr-cart-img"><img src="${tprThumb(item.img, 200)}" alt="${item.name}"></div>
+        <a class="tpr-cart-img" href="${cartItemHref(item)}"><img src="${tprThumb(item.img, 200)}" alt="${item.name}"></a>
         <div class="tpr-cart-info">
           <h4 class="tpr-cart-name">${item.name}</h4>
           <p class="tpr-cart-variant">${item.variant || ''}</p>
@@ -601,6 +611,7 @@
         cart.push({
           id: product.id,
           name: product.name,
+          slug: product.slug,
           variant: variantBits.length ? variantBits.join(' · ') : (product.subcategoryName || product.categoryName || ''),
           color: colorName || null,
           size: sizeName || null,
