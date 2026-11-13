@@ -605,3 +605,11 @@ html[dir="rtl"] .tpr-dd-menu li{text-align:right;}
 @media (prefers-reduced-motion: reduce){
   .tpr-reveal{opacity:1;transform:none;transition:none;}
 }
+
+/* The bag's summary (governorate, shipping, total, COD, WhatsApp) is tall
+   enough on phones to squeeze the item list to nothing. Scroll the whole
+   drawer as one column instead, so every item is always visible above
+   the totals. */
+#tprCart{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+#tprCart .tpr-cart-items{flex:0 0 auto;overflow:visible;}
+#tprCart .tpr-summary{box-shadow:none;}
