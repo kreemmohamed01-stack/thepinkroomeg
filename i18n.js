@@ -29,7 +29,7 @@
       shopAll: 'SHOP ALL', paintings: 'PAINTINGS', lighting: 'LIGHTING', furniture: 'FURNITURE',
       home: 'Home', accessories: 'Accessories', wallArt: 'WallArt', plants: 'Artificial Plants', christmas: 'Christmas Decor', specialCollection: '— Special Collection —', shopTheCollection: 'Shop the Collection', sale: 'Sale', contact: 'Contact',
       shopByRoom: 'SHOP BY ROOM', currency: 'CURRENCY', language: 'LANGUAGE',
-      yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECKOUT',
+      yourBag: 'YOUR BAG', shoppingBag: 'Shopping Bag', subtotal: 'Subtotal', checkout: 'CHECK OUT',
       taxNote: 'Prices include VAT.',
       cartDeliverTo: 'Deliver to', cartPickGov: 'Select your governorate', cartShipping: 'Shipping',
       cartShipPending: 'Choose governorate', cartTotal: 'Total',
@@ -179,7 +179,7 @@
       // are intentionally left in English: they're written verbatim into
       // saved order records the dashboard reads, so translating them would
       // put Arabic text into the database instead of just the display.
-      continueShoppingCo: 'CONTINUE SHOPPING', secureCheckout: 'SECURE CHECKOUT',
+      continueShoppingCo: 'CONTINUE SHOPPING', secureCheckout: 'SECURE CHECK OUT',
       coCheckoutTitle: 'Check out', coLead: 'We’re almost there. Please complete your order.',
       contactInformation: 'CONTACT INFORMATION', fullName: 'Full Name', emailAddress: 'Email Address',
       phoneNumber: 'Phone Number', phoneExample: 'e.g. +20 100 123 4567', phoneExampleLocal: '100 123 4567', phoneExampleEg: '01XXXXXXXXX',
@@ -229,7 +229,7 @@
       subtotalLabel: 'Subtotal', discountLabel: 'Discount', shippingLabel: 'Shipping', includesWeightSurcharge: 'incl. weight surcharge',
       totalLabel: 'Total', includingVat: 'Including VAT',
       orderReview: 'ORDER REVIEW', orderReviewLead: 'Please review your order before placing it.', qtyLabel: 'Qty', deliverToLabel: 'Deliver to', payWithLabel: 'Payment',
-      secureCheckoutTrust: 'Secure Checkout', dataProtected: 'Your data is 100% protected',
+      secureCheckoutTrust: 'Secure Check Out', dataProtected: 'Your data is 100% protected',
       easyReturnsTrust: 'Easy Returns', returnPolicy14: '14-day return policy',
       customerSupportTrust: 'Customer Support', hereToHelp: 'We’re here to help',
       yourNamePh: 'Your name', streetAddressPh: 'Street address', editLabel: 'EDIT',
