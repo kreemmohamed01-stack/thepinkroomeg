@@ -613,3 +613,32 @@ html[dir="rtl"] .tpr-dd-menu li{text-align:right;}
 #tprCart{overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 #tprCart .tpr-cart-items{flex:0 0 auto;overflow:visible;}
 #tprCart .tpr-summary{box-shadow:none;}
+
+/* ---------- button motion ----------
+   Filled buttons: the ink fill draws back to the centre on hover, leaving
+   the outline. Outline buttons: two halves sweep in from the edges and
+   meet in the middle. Hover-capable devices only, so a tap on a phone
+   never leaves a button stuck half-way. */
+.tpr-checkout, .tpr-btn, .tpr-wa-order{position:relative;isolation:isolate;overflow:hidden;}
+.tpr-checkout{background:transparent;border:1px solid var(--ink);transition:color .5s ease;}
+.tpr-checkout::before{display:none;}
+.tpr-checkout::after{content:'';position:absolute;inset:0;z-index:-1;background:var(--ink);transition:transform .3s cubic-bezier(0,0,.2,1);}
+.tpr-checkout svg{transition:stroke .5s ease, transform .35s ease;}
+.tpr-checkout:hover{transform:none;box-shadow:none;}
+.tpr-btn::before, .tpr-btn::after, .tpr-wa-order::before, .tpr-wa-order::after{
+  content:'';position:absolute;top:0;bottom:0;z-index:-1;background:var(--ink);
+  transform:scaleX(0);transition:transform .3s cubic-bezier(0,0,.2,1);
+}
+.tpr-btn::before, .tpr-wa-order::before{left:0;right:50%;transform-origin:0 50%;}
+.tpr-btn::after, .tpr-wa-order::after{left:50%;right:0;transform-origin:100% 50%;}
+.tpr-wa-order::before, .tpr-wa-order::after{background:#1c9c4d;}
+.tpr-btn, .tpr-wa-order{transition:color .5s ease;}
+.tpr-btn:hover{background:none;color:var(--ink);transform:none;}
+@media (hover:hover){
+  .tpr-checkout:hover{color:var(--ink);}
+  .tpr-checkout:hover::after{transform:scaleX(0);}
+  .tpr-checkout:hover svg{stroke:var(--ink);}
+  .tpr-btn:hover, .tpr-wa-order:hover{color:#fff;}
+  .tpr-btn:hover::before, .tpr-btn:hover::after,
+  .tpr-wa-order:hover::before, .tpr-wa-order:hover::after{transform:scaleX(1);}
+}

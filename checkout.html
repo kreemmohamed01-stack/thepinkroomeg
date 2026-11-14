@@ -551,6 +551,18 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     .co-option .brand-row{display:none;}
     .co-pay-icons{gap:6px;}
   }
+
+  /* Place Order: the ink fill draws back to the centre on hover (replaces
+     the woven texture + sheen) */
+  .co-btn-primary{background:transparent;border:1px solid var(--ink);transition:color .5s ease;}
+  .co-btn-primary::before{display:none;}
+  .co-btn-primary::after{top:0;bottom:0;left:0;right:0;width:auto;border-radius:0;background:var(--ink);transform:none;animation:none !important;transition:transform .3s cubic-bezier(0,0,.2,1);}
+  .co-btn-primary.loading::after{display:block;}
+  .co-btn-primary:not(:disabled):hover, .co-btn-primary:not(:disabled):active{animation:none;opacity:1;}
+  @media (hover:hover){
+    .co-btn-primary:not(:disabled):hover{color:var(--ink);}
+    .co-btn-primary:not(:disabled):hover::after{transform:scaleX(0);}
+  }
 </style>
 </head>
 <body>

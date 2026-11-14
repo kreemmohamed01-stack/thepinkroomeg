@@ -2578,6 +2578,35 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   @media (max-aspect-ratio:1/1) and (min-width:600px){
     .video-hero{max-height:100vh;max-height:100svh;}
   }
+
+  /* Landscape screens up to 960px wide (small laptops, zoomed-in browsers,
+     tablets on their side): the hero takes the film's 16:9 shape and gets
+     short, while the bar above it kept the tall portrait-tablet padding and
+     a 430px logo — so the logo landed on top of the hero title. Slimmer bar,
+     smaller logo and a floor on the hero height keep them apart. */
+  @media (min-aspect-ratio:1/1) and (max-width:960px){
+    .topbar-mobile{padding:40px 22px 8px;}
+    .logo-wrap{width:280px;max-width:34vw;}
+    .video-hero{min-height:440px;}
+    .video-hero-content{bottom:9%;}
+  }
+
+  /* hero button: two halves sweep in from the edges and meet in the middle */
+  .video-hero-btn{transition:border-color .35s ease, color .5s ease;}
+  .video-hero-btn::before, .video-hero-btn::after{
+    content:'';position:absolute;top:0;bottom:0;width:auto;z-index:1;
+    background:#fdfaf5;transform:scaleX(0);transition:transform .3s cubic-bezier(0,0,.2,1);
+  }
+  .video-hero-btn::before{left:0;right:50%;transform-origin:0 50%;}
+  .video-hero-btn::after{left:50%;right:0;transform-origin:100% 50%;}
+  .video-hero-btn svg{transition:stroke .5s ease, transform .35s ease;}
+  .video-hero-btn:hover{transform:none;}
+  .video-hero-btn:hover::before{left:0;}
+  @media (hover:hover){
+    .video-hero-btn:hover{color:#1c1a17;border-color:#fdfaf5;}
+    .video-hero-btn:hover::before, .video-hero-btn:hover::after{transform:scaleX(1);}
+    .video-hero-btn:hover svg{stroke:#1c1a17;}
+  }
 </style>
 </head>
 <body data-tpr-chrome="drawers-only">
