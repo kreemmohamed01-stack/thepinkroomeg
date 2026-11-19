@@ -125,7 +125,7 @@ function productRow(p){
     <td>${p.price != null ? money(p.price) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.salePrice != null ? money(p.salePrice) : '<span class="no-price">&mdash;</span>'}</td>
     <td>${p.trackInventory ? `<span style="color:${p.stockQuantity <= 0 ? 'var(--err)' : (p.stockQuantity <= p.lowStockThreshold ? 'var(--warn)' : 'inherit')}">${p.stockQuantity}</span>` : '<span class="no-price">&mdash;</span>'}</td>
-    <td>${escHtml(p.availability || '')}${p.hidden ? '<span class="td-extracats">Hidden from site</span>' : ''}</td>
+    <td>${escHtml(p.availability || '')}${p.hidden ? '<span class="td-extracats">Hidden from site</span>' : ''}${p.cairoOnly ? '<span class="td-extracats">Cairo delivery only</span>' : ''}</td>
     <td class="td-actions">
       <button class="btnToggleVis" data-id="${escAttr(p.id)}" data-hidden="${p.hidden ? '1' : ''}" title="${p.hidden ? 'Hidden — click to show on site' : 'Visible — click to hide from site'}">${p.hidden
         ? '<svg viewBox="0 0 24 24"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/></svg>'
@@ -401,6 +401,7 @@ function renderProductForm(p){
       ${ROOM_OPTIONS.map(r => `<label class="db-checkline"><input type="checkbox" class="fRoom" value="${escAttr(r.value)}" ${p && Array.isArray(p.rooms) && p.rooms.includes(r.value) ? 'checked' : ''}> ${escHtml(r.label)}</label>`).join('') || '<p style="font-size:12px;color:var(--ink-soft)">No rooms set up yet &mdash; add some from Catalog Structure.</p>'}
     </div>
 
+    <label class="db-checkline"><input type="checkbox" id="fCairoOnly" ${p && p.cairoOnly ? 'checked' : ''}> Deliver within Cairo only <span style="color:var(--ink-soft);font-weight:400">&mdash; shows &ldquo;Cairo delivery only&rdquo; on the product page &amp; bag, and locks checkout to Cairo</span></label>
     <label class="db-checkline"><input type="checkbox" id="fIsNew" ${p && p.isNew ? 'checked' : ''}> Mark as New Arrival</label>
     <label class="db-checkline"><input type="checkbox" id="fTopSeller" ${p && TOP_SELLER_IDS.includes(p.id) ? 'checked' : ''}> Feature in homepage Top Sellers</label>
     <label class="db-checkline"><input type="checkbox" id="fNotifySubs"> Email &ldquo;Stay Inspired&rdquo; subscribers about this<span id="fNotifySubsCount" style="color:var(--ink-soft);font-weight:400"></span></label>
@@ -772,6 +773,7 @@ async function saveProduct(existingId){
     sku: $('fSku').value.trim() || null,
     weight: $('fWeight').value === '' ? null : Number($('fWeight').value),
     isNew: $('fIsNew').checked,
+    cairoOnly: $('fCairoOnly').checked,
     rooms: Array.from(document.querySelectorAll('.fRoom:checked')).map(cb => cb.value),
     trackInventory: $('fTrackInventory').checked,
     stockQuantity: $('fStockQuantity').value === '' ? 0 : Number($('fStockQuantity').value),

@@ -59,6 +59,8 @@ function rowToProduct(row){
     // used as CSS object-position so the card can show the part of the photo
     // the admin picked instead of always centering it. Missing entry = center.
     imageFocus: extra.imageFocus || {},
+    // true = this product is delivered inside Cairo only (dashboard toggle)
+    cairoOnly: extra.cairoOnly === true,
     isNew: !!row.is_new,
     createdAt: new Date(row.created_at).getTime(),
     trackInventory: !!row.track_inventory,
@@ -224,6 +226,7 @@ function validateProduct(p){
         colors,
         sizeOptions,
         imageFocus,
+        cairoOnly: p.cairoOnly === true,
         _provisional: Array.isArray(p._provisional) ? p._provisional : []
       }
     }

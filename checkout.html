@@ -440,6 +440,10 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .co-summary-item-info b{display:block;font-size:12.5px;font-weight:500;line-height:1.35;}
   .co-summary-item-info span{display:block;font-size:11px;color:var(--ink-soft);margin-top:2px;}
   .co-summary-item-price{font-size:12.5px;font-weight:600;white-space:nowrap;}
+  .co-cairo-lock{display:flex;gap:7px;align-items:flex-start;margin-top:8px;font-size:11.5px;line-height:1.45;color:#9c4f63;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);border-radius:4px;padding:8px 10px;}
+  .co-cairo-lock[hidden]{display:none;}
+  .co-cairo-tag{display:inline-flex!important;align-items:center;gap:4px;margin-top:5px!important;padding:2px 8px;border-radius:20px;background:#fdf3f5;border:1px solid rgba(196,120,140,.35);color:#9c4f63!important;font-size:10px!important;letter-spacing:.6px;font-weight:600;text-transform:uppercase;}
+  select:disabled{opacity:.75;cursor:not-allowed;}
   .co-summary-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;}
 
   .co-promo{display:flex;gap:8px;margin-bottom:18px;}
@@ -653,6 +657,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
                    (validateInformation, the field-error CSS) needs to know
                    which one is showing. -->
               <input type="text" id="inGovText" data-i18n-placeholder="stateRegionPh" placeholder="State / Region" style="display:none">
+              <p class="co-cairo-lock" id="cairoLockNote" hidden></p>
               <p class="co-field-msg" data-i18n="errGovernorate">Please select your governorate.</p>
             </div>
           </div>
@@ -891,6 +896,26 @@ syncField(inPhone, ()=>{
   CO.captureCart(state.customer);
 });
 syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist(); });
+/* ---------- Cairo-only lock ----------
+   A product marked "Deliver within Cairo only" in the dashboard means the
+   whole order can only go to Cairo: Country is pinned to Egypt and
+   Governorate to Cairo. The server re-checks this (api/orders.js). */
+function applyCairoLock(){
+  const locked = CO.loadCart().some(i => i && i.cairoOnly);
+  const note = $('cairoLockNote');
+  inCountry.disabled = locked;
+  inGov.disabled = locked;
+  note.hidden = !locked;
+  if (!locked) return;
+  note.textContent = '📍 ' + t('cairoOnlyLocked');
+  if (inCountry.value !== 'EG'){ inCountry.value = 'EG'; applyCountry('EG'); inGovText.value = ''; }
+  state.shippingAddress.country = 'EG';
+  inGov.value = 'Cairo';
+  state.shippingAddress.governorate = 'Cairo';
+  persist();
+}
+applyCairoLock();
+
 inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
 syncField(inGovText, ()=>{ state.shippingAddress.governorate = inGovText.value; persist(); });
 inCountry.addEventListener('change', ()=>{
@@ -1350,7 +1375,7 @@ function renderSummary(){
   const itemsHtml = cart.length ? cart.map(i => `
     <div class="co-summary-item">
       <div class="co-summary-item-img"><img src="${i.img}" alt="${i.name}"><span class="co-summary-item-qty">${i.qty}</span></div>
-      <div class="co-summary-item-info"><b>${i.name}</b><span>${i.variant || ''}</span></div>
+      <div class="co-summary-item-info"><b>${i.name}</b><span>${i.variant || ''}</span>${i.cairoOnly ? `<span class="co-cairo-tag">📍 ${t('cairoOnlyTag')}</span>` : ''}</div>
       <div class="co-summary-item-price">${CO.money(i.price * i.qty)}</div>
     </div>`).join('') : `<p class="co-summary-empty">${t('bagEmptyCo')}</p>`;
 

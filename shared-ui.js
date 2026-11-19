@@ -503,6 +503,7 @@
         <div class="tpr-cart-info">
           <h4 class="tpr-cart-name">${item.name}</h4>
           <p class="tpr-cart-variant">${item.variant || ''}</p>
+          ${item.cairoOnly ? `<p class="tpr-cart-cairo" style="display:inline-block;margin:4px 0 2px;padding:2px 8px;border-radius:20px;background:#fdf3f5;border:1px solid rgba(196,120,140,.35);color:#9c4f63;font-size:10px;letter-spacing:.6px;font-weight:600;text-transform:uppercase">📍 ${t('cairoOnlyTag')}</p>` : ''}
           <div class="tpr-cart-bottom">
             <div class="tpr-qty">
               <button class="minus" aria-label="Decrease">&minus;</button>
@@ -621,6 +622,9 @@
           // never trusts this and re-reads the real weight from the DB
           // (see recomputePricing() in api/orders.js)
           weight: product.weight != null ? Number(product.weight) : 0,
+          // "Cairo delivery only" product — checkout locks the governorate
+          // to Cairo; the server re-checks this from the DB
+          cairoOnly: product.cairoOnly === true,
           img: (colorImg && colorImg[0]) || (sizeImg && sizeImg[0]) || (product.images && product.images[0]) || product.img,
           qty: 1
         });

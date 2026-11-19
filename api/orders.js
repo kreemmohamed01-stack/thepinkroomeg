@@ -392,6 +392,18 @@ async function createOrder(req, res) {
 
   if (!sql) return res.status(500).json({ ok: false, error: 'Database is not configured.' });
 
+  // products the dashboard marked "Cairo delivery only" can't ship anywhere
+  // else — enforced here too so an old cart or a tampered request can't slip by
+  const cairoIds = (order.items || []).map(i => i && i.id).filter(Boolean);
+  if (cairoIds.length) {
+    const cairoRows = await sql`SELECT name FROM products WHERE id = ANY(${cairoIds}) AND extra->>'cairoOnly' = 'true'`;
+    const addr = order.shippingAddress || {};
+    const inCairo = (addr.country || 'EG') === 'EG' && String(addr.governorate || '').trim().toLowerCase() === 'cairo';
+    if (cairoRows.length && !inCairo) {
+      return res.status(400).json({ ok: false, error: `"${cairoRows[0].name}" is delivered within Cairo only. Please choose Cairo as your governorate or remove it from your bag.` });
+    }
+  }
+
   const recomputed = await recomputePricing(order);
   if (recomputed.error) return res.status(400).json({ ok: false, error: recomputed.error });
   order = { ...order, items: recomputed.items, pricing: recomputed.pricing, promo: recomputed.promo, shippingMethod: recomputed.shippingMethod };
