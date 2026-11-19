@@ -119,6 +119,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 <link rel="preload" as="font" type="font/woff2" href="/fonts/PlayfairDisplay.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-400.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/Poppins-600.woff2" crossorigin>
+<link rel="preload" href="/intro/pinkroom-christmas-intro-poster.jpg" as="image">
 <link rel="preload" as="image" href="sec 7/hero-night-poster.webp" fetchpriority="high" media="(max-aspect-ratio: 1/1)">
 <link rel="preload" as="image" href="sec 7/hero-trees-poster.webp" fetchpriority="high" media="(min-aspect-ratio: 1/1)">
 <style>
@@ -2627,7 +2628,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     /* Landscape backdrop is a tiny blurred still (5KB) instead of a second
        decoding video — one video decoder only, so the intro never stutters. */
     #tprIntro .bg{position:absolute;inset:-40px;background:url('/intro/pinkroom-christmas-intro-bg.jpg') center/cover;filter:blur(24px) brightness(.6);}
-    #tprIntro .main{position:relative;height:100%;width:100%;object-fit:contain;animation:tprIntroIn 1s ease both;}
+    #tprIntro .main{position:relative;height:100%;width:100%;object-fit:contain;background:#0d0b0a url('/intro/pinkroom-christmas-intro-poster.jpg') center/cover no-repeat;}
     @media (orientation:portrait){#tprIntro .main{object-fit:cover;}#tprIntro .bg{display:none;}}
     @media (min-aspect-ratio:1/1){#tprIntro .main{height:92%;width:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55);}}
     @keyframes tprIntroIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
@@ -2635,7 +2636,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   </style>
   <script>
   (function(){
-    var SRC='/intro/pinkroom-christmas-intro.mp4?v=1', KEY='tpr_intro_seen';
+    var SRC='/intro/pinkroom-christmas-intro.mp4?v=2', KEY='tpr_intro_seen';
     try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
     // never on back/forward or when arriving from another page of the site — the intro is for the first landing only
     try{ var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
@@ -2651,7 +2652,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     window.__tprIntroActive=true;
 
     var root=document.createElement('div'); root.id='tprIntro'; root.setAttribute('aria-label','The Pink Room intro');
-    root.innerHTML='<div class="bg" aria-hidden="true"></div><video class="main" playsinline preload="auto" disablepictureinpicture disableremoteplayback></video>';
+    root.innerHTML='<div class="bg" aria-hidden="true"></div><video class="main" playsinline autoplay preload="auto" poster="/intro/pinkroom-christmas-intro-poster.jpg" disablepictureinpicture disableremoteplayback></video>';
     var v=root.querySelector('.main');
     v.src=SRC;
     document.documentElement.classList.add('tpr-intro-lock');
@@ -2683,8 +2684,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     window.addEventListener('pageshow',function(e){ if(e.persisted) close(); });
     v.addEventListener('ended',close);
     v.addEventListener('error',close);
-    setTimeout(function(){ if(v.readyState<2) close(); },8000);   // nothing at all after 8s (very slow network): never hold the shop hostage
-    setTimeout(close,12000);                                      // hard safety cap
+    setTimeout(function(){ if(v.readyState<2) close(); },5000);   // nothing at all after 8s (very slow network): never hold the shop hostage
+    setTimeout(close,6000);                                       // hard safety cap
 
     // Sound on by default. Browsers refuse unmuted autoplay until the visitor has interacted
     // with the site, so in that case it starts muted and the sound switches on by itself
