@@ -458,8 +458,10 @@
     if (window.TPRAnalytics && govSel.value) window.TPRAnalytics.trackEvent('cart_governorate', { governorate: govSel.value });
     renderCart();
   });
-  if (typeof PRODUCTS_READY !== 'undefined'){
-    PRODUCTS_READY.then(list => {
+  /* the Cairo-only flag is copied onto a bag line when it's added; bags
+     saved before the product was flagged learn it here from the server */
+  if (cart.length){
+    fetch('/api/products').then(r => r.ok ? r.json() : null).then(d => d && d.products ? d.products : []).then(list => {
       let changed = false;
       cart.forEach(i => {
         const p = (list || []).find(x => String(x.id) === String(i.id));

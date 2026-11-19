@@ -915,6 +915,23 @@ function applyCairoLock(){
   persist();
 }
 applyCairoLock();
+// bags saved before a product was flagged Cairo-only learn it from the server
+(function refreshCairoFlags(){
+  const bag = CO.loadCart();
+  if (!bag.length) return;
+  fetch('/api/products').then(r => r.ok ? r.json() : null).then(d => {
+    const list = d && d.products ? d.products : [];
+    let changed = false;
+    bag.forEach(i => {
+      const p = list.find(x => String(x.id) === String(i.id));
+      if (p && !!p.cairoOnly !== !!i.cairoOnly){ i.cairoOnly = !!p.cairoOnly; changed = true; }
+    });
+    if (!changed) return;
+    try { localStorage.setItem('tpr_cart_v1', JSON.stringify(bag)); } catch(e){}
+    applyCairoLock();
+    if (typeof renderSummary === 'function') renderSummary();
+  }).catch(()=>{});
+})();
 
 inGov.addEventListener('change', ()=>{ state.shippingAddress.governorate = inGov.value; persist(); });
 syncField(inGovText, ()=>{ state.shippingAddress.governorate = inGovText.value; persist(); });
