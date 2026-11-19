@@ -186,6 +186,7 @@
           <span>${t('cartDeliverTo')}</span>
           <select id="tprGov"><option value="">${t('cartPickGov')}</option></select>
         </label>
+        <p id="tprCairoNote" hidden style="margin:-6px 0 14px;padding:8px 10px;border-radius:4px;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);color:#9c4f63;font-size:11.5px;line-height:1.45">📍 ${t('cairoOnlyLocked')}</p>
         <div class="tpr-subtotal sm"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
         <div class="tpr-subtotal sm"><span>${t('cartShipping')}</span><span id="tprShip">${t('cartShipPending')}</span></div>
         <div class="tpr-subtotal"><span>${t('cartTotal')}</span><span id="tprTotal">EGP 0.00</span></div>
@@ -457,6 +458,16 @@
     if (window.TPRAnalytics && govSel.value) window.TPRAnalytics.trackEvent('cart_governorate', { governorate: govSel.value });
     renderCart();
   });
+  if (typeof PRODUCTS_READY !== 'undefined'){
+    PRODUCTS_READY.then(list => {
+      let changed = false;
+      cart.forEach(i => {
+        const p = (list || []).find(x => String(x.id) === String(i.id));
+        if (p && !!p.cairoOnly !== !!i.cairoOnly){ i.cairoOnly = !!p.cairoOnly; changed = true; }
+      });
+      if (changed) renderCart();
+    }).catch(()=>{});
+  }
   let shipMethod = null;
   fetch('/api/orders?action=shipping-methods').then(r => r.ok ? r.json() : null).then(d => {
     const ms = d && d.ok && d.methods ? Object.values(d.methods) : [];
@@ -518,6 +529,16 @@
     }).join('');
 
     $('tprSubtotal').textContent = money(subtotal);
+    // a "Cairo delivery only" piece in the bag pins delivery to Cairo
+    const cairoLocked = cart.some(i => i && i.cairoOnly);
+    govSel.disabled = cairoLocked;
+    $('tprCairoNote').hidden = !cairoLocked;
+    if (cairoLocked && govSel.value !== 'Cairo'){
+      govSel.value = 'Cairo';
+      const st = loadCheckout();
+      st.shippingAddress = Object.assign({}, st.shippingAddress, { country:'EG', governorate:'Cairo' });
+      try { localStorage.setItem(CHECKOUT_KEY, JSON.stringify(st)); } catch(e){}
+    }
     const gov = govSel.value;
     let shipping = null;
     if (gov && shipMethod){
