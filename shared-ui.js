@@ -186,7 +186,7 @@
           <span>${t('cartDeliverTo')}</span>
           <select id="tprGov"><option value="">${t('cartPickGov')}</option></select>
         </label>
-        <p id="tprCairoNote" hidden style="margin:-6px 0 14px;padding:8px 10px;border-radius:4px;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);color:#9c4f63;font-size:11.5px;line-height:1.45">📍 ${t('cairoOnlyLocked')}</p>
+        <p id="tprCairoNote" hidden style="margin:-6px 0 14px;padding:8px 10px;border-radius:4px;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);color:#9c4f63;transition:all .2s;font-size:11.5px;line-height:1.45">📍 ${t('cairoOnlyLocked')}</p>
         <div class="tpr-subtotal sm"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
         <div class="tpr-subtotal sm"><span>${t('cartShipping')}</span><span id="tprShip">${t('cartShipPending')}</span></div>
         <div class="tpr-subtotal"><span>${t('cartTotal')}</span><span id="tprTotal">EGP 0.00</span></div>
@@ -451,6 +451,27 @@
     const a = loadCheckout().shippingAddress;
     if (a && (!a.country || a.country === 'EG') && a.governorate) govSel.value = a.governorate;
   })();
+  /* Cairo-only bag: tapping the governorate shows a red warning instead
+     of opening it; if a phone still opens the picker, the choice snaps
+     back to Cairo with the same warning */
+  const bagCairoLocked = () => cart.some(i => i && i.cairoOnly);
+  function warnCairo(){
+    const n = $('tprCairoNote');
+    n.hidden = false;
+    n.textContent = '⚠ ' + t('cairoOnlyBlocked');
+    n.style.background = '#fdecec'; n.style.borderColor = '#e0a3a3'; n.style.color = '#c0392b'; n.style.fontWeight = '600';
+    const box = govSel.closest('.tpr-gov');
+    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
+    setTimeout(()=> box.classList.remove('shake'), 500);
+  }
+  ['mousedown','touchstart','keydown'].forEach(ev => govSel.addEventListener(ev, e => {
+    if (!bagCairoLocked()) return;
+    if (!(e.type === 'keydown' && e.key === 'Tab')) e.preventDefault();
+    warnCairo();
+  }, { passive:false }));
+  govSel.addEventListener('change', e => {
+    if (bagCairoLocked() && govSel.value !== 'Cairo'){ govSel.value = 'Cairo'; warnCairo(); e.stopImmediatePropagation(); }
+  });
   govSel.addEventListener('change', ()=>{
     const s = loadCheckout();
     s.shippingAddress = Object.assign({}, s.shippingAddress, { country:'EG', governorate: govSel.value });
@@ -533,7 +554,6 @@
     $('tprSubtotal').textContent = money(subtotal);
     // a "Cairo delivery only" piece in the bag pins delivery to Cairo
     const cairoLocked = cart.some(i => i && i.cairoOnly);
-    govSel.disabled = cairoLocked;
     $('tprCairoNote').hidden = !cairoLocked;
     if (cairoLocked && govSel.value !== 'Cairo'){
       govSel.value = 'Cairo';

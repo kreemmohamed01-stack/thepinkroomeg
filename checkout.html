@@ -442,6 +442,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .co-summary-item-price{font-size:12.5px;font-weight:600;white-space:nowrap;}
   .co-cairo-lock{display:flex;gap:7px;align-items:flex-start;margin-top:8px;font-size:11.5px;line-height:1.45;color:#9c4f63;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);border-radius:4px;padding:8px 10px;}
   .co-cairo-lock[hidden]{display:none;}
+  .co-cairo-lock.warn{color:#c0392b;background:#fdecec;border-color:#e0a3a3;font-weight:600;animation:coCairoShake .45s ease;}
+  @keyframes coCairoShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-5px)}40%,80%{transform:translateX(5px)}}
   .co-cairo-tag{display:inline-flex!important;align-items:center;gap:4px;margin-top:5px!important;padding:2px 8px;border-radius:20px;background:#fdf3f5;border:1px solid rgba(196,120,140,.35);color:#9c4f63!important;font-size:10px!important;letter-spacing:.6px;font-weight:600;text-transform:uppercase;}
   select:disabled{opacity:.75;cursor:not-allowed;}
   .co-summary-empty{font-size:13px;color:var(--ink-soft);text-align:center;padding:20px 0;}
@@ -903,9 +905,8 @@ syncField(inStreet, ()=>{ state.shippingAddress.street = inStreet.value; persist
 function applyCairoLock(){
   const locked = CO.loadCart().some(i => i && i.cairoOnly);
   const note = $('cairoLockNote');
-  inCountry.disabled = locked;
-  inGov.disabled = locked;
   note.hidden = !locked;
+  note.classList.remove('warn');
   if (!locked) return;
   note.textContent = '📍 ' + t('cairoOnlyLocked');
   if (inCountry.value !== 'EG'){ inCountry.value = 'EG'; applyCountry('EG'); inGovText.value = ''; }
@@ -915,6 +916,29 @@ function applyCairoLock(){
   persist();
 }
 applyCairoLock();
+/* tapping Country / Governorate while the bag is Cairo-only shows a red
+   warning instead of opening it; a choice that still gets through (phone
+   pickers) snaps back to Egypt / Cairo */
+const cairoLockedNow = () => CO.loadCart().some(i => i && i.cairoOnly);
+function warnCairo(){
+  const note = $('cairoLockNote');
+  note.hidden = false;
+  note.textContent = '⚠ ' + t('cairoOnlyBlocked');
+  note.classList.remove('warn'); void note.offsetWidth; note.classList.add('warn');
+}
+[inCountry, inGov].forEach(sel => {
+  ['mousedown','touchstart','keydown'].forEach(ev => sel.addEventListener(ev, e => {
+    if (!cairoLockedNow()) return;
+    if (!(e.type === 'keydown' && e.key === 'Tab')) e.preventDefault();
+    warnCairo();
+  }, { passive:false }));
+  sel.addEventListener('change', e => {
+    if (!cairoLockedNow()) return;
+    e.stopImmediatePropagation();
+    applyCairoLock();
+    warnCairo();
+  });
+});
 // bags saved before a product was flagged Cairo-only learn it from the server
 (function refreshCairoFlags(){
   const bag = CO.loadCart();
