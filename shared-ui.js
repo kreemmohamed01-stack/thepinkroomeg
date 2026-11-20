@@ -33,7 +33,7 @@
     wa:    '<svg viewBox="0 0 32 32" fill="#fff" stroke="none"><path d="M16.004 3C9.06 3 3.43 8.62 3.43 15.56c0 2.45.68 4.73 1.86 6.68L3 29l6.94-2.24a12.5 12.5 0 0 0 6.06 1.55h.005c6.94 0 12.57-5.62 12.57-12.56C28.58 8.8 22.95 3 16.004 3Zm0 22.9h-.004a10.4 10.4 0 0 1-5.3-1.45l-.38-.22-4.12 1.33 1.35-4.02-.25-.41a10.35 10.35 0 0 1-1.6-5.53c0-5.75 4.68-10.42 10.44-10.42 2.79 0 5.4 1.09 7.37 3.06a10.34 10.34 0 0 1 3.05 7.36c0 5.75-4.68 10.3-10.53 10.3Zm5.72-7.72c-.31-.16-1.87-.92-2.16-1.03-.29-.1-.5-.16-.72.16-.21.31-.83 1.03-1.02 1.25-.19.21-.38.24-.7.08-.31-.16-1.32-.49-2.51-1.56-.93-.83-1.56-1.85-1.74-2.17-.18-.31-.02-.48.14-.64.14-.14.31-.37.47-.55.16-.19.21-.31.31-.52.1-.21.05-.4-.03-.55-.08-.16-.72-1.75-.99-2.39-.26-.63-.53-.54-.72-.55-.19-.01-.4-.01-.61-.01-.21 0-.55.08-.84.4-.29.31-1.1 1.08-1.1 2.63 0 1.55 1.13 3.05 1.29 3.26.16.21 2.22 3.42 5.39 4.79.75.32 1.34.52 1.8.66.76.24 1.44.21 1.99.13.61-.09 1.87-.76 2.13-1.5.26-.73.26-1.36.18-1.5-.08-.13-.28-.21-.6-.36Z"/></svg>'
   };
 
-  const LOGO_MARK = `<img src="logo-beige.png" alt="The Pink Room">`;
+  const LOGO_MARK = `<img src="logo-beige-500.png" alt="The Pink Room" width="500" height="119">`;
 
   /* a product is sold out either because the admin flagged it manually,
      or because its tracked stock quantity has hit zero — "Made to Order"
@@ -114,7 +114,7 @@
 
     <aside class="tpr-menu" id="tprMenu">
       <div class="tpr-menu-head">
-        <div class="tpr-menu-logo"><img src="logo-sidebar.jpeg" alt="The Pink Room"></div>
+        <div class="tpr-menu-logo"><img src="logo-sidebar-300.webp" alt="The Pink Room" width="300" height="177" decoding="async"></div>
         <button class="tpr-close" id="tprMenuClose" aria-label="Close">&times;</button>
       </div>
       <nav class="tpr-menu-nav">
@@ -717,7 +717,7 @@
       const editPicks = [catalogue[0], catalogue[10], catalogue[18]].filter(Boolean);
       $('tprEditGrid').innerHTML = editPicks.map(p => `
         <a class="tpr-edit-card" href="product.html?slug=${p.slug}">
-          <div class="tpr-edit-card-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 200)}" alt="${p.name}"></div>
+          <div class="tpr-edit-card-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 200)}" alt="" loading="lazy" decoding="async" width="200" height="200"></div>
           <span>${p.name}</span>
         </a>`).join('');
     });
@@ -779,7 +779,7 @@
     $('tprViewAll').href = 'category.html?cat=all&q=' + encodeURIComponent(q.trim());
     $('tprResultsList').innerHTML = hits.map((p,i) => `
       <a class="tpr-result" href="product.html?slug=${p.slug}" style="animation-delay:${i*0.05}s">
-        <div class="tpr-result-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 150)}" alt="${p.name}"></div>
+        <div class="tpr-result-img"><img src="${tprThumb((p.images&&p.images[0])||'logo-beige.png', 150)}" alt="" loading="lazy" decoding="async"></div>
         <div class="tpr-result-info">
           <div class="tpr-result-name">${p.name}</div>
           <div class="tpr-result-cat">${p.subcategoryName || p.categoryName}</div>

@@ -55,7 +55,7 @@ async function sendPurchaseCAPI(order, req) {
         // key before this code can ever run twice for the same order
         event_id: String(order.id),
         action_source: 'website',
-        event_source_url: `https://www.thepinkroomeg.com/order-success.html?order=${encodeURIComponent(order.id)}`,
+        event_source_url: `https://thepinkroomeg.com/order-success.html?order=${encodeURIComponent(order.id)}`,
         user_data: userData,
         custom_data: {
           currency: 'EGP',
