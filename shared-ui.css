@@ -549,6 +549,16 @@
   .tpr-tabbar{display:flex;}
   body.tpr-has-tabbar{padding-bottom:66px;}
 }
+/* small phones: keep logo, language pill and icons from touching.
+   Search is also in the bottom tab bar here, so the top one steps aside. */
+@media (max-width:430px){
+  .tpr-nav{padding:10px 12px;}
+  .tpr-nav .tpr-side{gap:9px;}
+  .tpr-logo{width:auto;max-width:40vw;}
+  .tpr-lang{min-width:0;height:22px;padding:0 7px;gap:3px;font-size:9px;}
+  .tpr-lang svg{display:none;}
+  body.tpr-has-tabbar #tprSearchBtn{display:none;}
+}
 
 /* ============================================================
    RTL (Arabic) — Phase 1: the shared chrome this file builds
