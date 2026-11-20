@@ -2654,7 +2654,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .lx-look-tab.active{color:var(--lx-ink);border-color:var(--lx-gold);}
   .lx-look-body{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(30px,4vw,64px);align-items:center;}
   .lx-look-stage{position:relative;overflow:hidden;background:var(--lx-cream);}
-  .lx-look-stage img{display:block;width:100%;height:auto;max-height:78vh;object-fit:cover;transition:opacity .6s ease,transform 1.4s ease;}
+  .lx-look-stage img{display:block;width:100%;aspect-ratio:1/1;height:auto;max-height:78vh;object-fit:cover;transition:opacity .6s ease,transform 1.4s ease;}
   .lx-look-stage.swap img{opacity:0;transform:scale(1.02);}
   .lx-hot{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:0;padding:0;background:none;cursor:pointer;z-index:2;}
   .lx-hot::before,.lx-hot::after{content:"";position:absolute;inset:0;border-radius:50%;}
@@ -2972,25 +2972,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   </section>
 
 
-  <!-- ===== SIGNATURE PIECE (first product of the dashboard's Top Sellers list) ===== -->
-  <section class="lx-sig" id="lxSig" hidden>
-    <span class="lx-sig-num" aria-hidden="true">01</span>
-    <div class="lx-sig-inner">
-      <a class="lx-sig-media lx-reveal" id="lxSigMedia" href="#"><img id="lxSigImg" alt="" loading="lazy" decoding="async"><span class="lx-sig-frame"></span></a>
-      <div class="lx-sig-copy">
-        <p class="lx-eyebrow lx-reveal" id="lxSigEyebrow">THE SIGNATURE PIECE</p>
-        <h2 class="lx-title lx-reveal d1" id="lxSigName"></h2>
-        <div class="lx-rule lx-reveal d1"></div>
-        <p class="lx-sig-desc lx-reveal d2" id="lxSigDesc"></p>
-        <p class="lx-sig-price lx-reveal d2" id="lxSigPrice"></p>
-        <div class="lx-sig-actions lx-reveal d3">
-          <a class="lx-btn solid" id="lxSigBtn" href="#"><span id="lxSigBtnTxt">DISCOVER THE PIECE</span></a>
-          <a class="lx-btn" href="shop.html"><span id="lxSigAll">VIEW THE COLLECTION</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
-        </div>
-      </div>
-    </div>
-  </section>
-
   <!-- ===== SHOP BY CATEGORY ===== -->
   <section class="cats">
     <p class="cats-eyebrow" data-i18n="catsEyebrow">EXPLORE OUR RANGE</p>
@@ -3064,6 +3045,25 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
           <span class="cat-cta"><span data-i18n="catSaleCta">Shop Now</span> <svg viewBox="0 0 24 24"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
         </div>
       </a>
+    </div>
+  </section>
+
+  <!-- ===== SIGNATURE PIECE (a Christmas piece — set SIGNATURE_ID in the luxury-layer script) ===== -->
+  <section class="lx-sig" id="lxSig" hidden>
+    <span class="lx-sig-num" aria-hidden="true">01</span>
+    <div class="lx-sig-inner">
+      <a class="lx-sig-media lx-reveal" id="lxSigMedia" href="#"><img id="lxSigImg" alt="" loading="lazy" decoding="async"><span class="lx-sig-frame"></span></a>
+      <div class="lx-sig-copy">
+        <p class="lx-eyebrow lx-reveal" id="lxSigEyebrow">THE CHRISTMAS SIGNATURE</p>
+        <h2 class="lx-title lx-reveal d1" id="lxSigName"></h2>
+        <div class="lx-rule lx-reveal d1"></div>
+        <p class="lx-sig-desc lx-reveal d2" id="lxSigDesc"></p>
+        <p class="lx-sig-price lx-reveal d2" id="lxSigPrice"></p>
+        <div class="lx-sig-actions lx-reveal d3">
+          <a class="lx-btn solid" id="lxSigBtn" href="#"><span id="lxSigBtnTxt">DISCOVER THE PIECE</span></a>
+          <a class="lx-btn" href="shop.html"><span id="lxSigAll">VIEW THE COLLECTION</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
+        </div>
+      </div>
     </div>
   </section>
 
@@ -3700,25 +3700,27 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 (function(){
   var AR = (document.documentElement.lang === 'ar');
   var T = AR ? {
-    sigEyebrow:'القطعة المميزة', sigBtn:'اكتشفي القطعة', sigAll:'شوفي المجموعة',
+    sigEyebrow:'قطعة الكريسماس المميزة', sigBtn:'اكتشفي القطعة', sigAll:'شوفي المجموعة',
     lookEyebrow:'بتنسيق ذا بينك روم', lookTitle:'تسوّقي <em>الإطلالة</em>',
     lookNote:'قطعنا الحقيقية في بيوت حقيقية. دوسي على النقطة لتشوفي القطعة وتضيفيها لحقيبتك.',
     hint:'دوسي على النقطة', add:'أضيفي للحقيبة', view:'شوفي التفاصيل', added:'تمت الإضافة',
-    looks:['الصالون','المدخل','الركن الدافئ']
+    looks:['لمسة الصنوبر','سنتربيس ذهبي','صندوق الهدايا']
   } : {
-    sigEyebrow:'THE SIGNATURE PIECE', sigBtn:'DISCOVER THE PIECE', sigAll:'VIEW THE COLLECTION',
+    sigEyebrow:'THE CHRISTMAS SIGNATURE', sigBtn:'DISCOVER THE PIECE', sigAll:'VIEW THE COLLECTION',
     lookEyebrow:'STYLED BY THE PINK ROOM', lookTitle:'Shop the <em>Look</em>',
     lookNote:'Our pieces, styled in real rooms. Tap the dot to see the piece and add it to your bag.',
     hint:'Tap the dot', add:'ADD TO BAG', view:'VIEW DETAILS', added:'ADDED',
-    looks:['THE LOUNGE','THE ENTRANCE','THE WARM CORNER']
+    looks:['PINE & GOLD','GOLDEN CENTERPIECE','THE GIFT BOX']
   };
   /* Each look = a styled photo + the product shown in it. To add a look:
      drop a photo in /looks and add a line here (x/y = dot position in %). */
   var LOOKS = [
-    { img:'looks/look-1.webp', id:'wa-botanical-garden-set-of-2',     x:38, y:36 },
-    { img:'looks/look-3.webp', id:'wa-golden-fan-leaf',               x:48, y:30 },
-    { img:'looks/look-4.webp', id:'wa-illuminated-golden-branch',     x:57, y:36 }
+    { id:'chri-handmade-christmas-pine-gold-bird-arrangement-in-green-', x:50, y:52 },
+    { id:'chri-handmade-luxury-christmas-centerpiece-olive-green-gold-', x:54, y:62 },
+    { id:'chri-luxury-gold-ivory-christmas-gift-box-deer-tree-d-cor-se', x:52, y:58 }
   ];
+  // the single hero product of the "Signature Piece" section
+  var SIGNATURE_ID = 'chri-handmade-christmas-centerpiece-in-hammered-gold-bowl-re';
 
   function $(id){ return document.getElementById(id); }
   function money(n){ return 'EGP ' + Math.round(Number(n)||0).toLocaleString('en-US'); }
@@ -3766,7 +3768,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
     // ---- 1. Signature Piece = first Top Seller picked in the dashboard ----
     var ids = (typeof TOP_SELLER_IDS !== 'undefined' && TOP_SELLER_IDS.length) ? TOP_SELLER_IDS : [];
-    var sig = ids.map(byId).filter(Boolean)[0];
+    var sig = byId(SIGNATURE_ID) || ids.map(byId).filter(Boolean)[0];
     if (sig){
       var img = (sig.images && sig.images[0]) || '';
       sigImg.src = thumb(img, 1200); sigImg.alt = cleanName(sig.name);
@@ -3786,7 +3788,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       var l = looks[i], p = l.p;
       tabs.querySelectorAll('.lx-look-tab').forEach(function(b){ b.classList.toggle('active', +b.dataset.i === i); });
       var paint = function(){
-        lookImg.src = l.img; lookImg.alt = cleanName(p.name);
+        lookImg.src = l.img || thumb(p.images && p.images[0], 1400); lookImg.alt = cleanName(p.name);
         stage.querySelectorAll('.lx-hot').forEach(function(h){ h.remove(); });
         var hot = document.createElement('button');
         hot.type = 'button'; hot.className = 'lx-hot'; hot.style.left = l.x + '%'; hot.style.top = l.y + '%';
