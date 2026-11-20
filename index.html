@@ -2609,6 +2609,88 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     .video-hero-btn:hover svg{stroke:#1c1a17;}
   }
 </style>
+
+<!-- ===== LUXURY LAYER: Signature Piece + Shop the Look + editorial polish ===== -->
+<style>
+  :root{--lx-ink:#1a1714;--lx-soft:#6f655c;--lx-gold:#b08d57;--lx-cream:#f7f2ea;--lx-blush:#f3e6e3;}
+  /* ---- shared editorial heading ---- */
+  .lx-eyebrow{font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--lx-gold);margin:0 0 18px;}
+  .lx-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(34px,4.6vw,64px);line-height:1.08;color:var(--lx-ink);margin:0;letter-spacing:-.01em;}
+  .lx-title em{font-style:italic;color:var(--lx-gold);}
+  .lx-rule{width:56px;height:1px;background:var(--lx-gold);margin:26px 0;}
+  .lx-btn{display:inline-flex;align-items:center;gap:14px;font-family:'Poppins',sans-serif;font-size:11.5px;letter-spacing:.32em;text-transform:uppercase;color:var(--lx-ink);text-decoration:none;padding:16px 0;border-bottom:1px solid var(--lx-ink);transition:gap .4s ease,color .3s,border-color .3s;background:none;border-top:0;border-left:0;border-right:0;cursor:pointer;}
+  .lx-btn svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.4;}
+  .lx-btn:hover{gap:22px;color:var(--lx-gold);border-color:var(--lx-gold);}
+  .lx-btn.solid{padding:16px 30px;border:1px solid var(--lx-ink);background:var(--lx-ink);color:#fff;}
+  .lx-btn.solid:hover{background:transparent;color:var(--lx-ink);}
+
+  /* ---- 1. Signature Piece ---- */
+  .lx-sig{position:relative;background:var(--lx-cream);padding:clamp(80px,11vw,160px) clamp(20px,6vw,96px);overflow:hidden;}
+  .lx-sig[hidden]{display:none;}
+  .lx-sig-inner{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:1.15fr 1fr;gap:clamp(40px,7vw,120px);align-items:center;}
+  .lx-sig-media{position:relative;aspect-ratio:4/5;overflow:hidden;background:#ece4d8;}
+  .lx-sig-media img{position:absolute;inset:-6% 0;width:100%;height:112%;object-fit:cover;will-change:transform;transition:transform 1.6s cubic-bezier(.2,.7,.2,1);}
+  .lx-sig-media:hover img{transform:scale(1.04);}
+  .lx-sig-frame{position:absolute;inset:18px;border:1px solid rgba(255,255,255,.55);pointer-events:none;}
+  .lx-sig-num{position:absolute;top:-.18em;inset-inline-end:clamp(10px,3vw,40px);font-family:'Playfair Display',serif;font-size:clamp(120px,18vw,260px);line-height:1;color:rgba(176,141,87,.09);pointer-events:none;user-select:none;}
+  .lx-sig-copy{position:relative;}
+  .lx-sig-inner>*,.lx-look-body>*{min-width:0;}
+  .lx-sig-desc{font-family:'Poppins',sans-serif;font-size:15px;line-height:1.85;color:var(--lx-soft);max-width:440px;margin:0 0 30px;}
+  .lx-sig-price{font-family:'Playfair Display',serif;font-size:24px;color:var(--lx-ink);margin:0 0 36px;}
+  .lx-sig-price s{font-size:16px;color:var(--lx-soft);margin-inline-start:10px;}
+  .lx-sig-actions{display:flex;flex-wrap:wrap;align-items:center;gap:30px;}
+  @media (max-width:860px){
+    .lx-sig-inner{grid-template-columns:1fr;}
+    .lx-sig-media{aspect-ratio:4/5;}
+  }
+
+  /* ---- 3. Shop the Look ---- */
+  .lx-look{background:#fff;padding:clamp(80px,11vw,160px) clamp(20px,6vw,96px);}
+  .lx-look[hidden]{display:none;}
+  .lx-look-head{max-width:1320px;margin:0 auto clamp(40px,5vw,70px);display:flex;justify-content:space-between;align-items:flex-end;gap:30px;flex-wrap:wrap;}
+  .lx-look-head .lx-rule{margin:22px 0 0;}
+  .lx-look-tabs{display:flex;gap:26px;}
+  .lx-look-tab{background:none;border:0;padding:6px 0;font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:.3em;color:var(--lx-soft);cursor:pointer;border-bottom:1px solid transparent;transition:color .3s,border-color .3s;}
+  .lx-look-tab.active{color:var(--lx-ink);border-color:var(--lx-gold);}
+  .lx-look-body{max-width:1320px;margin:0 auto;display:grid;grid-template-columns:1.6fr 1fr;gap:clamp(30px,4vw,64px);align-items:center;}
+  .lx-look-stage{position:relative;overflow:hidden;background:var(--lx-cream);}
+  .lx-look-stage img{display:block;width:100%;height:auto;max-height:78vh;object-fit:cover;transition:opacity .6s ease,transform 1.4s ease;}
+  .lx-look-stage.swap img{opacity:0;transform:scale(1.02);}
+  .lx-hot{position:absolute;width:44px;height:44px;margin:-22px 0 0 -22px;border:0;padding:0;background:none;cursor:pointer;z-index:2;}
+  .lx-hot::before,.lx-hot::after{content:"";position:absolute;inset:0;border-radius:50%;}
+  .lx-hot::before{background:rgba(255,255,255,.35);animation:lxPulse 2.2s ease-out infinite;}
+  .lx-hot::after{inset:13px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.08),0 4px 14px rgba(0,0,0,.25);}
+  .lx-hot span{position:absolute;inset:19px;border-radius:50%;background:var(--lx-gold);z-index:1;}
+  @keyframes lxPulse{0%{transform:scale(.55);opacity:1}100%{transform:scale(1.5);opacity:0}}
+  .lx-look-card{display:grid;grid-template-columns:110px 1fr;gap:22px;align-items:center;padding:26px;border:1px solid #ece4d8;background:#fff;transition:opacity .5s ease,transform .5s ease;}
+  .lx-look-card.swap{opacity:0;transform:translateY(10px);}
+  .lx-look-card img{width:110px;height:138px;object-fit:cover;background:var(--lx-cream);}
+  .lx-look-card h3{font-family:'Playfair Display',serif;font-weight:400;font-size:20px;line-height:1.3;color:var(--lx-ink);margin:0 0 10px;}
+  .lx-look-card .lx-price{font-family:'Poppins',sans-serif;font-size:14px;color:var(--lx-ink);margin:0 0 16px;letter-spacing:.04em;}
+  .lx-look-card .lx-price s{color:var(--lx-soft);margin-inline-start:8px;font-size:12.5px;}
+  .lx-look-card .lx-btn{padding:10px 0;font-size:10.5px;}
+  .lx-look-side .lx-look-note{font-family:'Poppins',sans-serif;font-size:14px;line-height:1.8;color:var(--lx-soft);margin:0 0 30px;}
+  .lx-look-side .lx-look-hint{display:flex;align-items:center;gap:10px;font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--lx-gold);margin:22px 0 0;}
+  @media (max-width:900px){
+    .lx-look-body{grid-template-columns:1fr;}
+    .lx-look-stage img{max-height:none;}
+    .lx-look-card{grid-template-columns:90px 1fr;padding:18px;}
+    .lx-look-card img{width:90px;height:112px;}
+  }
+
+  /* ---- 5. Editorial polish across the page ---- */
+  .lx-reveal{opacity:0;transform:translateY(34px);transition:opacity 1.1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1);}
+  .lx-reveal.in{opacity:1;transform:none;}
+  .lx-reveal.d1{transition-delay:.12s}.lx-reveal.d2{transition-delay:.24s}.lx-reveal.d3{transition-delay:.36s}
+  @media (prefers-reduced-motion:reduce){.lx-reveal{opacity:1;transform:none;transition:none;}.lx-hot::before{animation:none;}}
+  /* more breathing room between the existing sections */
+  .cats,.top-sellers,.rooms,.journal{scroll-margin-top:80px;}
+  .cats{padding-top:clamp(90px,10vw,150px)!important;padding-bottom:clamp(90px,10vw,150px)!important;}
+  .journal{padding-top:clamp(90px,10vw,150px)!important;}
+  /* existing section titles in the same editorial serif */
+  .cats-title{font-family:'Playfair Display',serif!important;font-weight:400!important;font-size:clamp(34px,4.6vw,60px)!important;letter-spacing:-.01em!important;}
+  .cats-eyebrow,.rooms-eyebrow{letter-spacing:.42em!important;}
+</style>
 </head>
 <body data-tpr-chrome="drawers-only">
 
@@ -2889,6 +2971,26 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     </div>
   </section>
 
+
+  <!-- ===== SIGNATURE PIECE (first product of the dashboard's Top Sellers list) ===== -->
+  <section class="lx-sig" id="lxSig" hidden>
+    <span class="lx-sig-num" aria-hidden="true">01</span>
+    <div class="lx-sig-inner">
+      <a class="lx-sig-media lx-reveal" id="lxSigMedia" href="#"><img id="lxSigImg" alt="" loading="lazy" decoding="async"><span class="lx-sig-frame"></span></a>
+      <div class="lx-sig-copy">
+        <p class="lx-eyebrow lx-reveal" id="lxSigEyebrow">THE SIGNATURE PIECE</p>
+        <h2 class="lx-title lx-reveal d1" id="lxSigName"></h2>
+        <div class="lx-rule lx-reveal d1"></div>
+        <p class="lx-sig-desc lx-reveal d2" id="lxSigDesc"></p>
+        <p class="lx-sig-price lx-reveal d2" id="lxSigPrice"></p>
+        <div class="lx-sig-actions lx-reveal d3">
+          <a class="lx-btn solid" id="lxSigBtn" href="#"><span id="lxSigBtnTxt">DISCOVER THE PIECE</span></a>
+          <a class="lx-btn" href="shop.html"><span id="lxSigAll">VIEW THE COLLECTION</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
+        </div>
+      </div>
+    </div>
+  </section>
+
   <!-- ===== SHOP BY CATEGORY ===== -->
   <section class="cats">
     <p class="cats-eyebrow" data-i18n="catsEyebrow">EXPLORE OUR RANGE</p>
@@ -3028,6 +3130,27 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       <div>
         <div class="trust-title" data-i18n="trustSupport">Support 24/7</div>
         <p class="trust-sub" data-i18n="trustSupportSub">We&rsquo;re here to help</p>
+      </div>
+    </div>
+  </section>
+
+
+  <!-- ===== SHOP THE LOOK (real styled photos of our pieces; tap the dot to shop it) ===== -->
+  <section class="lx-look" id="lxLook" hidden>
+    <div class="lx-look-head">
+      <div>
+        <p class="lx-eyebrow lx-reveal" id="lxLookEyebrow">STYLED BY THE PINK ROOM</p>
+        <h2 class="lx-title lx-reveal d1" id="lxLookTitle">Shop the <em>Look</em></h2>
+        <div class="lx-rule lx-reveal d1"></div>
+      </div>
+      <div class="lx-look-tabs lx-reveal d2" id="lxLookTabs"></div>
+    </div>
+    <div class="lx-look-body">
+      <div class="lx-look-stage lx-reveal" id="lxLookStage"><img id="lxLookImg" alt="" loading="lazy" decoding="async"></div>
+      <div class="lx-look-side lx-reveal d2">
+        <p class="lx-look-note" id="lxLookNote"></p>
+        <div class="lx-look-card" id="lxLookCard"></div>
+        <p class="lx-look-hint" id="lxLookHint"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><circle cx="12" cy="12" r="9"/></svg><span></span></p>
       </div>
     </div>
   </section>
@@ -3570,6 +3693,129 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       window.TPR_I18N.setLang(window.TPR_I18N.getLang() === 'ar' ? 'en' : 'ar');
     });
   })();
+</script>
+
+<script>
+/* ===== Luxury layer: Signature Piece, Shop the Look, scroll reveals ===== */
+(function(){
+  var AR = (document.documentElement.lang === 'ar');
+  var T = AR ? {
+    sigEyebrow:'القطعة المميزة', sigBtn:'اكتشفي القطعة', sigAll:'شوفي المجموعة',
+    lookEyebrow:'بتنسيق ذا بينك روم', lookTitle:'تسوّقي <em>الإطلالة</em>',
+    lookNote:'قطعنا الحقيقية في بيوت حقيقية. دوسي على النقطة لتشوفي القطعة وتضيفيها لحقيبتك.',
+    hint:'دوسي على النقطة', add:'أضيفي للحقيبة', view:'شوفي التفاصيل', added:'تمت الإضافة',
+    looks:['الصالون','المدخل','الركن الدافئ']
+  } : {
+    sigEyebrow:'THE SIGNATURE PIECE', sigBtn:'DISCOVER THE PIECE', sigAll:'VIEW THE COLLECTION',
+    lookEyebrow:'STYLED BY THE PINK ROOM', lookTitle:'Shop the <em>Look</em>',
+    lookNote:'Our pieces, styled in real rooms. Tap the dot to see the piece and add it to your bag.',
+    hint:'Tap the dot', add:'ADD TO BAG', view:'VIEW DETAILS', added:'ADDED',
+    looks:['THE LOUNGE','THE ENTRANCE','THE WARM CORNER']
+  };
+  /* Each look = a styled photo + the product shown in it. To add a look:
+     drop a photo in /looks and add a line here (x/y = dot position in %). */
+  var LOOKS = [
+    { img:'looks/look-1.webp', id:'wa-botanical-garden-set-of-2',     x:38, y:36 },
+    { img:'looks/look-3.webp', id:'wa-golden-fan-leaf',               x:48, y:30 },
+    { img:'looks/look-4.webp', id:'wa-illuminated-golden-branch',     x:57, y:36 }
+  ];
+
+  function $(id){ return document.getElementById(id); }
+  function money(n){ return 'EGP ' + Math.round(Number(n)||0).toLocaleString('en-US'); }
+  function esc(x){ return String(x||'').replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); }
+  function thumb(src, w){ return window.tprThumb ? window.tprThumb(src, w) : src; }
+  function priceHtml(p){
+    if (p.salePrice != null && p.price != null && p.salePrice < p.price) return money(p.salePrice) + ' <s>' + money(p.price) + '</s>';
+    return money(p.salePrice != null ? p.salePrice : p.price);
+  }
+  function cleanName(n){ return String(n||'').split(/\s+-\s+size\b|\s+\|\s+/i)[0].trim(); }
+  function href(p){ return 'product.html?slug=' + encodeURIComponent(p.slug); }
+
+  // static labels
+  $('lxSigEyebrow').textContent = T.sigEyebrow; $('lxSigBtnTxt').textContent = T.sigBtn; $('lxSigAll').textContent = T.sigAll;
+  $('lxLookEyebrow').textContent = T.lookEyebrow; $('lxLookTitle').innerHTML = T.lookTitle;
+  $('lxLookNote').textContent = T.lookNote; $('lxLookHint').querySelector('span').textContent = T.hint;
+
+  // ---- scroll reveals: new sections + headings/cards of the existing ones ----
+  ['.cats-eyebrow','.cats-title','.cats-sub','.ts-text','.trust-item','.rooms-glass-card','.journal h2','.journal p']
+    .forEach(function(sel){ document.querySelectorAll(sel).forEach(function(el, i){ el.classList.add('lx-reveal'); if (i % 3) el.classList.add('d' + (i % 3)); }); });
+  var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){
+    es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+  }, { rootMargin:'0px 0px -8% 0px', threshold:.08 }) : null;
+  document.querySelectorAll('.lx-reveal').forEach(function(el){ io ? io.observe(el) : el.classList.add('in'); });
+
+  // ---- gentle parallax on the signature photo ----
+  var sigImg = $('lxSigImg'), sigMedia = $('lxSigMedia'), ticking = false;
+  if (!matchMedia('(prefers-reduced-motion:reduce)').matches){
+    addEventListener('scroll', function(){
+      if (ticking) return; ticking = true;
+      requestAnimationFrame(function(){
+        ticking = false;
+        var r = sigMedia.getBoundingClientRect();
+        if (r.bottom < 0 || r.top > innerHeight) return;
+        var k = (r.top + r.height/2 - innerHeight/2) / innerHeight;
+        sigImg.style.transform = 'translateY(' + (k * -5).toFixed(2) + '%)';
+      });
+    }, { passive:true });
+  }
+
+  if (typeof PRODUCTS_READY === 'undefined') return;
+  PRODUCTS_READY.then(function(list){
+    list = (list || []).filter(function(p){ return !p.hidden; });
+    var byId = function(id){ return list.find(function(p){ return p.id === id; }); };
+
+    // ---- 1. Signature Piece = first Top Seller picked in the dashboard ----
+    var ids = (typeof TOP_SELLER_IDS !== 'undefined' && TOP_SELLER_IDS.length) ? TOP_SELLER_IDS : [];
+    var sig = ids.map(byId).filter(Boolean)[0];
+    if (sig){
+      var img = (sig.images && sig.images[0]) || '';
+      sigImg.src = thumb(img, 1200); sigImg.alt = cleanName(sig.name);
+      $('lxSigName').textContent = cleanName(sig.name);
+      $('lxSigDesc').textContent = sig.shortDescription || (sig.subcategoryName || sig.categoryName || '');
+      $('lxSigPrice').innerHTML = priceHtml(sig);
+      sigMedia.href = $('lxSigBtn').href = href(sig);
+      $('lxSig').hidden = false;
+    }
+
+    // ---- 3. Shop the Look ----
+    var looks = LOOKS.map(function(l){ var p = byId(l.id); return p ? Object.assign({ p:p }, l) : null; }).filter(Boolean);
+    if (!looks.length) return;
+    var tabs = $('lxLookTabs'), stage = $('lxLookStage'), lookImg = $('lxLookImg'), card = $('lxLookCard');
+    tabs.innerHTML = looks.map(function(l, i){ return '<button type="button" class="lx-look-tab' + (i ? '' : ' active') + '" data-i="' + i + '">' + esc(T.looks[LOOKS.indexOf(LOOKS.find(function(x){return x.id===l.id;}))] || ('0' + (i+1))) + '</button>'; }).join('');
+    function show(i, first){
+      var l = looks[i], p = l.p;
+      tabs.querySelectorAll('.lx-look-tab').forEach(function(b){ b.classList.toggle('active', +b.dataset.i === i); });
+      var paint = function(){
+        lookImg.src = l.img; lookImg.alt = cleanName(p.name);
+        stage.querySelectorAll('.lx-hot').forEach(function(h){ h.remove(); });
+        var hot = document.createElement('button');
+        hot.type = 'button'; hot.className = 'lx-hot'; hot.style.left = l.x + '%'; hot.style.top = l.y + '%';
+        hot.setAttribute('aria-label', cleanName(p.name)); hot.innerHTML = '<span></span>';
+        hot.addEventListener('click', function(){ card.classList.remove('swap'); card.animate && card.animate([{transform:'scale(1)'},{transform:'scale(1.025)'},{transform:'scale(1)'}],{duration:500}); card.scrollIntoView({ behavior:'smooth', block:'nearest' }); });
+        stage.appendChild(hot);
+        var needsPick = (p.colors && p.colors.length) || (p.sizeOptions && p.sizeOptions.length);
+        var oos = window.TPR && window.TPR.isOutOfStock && window.TPR.isOutOfStock(p);
+        card.innerHTML = '<a href="' + href(p) + '"><img src="' + thumb(p.images && p.images[0], 300) + '" alt="" loading="lazy"></a>' +
+          '<div><h3>' + esc(cleanName(p.name)) + '</h3><p class="lx-price">' + priceHtml(p) + '</p>' +
+          ((needsPick || oos) ? '<a class="lx-btn" href="' + href(p) + '">' + T.view + '</a>'
+                              : '<button type="button" class="lx-btn" id="lxLookAdd">' + T.add + '</button>') + '</div>';
+        var add = $('lxLookAdd');
+        if (add) add.addEventListener('click', function(){
+          if (!window.TPR) { location.href = href(p); return; }
+          window.TPR.addToCart(p); add.textContent = T.added;
+          setTimeout(function(){ add.textContent = T.add; if (window.TPR.openCart) window.TPR.openCart(); }, 500);
+        });
+        stage.classList.remove('swap'); card.classList.remove('swap');
+      };
+      if (first) return paint();
+      stage.classList.add('swap'); card.classList.add('swap');
+      setTimeout(paint, 380);
+    }
+    tabs.addEventListener('click', function(e){ var b = e.target.closest('.lx-look-tab'); if (b) show(+b.dataset.i); });
+    show(0, true);
+    $('lxLook').hidden = false;
+  }).catch(function(){});
+})();
 </script>
 </body>
 </html>
