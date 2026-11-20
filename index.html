@@ -2680,9 +2680,9 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }
 
   /* ---- 5. Editorial polish across the page ---- */
-  .lx-reveal{opacity:0;transform:translateY(34px);transition:opacity 1.1s cubic-bezier(.2,.7,.2,1),transform 1.1s cubic-bezier(.2,.7,.2,1);}
+  .lx-reveal{opacity:0;transform:translateY(18px);transition:opacity .55s ease-out,transform .55s ease-out;}
   .lx-reveal.in{opacity:1;transform:none;}
-  .lx-reveal.d1{transition-delay:.12s}.lx-reveal.d2{transition-delay:.24s}.lx-reveal.d3{transition-delay:.36s}
+  .lx-reveal.d1{transition-delay:.06s}.lx-reveal.d2{transition-delay:.12s}.lx-reveal.d3{transition-delay:.18s}
   @media (prefers-reduced-motion:reduce){.lx-reveal{opacity:1;transform:none;transition:none;}.lx-hot::before{animation:none;}}
   /* more breathing room between the existing sections */
   .cats,.top-sellers,.rooms,.journal{scroll-margin-top:80px;}
@@ -2719,7 +2719,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   </style>
   <script>
   (function(){
-    var SRC='/intro/pinkroom-christmas-intro.mp4?v=2', KEY='tpr_intro_seen';
+    var SRC='/intro/pinkroom-christmas-intro.mp4?v=3', KEY='tpr_intro_seen';
     try{ if(sessionStorage.getItem(KEY)) return; }catch(e){}
     // never on back/forward or when arriving from another page of the site — the intro is for the first landing only
     try{ var nav=performance.getEntriesByType&&performance.getEntriesByType('navigation')[0];
@@ -3737,12 +3737,12 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     .forEach(function(sel){ document.querySelectorAll(sel).forEach(function(el, i){ el.classList.add('lx-reveal'); if (i % 3) el.classList.add('d' + (i % 3)); }); });
   var io = 'IntersectionObserver' in window ? new IntersectionObserver(function(es){
     es.forEach(function(e){ if (e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
-  }, { rootMargin:'0px 0px -8% 0px', threshold:.08 }) : null;
+  }, { rootMargin:'0px 0px 15% 0px', threshold:0 }) : null;
   document.querySelectorAll('.lx-reveal').forEach(function(el){ io ? io.observe(el) : el.classList.add('in'); });
 
   // ---- gentle parallax on the signature photo ----
   var sigImg = $('lxSigImg'), sigMedia = $('lxSigMedia'), ticking = false;
-  if (!matchMedia('(prefers-reduced-motion:reduce)').matches){
+  if (!matchMedia('(prefers-reduced-motion:reduce)').matches && matchMedia('(hover:hover) and (pointer:fine)').matches){
     addEventListener('scroll', function(){
       if (ticking) return; ticking = true;
       requestAnimationFrame(function(){
@@ -3765,7 +3765,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     var sig = byId(SIGNATURE_ID) || ids.map(byId).filter(Boolean)[0];
     if (sig){
       var img = (sig.images && sig.images[0]) || '';
-      sigImg.src = thumb(img, 1200); sigImg.alt = cleanName(sig.name);
+      sigImg.src = thumb(img, innerWidth < 700 ? 700 : 900); sigImg.alt = cleanName(sig.name);
       $('lxSigName').textContent = cleanName(sig.name);
       $('lxSigDesc').textContent = sig.shortDescription || (sig.subcategoryName || sig.categoryName || '');
       $('lxSigPrice').innerHTML = priceHtml(sig);
@@ -3782,7 +3782,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       var l = looks[i], p = l.p;
       tabs.querySelectorAll('.lx-look-tab').forEach(function(b){ b.classList.toggle('active', +b.dataset.i === i); });
       var paint = function(){
-        lookImg.src = l.img || thumb(p.images && p.images[0], 1400); lookImg.alt = cleanName(p.name);
+        lookImg.src = l.img || thumb(p.images && p.images[0], innerWidth < 700 ? 700 : 1000); lookImg.alt = cleanName(p.name);
         stage.querySelectorAll('.lx-hot').forEach(function(h){ h.remove(); });
         var hot = document.createElement('button');
         hot.type = 'button'; hot.className = 'lx-hot'; hot.style.left = l.x + '%'; hot.style.top = l.y + '%';
@@ -3809,6 +3809,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     }
     tabs.addEventListener('click', function(e){ var b = e.target.closest('.lx-look-tab'); if (b) show(+b.dataset.i); });
     show(0, true);
+    setTimeout(function(){ looks.slice(1).forEach(function(l){ var im = new Image(); im.src = l.img || thumb(l.p.images && l.p.images[0], innerWidth < 700 ? 700 : 1000); }); }, 2500);
     $('lxLook').hidden = false;
   }).catch(function(){});
 })();

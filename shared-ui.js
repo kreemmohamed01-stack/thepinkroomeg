@@ -461,8 +461,14 @@
   });
   /* the Cairo-only flag is copied onto a bag line when it's added; bags
      saved before the product was flagged learn it here from the server */
+  // reuse the page's own product list when it has one (catalog.js), and
+  // otherwise fetch it only once the page is idle, so it never competes
+  // with the page's images
   if (cart.length){
-    fetch('/api/products').then(r => r.ok ? r.json() : null).then(d => d && d.products ? d.products : []).then(list => {
+    const later = window.requestIdleCallback || (fn => setTimeout(fn, 2000));
+    (typeof PRODUCTS_READY !== 'undefined' ? PRODUCTS_READY
+      : new Promise(res => later(() => fetch('/api/products').then(r => r.ok ? r.json() : null).then(d => res(d && d.products ? d.products : [])).catch(() => res([])))))
+    .then(list => {
       let changed = false;
       cart.forEach(i => {
         const p = (list || []).find(x => String(x.id) === String(i.id));
