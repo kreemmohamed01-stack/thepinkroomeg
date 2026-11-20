@@ -3730,7 +3730,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     if (p.salePrice != null && p.price != null && p.salePrice < p.price) return money(p.salePrice) + ' <s>' + money(p.price) + '</s>';
     return money(p.salePrice != null ? p.salePrice : p.price);
   }
-  function cleanName(n){ return String(n||'').split(/\s+-\s+size\b|\s+\|\s+/i)[0].trim(); }
+  function cleanName(n){ return String(n||'').split(/\s+-\s+size\b|\s+\|\s+|\s+–\s+/i)[0].trim(); }
   function href(p){ return 'product.html?slug=' + encodeURIComponent(p.slug); }
 
   // static labels
