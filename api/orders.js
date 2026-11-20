@@ -400,7 +400,7 @@ async function createOrder(req, res) {
     const addr = order.shippingAddress || {};
     const inCairo = (addr.country || 'EG') === 'EG' && String(addr.governorate || '').trim().toLowerCase() === 'cairo';
     if (cairoRows.length && !inCairo) {
-      return res.status(400).json({ ok: false, error: `"${cairoRows[0].name}" is delivered within Cairo only. Please choose Cairo as your governorate or remove it from your bag.` });
+      return res.status(400).json({ ok: false, error: `"${cairoRows[0].name}" is delivered within Cairo. For delivery outside Cairo, please message us on WhatsApp and we will arrange it with you.` });
     }
   }
 

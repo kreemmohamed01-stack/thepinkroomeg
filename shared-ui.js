@@ -186,7 +186,7 @@
           <span>${t('cartDeliverTo')}</span>
           <select id="tprGov"><option value="">${t('cartPickGov')}</option></select>
         </label>
-        <p id="tprCairoNote" hidden style="margin:-6px 0 14px;padding:8px 10px;border-radius:4px;background:#fdf3f5;border:1px solid rgba(196,120,140,.3);color:#9c4f63;transition:all .2s;font-size:11.5px;line-height:1.45">📍 ${t('cairoOnlyLocked')}</p>
+        <div id="tprCairoNote" hidden style="margin:-6px 0 14px;padding:10px 12px;border-radius:4px;background:#fdecec;border:1px solid #e0a3a3;color:#c0392b;font-size:11.5px;line-height:1.5"></div>
         <div class="tpr-subtotal sm"><span>${t('subtotal')}</span><span id="tprSubtotal">EGP 0.00</span></div>
         <div class="tpr-subtotal sm"><span>${t('cartShipping')}</span><span id="tprShip">${t('cartShipPending')}</span></div>
         <div class="tpr-subtotal"><span>${t('cartTotal')}</span><span id="tprTotal">EGP 0.00</span></div>
@@ -451,27 +451,7 @@
     const a = loadCheckout().shippingAddress;
     if (a && (!a.country || a.country === 'EG') && a.governorate) govSel.value = a.governorate;
   })();
-  /* Cairo-only bag: tapping the governorate shows a red warning instead
-     of opening it; if a phone still opens the picker, the choice snaps
-     back to Cairo with the same warning */
-  const bagCairoLocked = () => cart.some(i => i && i.cairoOnly);
-  function warnCairo(){
-    const n = $('tprCairoNote');
-    n.hidden = false;
-    n.textContent = '⚠ ' + t('cairoOnlyBlocked');
-    n.style.background = '#fdecec'; n.style.borderColor = '#e0a3a3'; n.style.color = '#c0392b'; n.style.fontWeight = '600';
-    const box = govSel.closest('.tpr-gov');
-    box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake');
-    setTimeout(()=> box.classList.remove('shake'), 500);
-  }
-  ['mousedown','touchstart','keydown'].forEach(ev => govSel.addEventListener(ev, e => {
-    if (!bagCairoLocked()) return;
-    if (!(e.type === 'keydown' && e.key === 'Tab')) e.preventDefault();
-    warnCairo();
-  }, { passive:false }));
-  govSel.addEventListener('change', e => {
-    if (bagCairoLocked() && govSel.value !== 'Cairo'){ govSel.value = 'Cairo'; warnCairo(); e.stopImmediatePropagation(); }
-  });
+  function escCairo(x){ return String(x).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
   govSel.addEventListener('change', ()=>{
     const s = loadCheckout();
     s.shippingAddress = Object.assign({}, s.shippingAddress, { country:'EG', governorate: govSel.value });
@@ -552,14 +532,18 @@
     }).join('');
 
     $('tprSubtotal').textContent = money(subtotal);
-    // a "Cairo delivery only" piece in the bag pins delivery to Cairo
-    const cairoLocked = cart.some(i => i && i.cairoOnly);
-    $('tprCairoNote').hidden = !cairoLocked;
-    if (cairoLocked && govSel.value !== 'Cairo'){
-      govSel.value = 'Cairo';
-      const st = loadCheckout();
-      st.shippingAddress = Object.assign({}, st.shippingAddress, { country:'EG', governorate:'Cairo' });
-      try { localStorage.setItem(CHECKOUT_KEY, JSON.stringify(st)); } catch(e){}
+    // a "Cairo delivery only" piece going to another governorate: the
+    // customer can still pick any governorate, but is pointed to WhatsApp
+    // to arrange that delivery personally
+    const cairoItems = cart.filter(i => i && i.cairoOnly);
+    const outGov = govSel.value && govSel.value !== 'Cairo' ? govSel.selectedOptions[0].textContent : '';
+    const cairoNote = $('tprCairoNote');
+    cairoNote.hidden = !(cairoItems.length && outGov);
+    if (!cairoNote.hidden){
+      const names = cairoItems.map(i => i.name).join(' + ');
+      const waText = t('cairoOutWa').replace('{items}', names).replace('{gov}', outGov);
+      cairoNote.innerHTML = `<b style="display:block;margin-bottom:3px">⚠ ${t('cairoOutTitle')}</b>${escCairo(t('cairoOutText').replace('{items}', names).replace('{gov}', outGov))}
+        <br><a href="${WA}?text=${encodeURIComponent(waText)}" target="_blank" rel="noopener" style="display:inline-block;margin-top:7px;padding:6px 14px;border-radius:20px;background:#25d366;color:#fff;font-weight:600;text-decoration:none">${t('cairoOutBtn')}</a>`;
     }
     const gov = govSel.value;
     let shipping = null;
@@ -665,8 +649,8 @@
           // never trusts this and re-reads the real weight from the DB
           // (see recomputePricing() in api/orders.js)
           weight: product.weight != null ? Number(product.weight) : 0,
-          // "Cairo delivery only" product — checkout locks the governorate
-          // to Cairo; the server re-checks this from the DB
+          // "Cairo delivery only" product — outside Cairo the customer is
+          // pointed to WhatsApp; the server re-checks this from the DB
           cairoOnly: product.cairoOnly === true,
           img: (colorImg && colorImg[0]) || (sizeImg && sizeImg[0]) || (product.images && product.images[0]) || product.img,
           qty: 1
