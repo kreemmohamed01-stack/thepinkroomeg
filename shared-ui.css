@@ -652,3 +652,37 @@ html[dir="rtl"] .tpr-dd-menu li{text-align:right;}
   .tpr-btn:hover::before, .tpr-btn:hover::after,
   .tpr-wa-order:hover::before, .tpr-wa-order:hover::after{transform:scaleX(1);}
 }
+
+/* ===== "Powered by Kreemaly" credit — editorial black & white, no box.
+   Overrides the older boxed/gold styles inlined on each page (higher specificity). ===== */
+html body .footer-credit{text-align:center;padding:34px 0 30px;}
+html body .footer-credit .footer-credit-box{
+  display:inline-flex;flex-direction:column;align-items:center;gap:10px;
+  padding:0;border:0;border-radius:0;background:none;box-shadow:none;overflow:visible;
+  animation:none;
+  font-family:'Poppins',system-ui,sans-serif;font-style:normal;font-weight:400;
+  font-size:9px;letter-spacing:.42em;text-transform:uppercase;
+  color:rgba(255,255,255,.5);
+}
+html body .footer-credit .footer-credit-box::after{content:none;animation:none;}
+html body .footer-credit .footer-credit-name{
+  position:relative;display:inline-block;margin:0;padding:0 0 8px;
+  font-family:'Playfair Display',Georgia,serif;font-style:normal;font-weight:400;
+  font-size:19px;letter-spacing:.32em;text-transform:uppercase;
+  margin-right:-.32em; /* balance trailing letter-spacing so it centers optically */
+  color:#fff;background:none;-webkit-background-clip:border-box;background-clip:border-box;
+  -webkit-text-fill-color:#fff;
+  text-decoration:none;animation:none;filter:none;transform:none;
+  transition:opacity .4s ease;
+}
+html body .footer-credit .footer-credit-name::after{
+  content:'';position:absolute;left:50%;bottom:0;
+  width:28px;height:1px;background:#fff;
+  transform:translateX(calc(-50% - .16em));
+  transition:width .5s cubic-bezier(.16,1,.3,1);
+}
+html body .footer-credit .footer-credit-name:hover{opacity:.85;filter:none;transform:none;}
+html body .footer-credit .footer-credit-name:hover::after{width:100%;}
+html body .tpr-menu .footer-credit{padding:26px 0 6px;}
+html body .tpr-menu .footer-credit .footer-credit-name{font-size:16px;}
+@media (prefers-reduced-motion:reduce){html body .footer-credit .footer-credit-name::after{transition:none;}}
