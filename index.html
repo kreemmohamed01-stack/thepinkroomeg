@@ -401,48 +401,45 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
      The navbar sits over the hero, so it is pushed down by the strip's
      height until it becomes the fixed (stuck) bar on scroll. */
   :root{--xmas-strip-h:44px;}
+  /* ===== Top strip — editorial marquee (seasonal). Text flows endlessly, speeds/tilts with scroll velocity, eases on hover ===== */
   .xmas-strip{
     position:relative;z-index:60;height:var(--xmas-strip-h);
-    display:flex;align-items:center;justify-content:center;gap:16px;padding:0 16px;
-    background:
-      radial-gradient(ellipse 45% 160% at 50% 50%, rgba(201,160,92,.16), transparent 70%),
-      linear-gradient(180deg,#14110e 0%,#0b0907 100%);
-    white-space:nowrap;overflow:hidden;
+    display:flex;align-items:stretch;
+    background:#0b0a09;color:#f4efe7;text-decoration:none;
+    border-bottom:1px solid rgba(255,255,255,.07);
+    overflow:hidden;white-space:nowrap;
   }
-  .xmas-strip::before,.xmas-strip::after{
-    content:'';position:absolute;left:0;right:0;height:1px;
-    background:linear-gradient(90deg,transparent 0%,#b8915a 20%,#f1d9a6 50%,#b8915a 80%,transparent 100%);
-  }
-  .xmas-strip::before{top:0;opacity:.55;}
-  .xmas-strip::after{bottom:0;}
-  .xmas-strip-rule{width:42px;height:1px;background:linear-gradient(90deg,transparent,#c9a46a);}
-  .xmas-strip-rule:last-child{background:linear-gradient(270deg,transparent,#c9a46a);}
-  .xmas-strip-dot{width:5px;height:5px;transform:rotate(45deg);background:#c9a46a;flex-shrink:0;}
-  .xmas-strip-title{
-    font-family:'Playfair Display',serif;font-style:italic;font-size:17px;letter-spacing:.5px;color:#ecd3a0;
-  }
-  .xmas-strip-cta{font:500 10.5px/1 'Poppins',sans-serif;letter-spacing:2.6px;text-transform:uppercase;color:#d9bd88;}
-  .xmas-strip:hover .xmas-strip-cta{color:#fff3da;}
-  /* falling letters */
-  .xmas-strip [data-drop] .ch{
-    /* solid gold + soft glow rather than gradient-clipped text: per-letter
-       background-clip:text with transforms paints unreliably (letters
-       vanishing / flickering, worst on Safari/iPad) */
-    display:inline-block;white-space:pre;
-    color:#e9cc93;text-shadow:0 0 10px rgba(233,204,147,.25);
-    opacity:0;transform:translateY(-120%);filter:blur(3px);
-    transition:opacity .5s ease, transform .7s cubic-bezier(.2,1.4,.4,1), filter .5s ease;
-    transition-delay:calc(var(--i) * 45ms);
-  }
-  .xmas-strip.in [data-drop] .ch{opacity:1;transform:none;filter:none;}
+  .xs-label,.xs-cta{position:relative;z-index:2;display:flex;align-items:center;flex-shrink:0;padding:0 26px;background:#0b0a09;
+    font:500 9.5px/1 'Poppins',sans-serif;letter-spacing:.34em;text-transform:uppercase;}
+  .xs-label{color:rgba(244,239,231,.45);border-right:1px solid rgba(255,255,255,.08);gap:12px;}
+  .xs-label b{font:400 13px/1 'Playfair Display',serif;font-style:italic;letter-spacing:0;text-transform:none;color:#d9bd8c;}
+  .xs-cta{color:#f4efe7;border-left:1px solid rgba(255,255,255,.08);gap:12px;}
+  .xs-cta span{position:relative;padding:4px 0;}
+  .xs-cta span::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:currentColor;transform:scaleX(.35);transform-origin:0 50%;transition:transform .6s cubic-bezier(.16,1,.3,1);}
+  .xs-cta svg{width:14px;height:14px;fill:none;stroke:currentColor;stroke-width:1.4;transition:transform .6s cubic-bezier(.16,1,.3,1);}
+  .xmas-strip:hover .xs-cta span::after{transform:scaleX(1);}
+  .xmas-strip:hover .xs-cta svg{transform:translateX(5px);}
+  html[dir="rtl"] .xs-cta svg{transform:scaleX(-1);}
+  html[dir="rtl"] .xmas-strip:hover .xs-cta svg{transform:scaleX(-1) translateX(5px);}
+  .xs-viewport{position:relative;flex:1;min-width:0;overflow:hidden;display:flex;align-items:center;
+    -webkit-mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);mask-image:linear-gradient(90deg,transparent,#000 7%,#000 93%,transparent);}
+  .xs-track{display:flex;align-items:center;will-change:transform;
+    opacity:0;transform:translate3d(0,110%,0);transition:opacity 1s ease,transform 1.2s cubic-bezier(.16,1,.3,1);}
+  .xmas-strip.in .xs-track{opacity:1;transform:none;}
+  .xs-run{display:flex;align-items:center;flex-shrink:0;will-change:transform;}
+  .xs-item{display:inline-flex;align-items:center;gap:26px;padding-right:26px;}
+  .xs-serif{font:400 17px/1 'Playfair Display',serif;font-style:italic;letter-spacing:.01em;color:#f4efe7;}
+  .xs-caps{font:500 10px/1 'Poppins',sans-serif;letter-spacing:.38em;text-transform:uppercase;color:rgba(244,239,231,.62);}
+  .xs-star{width:9px;height:9px;flex-shrink:0;color:#c9a46a;}
+  .xs-star svg{width:100%;height:100%;display:block;fill:currentColor;}
   .topbar-mobile:not(.is-stuck){top:var(--xmas-strip-h) !important;}
+  @media (max-width:820px){ .xs-label{display:none;} }
   @media (max-width:520px){
-    .xmas-strip{gap:10px;padding:0 10px;}
-    .xmas-strip-rule{display:none;}
-    .xmas-strip-title{font-size:13.5px;letter-spacing:.2px;}
-    .xmas-strip-cta{font-size:8.5px;letter-spacing:1.3px;}
+    .xs-cta{padding:0 14px;} .xs-cta span{display:none;}
+    .xs-serif{font-size:14px;} .xs-caps{font-size:8.5px;letter-spacing:.3em;}
+    .xs-item{gap:18px;padding-right:18px;}
   }
-  @media (max-width:360px){ .xmas-strip-dot,.xmas-strip-cta{display:none;} }
+  @media (prefers-reduced-motion:reduce){ .xs-track{transition:none;opacity:1;transform:none;} }
 
   /* ---------- VIDEO HERO ---------- */
   .video-hero{
@@ -2785,30 +2782,53 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
 
   <!-- ===== CHRISTMAS ANNOUNCEMENT STRIP (seasonal — delete this block + .xmas-strip CSS/JS to remove) ===== -->
   <a class="xmas-strip" href="category.html?cat=christmas-decor" aria-label="Christmas at The Pink Room — discover the holiday collection">
-    <span class="xmas-strip-rule" aria-hidden="true"></span>
-    <span class="xmas-strip-title" data-drop="xmasStripTitle">Christmas at The Pink Room</span>
-    <span class="xmas-strip-dot" aria-hidden="true"></span>
-    <span class="xmas-strip-cta" data-drop="xmasStripCta2">Discover the Holiday Edit</span>
-    <span class="xmas-strip-rule" aria-hidden="true"></span>
+    <span class="xs-label" aria-hidden="true"><b>N&deg;01</b> <span data-i18n="catChristmas">Christmas Decor</span></span>
+    <span class="xs-viewport" aria-hidden="true"><span class="xs-track" id="xsTrack"></span></span>
+    <span class="xs-cta"><span data-i18n="xmasStripCta2">Discover the Holiday Edit</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="14 6 20 12 14 18"/></svg></span>
   </a>
 
   <script>
   (function(){
-    var bar=document.querySelector('.xmas-strip'); if(!bar) return;
-    function split(){
-      var n=0;
-      bar.querySelectorAll('[data-drop]').forEach(function(el){
-        // text comes from i18n here (not data-i18n, which would overwrite the letter spans)
-        var I=window.TPR_I18N, key=el.getAttribute('data-drop');
-        var t=(I && I.t && I.t(key)) || el.textContent; if(t===key) t=el.textContent;
-        el.setAttribute('aria-label',t); el.textContent='';
-        for(var k=0;k<t.length;k++){ var c=document.createElement('span'); c.className='ch'; c.setAttribute('aria-hidden','true'); c.style.setProperty('--i',n++); c.textContent=t[k]; el.appendChild(c); }
-      });
+    var bar=document.querySelector('.xmas-strip'), track=document.getElementById('xsTrack'); if(!bar||!track) return;
+    var reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var STAR='<span class="xs-star"><svg viewBox="0 0 24 24"><path d="M12 0c.7 6.4 5.6 11.3 12 12-6.4.7-11.3 5.6-12 12-.7-6.4-5.6-11.3-12-12C6.4 11.3 11.3 6.4 12 0z"/></svg></span>';
+    var runW=0, x=0, speed=0, vel=0, hover=false, lastY=window.scrollY, built=false;
+    var dir=document.documentElement.dir==='rtl'?1:-1;
+    function txt(key,fb){ var I=window.TPR_I18N, t=I&&I.t&&I.t(key); return (!t||t===key)?fb:t; }
+    function build(){
+      var a=txt('xmasStripTitle','Christmas at The Pink Room'), b=txt('xmasStripCta2','Discover the Holiday Edit'), c=txt('xmasEyebrow',"The Season's Edit · Now Open");
+      var item='<span class="xs-item"><span class="xs-serif">'+a+'</span>'+STAR+'<span class="xs-caps">'+b+'</span>'+STAR+'<span class="xs-caps">'+c+'</span>'+STAR+'</span>';
+      // one run is wide enough to cover the screen; two runs side by side loop seamlessly
+      var run='<span class="xs-run">'+item+'</span>';
+      track.innerHTML=run; var one=track.firstChild, w=one.getBoundingClientRect().width||600;
+      var reps=Math.max(1,Math.ceil((window.innerWidth*1.2)/w));
+      one.innerHTML=new Array(reps+1).join(item);
+      track.appendChild(one.cloneNode(true));
+      runW=one.getBoundingClientRect().width; built=true;
     }
-    function drop(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.classList.add('in'); }); }); }
-    // i18n swaps the text in after load, so (re)split once the final language is in
-    function go(){ split(); if(window.__tprIntroActive) addEventListener('tpr-intro-done',function(){ setTimeout(drop,400); },{once:true}); else drop(); }
+    function tick(){
+      if(built&&!reduce){
+        var y=window.scrollY, dy=y-lastY; lastY=y;
+        vel+=(Math.max(-60,Math.min(60,dy))-vel)*0.12;                // smoothed scroll velocity
+        var target=(hover?0.25:1)*0.55 + Math.abs(vel)*0.18;         // base drift + scroll boost
+        speed+=(target-speed)*0.08;
+        x+=speed*dir;
+        if(dir<0&&x<=-runW) x+=runW; if(dir>0&&x>=0) x-=runW;
+        track.style.transform='translate3d('+x.toFixed(2)+'px,0,0) skewX('+(Math.max(-8,Math.min(8,-vel*0.25))).toFixed(2)+'deg)';
+      }
+      requestAnimationFrame(tick);
+    }
+    bar.addEventListener('mouseenter',function(){hover=true;}); bar.addEventListener('mouseleave',function(){hover=false;});
+    function show(){ requestAnimationFrame(function(){ requestAnimationFrame(function(){ bar.classList.add('in'); }); }); }
+    function go(){
+      build(); if(dir>0) x=-runW;
+      if(window.__tprIntroActive) addEventListener('tpr-intro-done',function(){ setTimeout(show,300); },{once:true}); else show();
+      requestAnimationFrame(tick);
+    }
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',function(){ setTimeout(go,0); }); else go();
+    // final language/fonts can change widths: rebuild once everything has loaded, and on resize
+    addEventListener('load',function(){ build(); });
+    var rt; addEventListener('resize',function(){ clearTimeout(rt); rt=setTimeout(build,200); });
   })();
   </script>
 
