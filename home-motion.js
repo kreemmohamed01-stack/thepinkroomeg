@@ -268,7 +268,7 @@
     tag('.cats-title, .ts-header, .rooms-title, .journal-title, .journal-eyebrow', 'hm-rv');
     tag('.trust-item', 'hm-rv', 0.1);
     tag('.room-card', 'hm-rv', 0.08);
-    tag('.ba-stage', 'hm-img', 0, 0.1);
+    tag('.ba-stage-wrap', 'hm-rv', 0, 0.1);
     tag('.ba-thumb', 'hm-rv', 0.07, 0.35);
     [].forEach.call(document.querySelectorAll('.hm-rv, .hm-split'), function (el) { revealIO.observe(el); });
     // product cards arrive after the catalogue loads
@@ -283,11 +283,7 @@
   function initCats() {
     if (!('IntersectionObserver' in window) || reduce) return;
     catCards = [].slice.call(document.querySelectorAll('.cats .cat-card'));
-    catCards.forEach(function (c) {
-      c.classList.add('hm-cat');
-      var cur = document.createElement('span'); cur.className = 'cat-curtain'; cur.setAttribute('aria-hidden', 'true'); c.appendChild(cur);
-      var sh = document.createElement('span'); sh.className = 'cat-sheen'; sh.setAttribute('aria-hidden', 'true'); c.appendChild(sh);
-    });
+    catCards.forEach(function (c) { c.classList.add('hm-cat'); });
     // cards that enter together are released one after another, in reading order
     var queue = [], timer = null, lastRelease = 0;
     function flush() {
@@ -295,10 +291,10 @@
       queue.sort(function (a, b) { return catCards.indexOf(a) - catCards.indexOf(b); });
       var now = performance.now(), wait = Math.max(0, lastRelease - now) / 1000;
       queue.forEach(function (c, i) {
-        var d = wait + i * 0.2;
+        var d = wait + i * 0.16;
         c.style.setProperty('--cd', d.toFixed(2) + 's');
         c.classList.add('hm-cat-in');
-        setTimeout(function () { c.classList.add('hm-cat-done'); c.style.removeProperty('--cd'); }, (d + 2.4) * 1000);
+        setTimeout(function () { c.classList.add('hm-cat-done'); c.style.removeProperty('--cd'); }, (d + 2.6) * 1000);
         lastRelease = now + (d + 0.2) * 1000;
       });
       queue = [];
@@ -312,24 +308,13 @@
     }, { rootMargin: '0px 0px -10% 0px', threshold: 0.15 });
     catCards.forEach(function (c) { io.observe(c); });
 
-    // desktop: the card tilts toward the cursor, the photo drifts the other way, a soft light follows
-    if (matchMedia('(hover:hover) and (pointer:fine)').matches) catCards.forEach(function (c) {
-      c.addEventListener('pointermove', function (e) {
-        if (!c.classList.contains('hm-cat-done')) return;
-        var r = c.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5;
-        c.style.transform = 'perspective(900px) translateY(-6px) rotateX(' + (-y * 7).toFixed(2) + 'deg) rotateY(' + (x * 9).toFixed(2) + 'deg)';
-        c.style.setProperty('--px', (-x * 14).toFixed(1) + 'px');
-        c.style.setProperty('--mx', ((x + 0.5) * 100).toFixed(1) + '%'); c.style.setProperty('--my', ((y + 0.5) * 100).toFixed(1) + '%');
-      });
-      c.addEventListener('pointerleave', function () { c.style.transform = ''; c.style.removeProperty('--px'); });
-    });
   }
   function paintCats(vh) {
     for (var i = 0; i < catCards.length; i++) {
       var r = catCards[i].getBoundingClientRect();
       if (r.bottom < -100 || r.top > vh + 100) continue;
       var k = ((r.top + r.height / 2) - vh / 2) / vh;          // -0.5 .. 0.5 across the screen
-      catCards[i].style.setProperty('--py', (k * -7).toFixed(2) + '%');
+      catCards[i].style.setProperty('--py', (k * -5).toFixed(2) + '%');
     }
   }
 

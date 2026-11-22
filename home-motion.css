@@ -121,39 +121,39 @@ html[lang="ar"] .hm-statement-text{font-family:'Cairo','Playfair Display',serif;
   .ba-stage.changing .ba-curtain,.ba-stage.changing .ba-img{animation:none;}
 }
 
-/* ======================= CATEGORY CARDS — curtain entrance, one by one ======================= */
-html.hm-on .hm-cat{opacity:0;transform:translate3d(0,90px,0) scale(.94);
-  transition:opacity 1s var(--hm-ease) var(--cd,0s),transform 1.6s var(--hm-ease) var(--cd,0s),box-shadow .5s ease;}
+/* ======================= CATEGORY CARDS — quiet editorial entrance, one by one =======================
+   The observed card is never clipped (a clipped target never "intersects"); the unveil runs on the photo inside. */
+html.hm-on .hm-cat{opacity:0;transform:translate3d(0,48px,0);
+  transition:opacity 1.2s var(--hm-ease) var(--cd,0s),transform 1.6s var(--hm-ease) var(--cd,0s),box-shadow .6s ease;}
 html.hm-on .hm-cat.hm-cat-in{opacity:1;transform:none;}
-html.hm-on .hm-cat.hm-cat-done{transition:transform .7s var(--hm-ease),box-shadow .5s ease;transform-style:preserve-3d;}
-.cat-curtain{position:absolute;inset:0;z-index:4;pointer-events:none;background:#14110f;transform-origin:50% 0;transform:scaleY(1);}
-.cat-curtain::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--hm-gold);}
-html.hm-on .hm-cat .cat-curtain{transition:transform 1.3s var(--hm-ease-io) calc(var(--cd,0s) + .12s);}
-html.hm-on .hm-cat.hm-cat-in .cat-curtain{transform:scaleY(0);}
-html.hm-on .hm-cat.hm-cat-done .cat-curtain{display:none;}
-/* image: oversized for parallax, settles from a deep zoom */
-html.hm-on .hm-cat .cat-card-img{inset:-8% 0;--cs:1.38;transform:translate3d(var(--px,0px),var(--py,0px),0) scale(var(--cs));
-  transition:transform 2.2s var(--hm-ease) calc(var(--cd,0s) + .12s),filter 1.6s var(--hm-ease) calc(var(--cd,0s) + .12s);filter:saturate(.6) brightness(.8);}
-html.hm-on .hm-cat.hm-cat-in .cat-card-img{--cs:1;filter:none;}
-html.hm-on .hm-cat.hm-cat-done .cat-card-img{transition:transform 1.1s var(--hm-ease);}
+html.hm-on .hm-cat.hm-cat-done{transition:transform .8s var(--hm-ease),box-shadow .8s ease;}
+/* photo: unveils top-to-bottom behind a soft mask while settling from a slow zoom */
+html.hm-on .hm-cat .cat-card-img{inset:-6% 0;--cs:1.22;
+  clip-path:inset(0 0 100% 0);
+  transform:translate3d(0,var(--py,0px),0) scale(var(--cs));
+  transition:clip-path 1.7s var(--hm-ease-io) calc(var(--cd,0s) + .1s),transform 2.8s var(--hm-ease) calc(var(--cd,0s) + .1s);}
+html.hm-on .hm-cat.hm-cat-in .cat-card-img{clip-path:inset(0 0 0 0);--cs:1;}
+html.hm-on .hm-cat.hm-cat-done .cat-card-img{transition:transform 1.6s var(--hm-ease);}
+html.hm-on .hm-cat .cat-card-veil{opacity:0;transition:opacity 1.4s ease calc(var(--cd,0s) + .7s);}
+html.hm-on .hm-cat.hm-cat-in .cat-card-veil{opacity:1;}
 @media (hover:hover) and (pointer:fine){
-  html.hm-on .hm-cat.hm-cat-done:hover .cat-card-img{--cs:1.08;}
+  html.hm-on .hm-cat.hm-cat-done:hover .cat-card-img{--cs:1.06;}
 }
-/* copy: title rises, gold rule draws, note and CTA follow */
-html.hm-on .hm-cat .cat-card-body > *{opacity:0;transform:translate3d(0,26px,0);
-  transition:opacity .9s var(--hm-ease) calc(var(--cd,0s) + var(--td,.7s)),transform 1.1s var(--hm-ease) calc(var(--cd,0s) + var(--td,.7s));}
-html.hm-on .hm-cat .cat-card-body > h3{--td:.72s;}
-html.hm-on .hm-cat .cat-card-body > .cat-rule{--td:.9s;width:0;transform:none;transition:opacity .4s ease calc(var(--cd,0s) + .9s),width 1s var(--hm-ease) calc(var(--cd,0s) + .9s);}
-html.hm-on .hm-cat .cat-card-body > .cat-note{--td:1s;}
-html.hm-on .hm-cat .cat-card-body > .cat-cta{--td:1.1s;}
+/* copy follows: title, gold rule drawing out, note, call to action */
+html.hm-on .hm-cat .cat-card-body > *{opacity:0;transform:translate3d(0,18px,0);
+  transition:opacity 1s var(--hm-ease) calc(var(--cd,0s) + var(--td,1s)),transform 1.2s var(--hm-ease) calc(var(--cd,0s) + var(--td,1s));}
+html.hm-on .hm-cat .cat-card-body > h3{--td:1s;letter-spacing:.18em;transition:opacity 1s var(--hm-ease) calc(var(--cd,0s) + 1s),transform 1.2s var(--hm-ease) calc(var(--cd,0s) + 1s),letter-spacing 1.8s var(--hm-ease) calc(var(--cd,0s) + 1s);}
+html.hm-on .hm-cat.hm-cat-in .cat-card-body > h3{letter-spacing:1px;}
+html.hm-on .hm-cat .cat-card-body > .cat-rule{width:0;transform:none;transition:opacity .4s ease calc(var(--cd,0s) + 1.2s),width 1.3s var(--hm-ease) calc(var(--cd,0s) + 1.2s);}
+html.hm-on .hm-cat .cat-card-body > .cat-note{--td:1.3s;}
+html.hm-on .hm-cat .cat-card-body > .cat-cta{--td:1.4s;}
 html.hm-on .hm-cat.hm-cat-in .cat-card-body > *{opacity:1;transform:none;}
 html.hm-on .hm-cat.hm-cat-in .cat-card-body > .cat-note{opacity:.9;}
 html.hm-on .hm-cat.hm-cat-in .cat-card-body > .cat-rule{width:42px;}
-html.hm-on .hm-cat.hm-cat-done .cat-card-body > *{transition:opacity .35s ease,transform .35s ease,width .5s var(--hm-ease),gap .35s ease,color .35s ease;}
+html.hm-on .hm-cat.hm-cat-done .cat-card-body > *{transition:opacity .35s ease,transform .35s ease,width .6s var(--hm-ease),gap .35s ease,color .35s ease;}
 @media (hover:hover) and (pointer:fine){ html.hm-on .hm-cat.hm-cat-done:hover .cat-card-body > .cat-rule{width:66px;} }
 @media (max-width:520px){ html.hm-on .hm-cat.hm-cat-in .cat-card-body > .cat-rule{width:32px;} }
-/* light sheen that follows the cursor on desktop */
-.cat-sheen{position:absolute;inset:0;z-index:3;pointer-events:none;opacity:0;transition:opacity .5s ease;
-  background:radial-gradient(420px circle at var(--mx,50%) var(--my,50%),rgba(255,240,215,.22),transparent 60%);}
-@media (hover:hover) and (pointer:fine){ .hm-cat-done:hover .cat-sheen{opacity:1;} }
-@media (prefers-reduced-motion:reduce){ .cat-curtain,.cat-sheen{display:none;} }
+/* hover: a fine inner frame draws in — gallery-mount detail */
+.hm-cat::after{content:'';position:absolute;inset:12px;z-index:3;pointer-events:none;border:1px solid rgba(253,250,245,.55);opacity:0;transform:scale(1.03);transition:opacity .7s var(--hm-ease),transform .9s var(--hm-ease);}
+@media (hover:hover) and (pointer:fine){ .hm-cat.hm-cat-done:hover::after{opacity:1;transform:none;} }
+@media (prefers-reduced-motion:reduce){ html.hm-on .hm-cat,html.hm-on .hm-cat *{transition:none!important;clip-path:none!important;opacity:1!important;transform:none!important;} }
