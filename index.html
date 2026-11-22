@@ -2691,6 +2691,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   .cats-title{font-family:'Playfair Display',serif!important;font-weight:400!important;font-size:clamp(34px,4.6vw,60px)!important;letter-spacing:-.01em!important;}
   .cats-eyebrow,.rooms-eyebrow{letter-spacing:.42em!important;}
 </style>
+<link rel="stylesheet" href="home-motion.css" media="print" onload="this.media='all'"><noscript><link rel="stylesheet" href="home-motion.css"></noscript>
 </head>
 <body data-tpr-chrome="drawers-only">
 
@@ -3046,6 +3047,45 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
         </div>
       </a>
     </div>
+  </section>
+
+  <!-- ===== BEFORE / AFTER (replaces the Signature Piece; drag the handle to place the piece in the room — rooms in before-after/, config in home-motion.js) ===== -->
+  <section class="ba" id="baSection" aria-labelledby="baTitle">
+    <div class="ba-inner">
+      <div class="ba-copy">
+        <p class="ba-eyebrow hm-rv" id="baEyebrow">Before &nbsp;/&nbsp; After</p>
+        <h2 class="ba-title hm-split" id="baTitle">One piece.<br><em>A different room.</em></h2>
+        <p class="ba-lede hm-rv" id="baLede">Drag across the room and watch a single Pink Room piece change the whole space.</p>
+        <div class="ba-meta hm-rv">
+          <span class="ba-count"><b id="baNow">01</b> / 04</span>
+          <span class="ba-line"><i id="baLine"></i></span>
+        </div>
+        <div class="ba-piece hm-rv">
+          <span class="ba-piece-label" id="baPieceLabel">The piece</span>
+          <a class="ba-piece-name" id="baPieceName" href="#"></a>
+          <span class="ba-piece-price" id="baPiecePrice"></span>
+          <a class="lx-btn ba-shop" id="baShop" href="#"><span id="baShopTxt">Shop the piece</span> <svg viewBox="0 0 24 24"><line x1="4" y1="12" x2="20" y2="12"/><polyline points="15 7 20 12 15 17"/></svg></a>
+        </div>
+      </div>
+      <div class="ba-stage-wrap">
+        <div class="ba-stage" id="baStage" style="--pos:50%">
+          <img class="ba-img ba-after" id="baAfter" alt="" decoding="async" loading="lazy" width="900" height="900">
+          <div class="ba-before-clip"><img class="ba-img ba-before" id="baBefore" alt="" decoding="async" loading="lazy" width="900" height="900"></div>
+          <span class="ba-tag ba-tag-b" id="baTagB">Before</span>
+          <span class="ba-tag ba-tag-a" id="baTagA">After</span>
+          <div class="ba-handle" aria-hidden="true"><span class="ba-knob"><svg viewBox="0 0 24 24"><polyline points="9 6 3 12 9 18"/><polyline points="15 6 21 12 15 18"/></svg></span></div>
+          <input class="ba-range" id="baRange" type="range" min="0" max="100" value="50" step="0.1" aria-label="Before and after slider">
+          <div class="ba-curtain" aria-hidden="true"></div>
+        </div>
+        <div class="ba-thumbs" id="baThumbs" role="tablist"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== BRAND STATEMENT (the footer "About" text, lit word by word as you scroll) ===== -->
+  <section class="hm-statement" aria-label="About The Pink Room">
+    <p class="hm-statement-eyebrow hm-rv" id="hmStateEyebrow">The Pink Room &nbsp;·&nbsp; Since 2020</p>
+    <p class="hm-statement-text" id="hmStatement" data-key="footerAbout">The Pink Room is an Egyptian home accessories brand founded in 2020 by Dalia Hassan and Ashraf El Sanjak, bringing together over 20 years of experience across multinational companies, event styling, and trading ventures. Built on the belief that chic doesn&rsquo;t have to be expensive, The Pink Room offers stylish, carefully selected pieces that bring character and elegance to every space at accessible prices.</p>
   </section>
 
   <!-- ===== SIGNATURE PIECE (a Christmas piece — set SIGNATURE_ID in the luxury-layer script) ===== -->
@@ -3769,7 +3809,7 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
       $('lxSigDesc').textContent = sig.shortDescription || (sig.subcategoryName || sig.categoryName || '');
       $('lxSigPrice').innerHTML = priceHtml(sig);
       sigMedia.href = $('lxSigBtn').href = href(sig);
-      $('lxSig').hidden = false;
+      /* Signature Piece retired — replaced by the Before/After section. */
     }
 
     // ---- 3. Shop the Look ----
@@ -3813,5 +3853,6 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
   }).catch(function(){});
 })();
 </script>
+<script src="home-motion.js" defer></script>
 </body>
 </html>

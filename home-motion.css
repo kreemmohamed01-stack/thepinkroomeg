@@ -1,0 +1,122 @@
+/* =====================================================================
+   HOME MOTION — editorial scroll choreography for the homepage
+   (hero scroll-out, reveals, split headings, Before/After, statement)
+   Loaded non-blocking; every hidden state is gated on html.hm-on, which
+   home-motion.js adds — so without JS the page simply shows as before.
+   ===================================================================== */
+
+:root{
+  --hm-ease:cubic-bezier(.16,1,.3,1);
+  --hm-ease-io:cubic-bezier(.77,0,.18,1);
+  --hm-ink:#14110f;
+  --hm-paper:#f8f4ee;
+  --hm-gold:#b08d57;
+  --hm-soft:#6f655c;
+}
+
+/* ---------- hero: frame tightens + film zooms as you scroll away ---------- */
+.video-hero{will-change:clip-path;}
+.video-hero .video-hero-media{transform-origin:50% 40%;will-change:transform;}
+.video-hero .video-hero-content{will-change:transform,opacity;}
+
+/* ---------- generic reveal (fade + rise) ---------- */
+html.hm-on .hm-rv{opacity:0;transform:translate3d(0,46px,0);transition:opacity 1.1s var(--hm-ease),transform 1.3s var(--hm-ease);transition-delay:var(--hm-d,0s);}
+html.hm-on .hm-rv.hm-in{opacity:1;transform:none;}
+
+/* image unveil: the picture wipes up out of a mask and settles from a zoom */
+html.hm-on .hm-img{clip-path:inset(100% 0 0 0);transition:clip-path 1.4s var(--hm-ease-io);transition-delay:var(--hm-d,0s);}
+html.hm-on .hm-img.hm-in{clip-path:inset(0 0 0 0);}
+html.hm-on .hm-img > .cat-card-img,
+html.hm-on .hm-img img{transform:scale(1.18);transition:transform 2s var(--hm-ease);transition-delay:var(--hm-d,0s);}
+html.hm-on .hm-img.hm-in > .cat-card-img,
+html.hm-on .hm-img.hm-in img{transform:scale(1);}
+
+/* split headings: each line rises out of its own mask */
+.hm-line{display:block;overflow:hidden;padding-bottom:.08em;margin-bottom:-.08em;}
+.hm-line > span{display:inline-block;}
+html.hm-on .hm-split .hm-line > span{transform:translate3d(0,110%,0) rotate(2deg);transform-origin:0 100%;transition:transform 1.25s var(--hm-ease);transition-delay:calc(var(--hm-i,0) * .11s + var(--hm-d,0s));}
+html.hm-on .hm-split.hm-in .hm-line > span{transform:none;}
+
+/* ======================= BEFORE / AFTER ======================= */
+.ba{background:var(--hm-paper);padding:clamp(80px,11vw,160px) 0;position:relative;overflow:hidden;}
+.ba::before{content:'';position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(20,17,15,.12),transparent);}
+.ba-inner{width:min(1320px,100% - 32px);margin:0 auto;display:grid;grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(32px,6vw,96px);align-items:center;}
+.ba-eyebrow{font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:.42em;text-transform:uppercase;color:var(--hm-gold);margin:0 0 22px;}
+.ba-title{font-family:'Playfair Display',serif;font-weight:400;font-size:clamp(38px,5.2vw,78px);line-height:1.02;letter-spacing:-.02em;color:var(--hm-ink);margin:0;}
+.ba-title em{font-style:italic;color:var(--hm-gold);}
+.ba-lede{font-size:14.5px;line-height:1.85;color:var(--hm-soft);max-width:380px;margin:28px 0 0;}
+.ba-meta{display:flex;align-items:center;gap:18px;margin:44px 0 0;font-family:'Poppins',sans-serif;font-size:11px;letter-spacing:.3em;color:var(--hm-soft);}
+.ba-count b{font-family:'Playfair Display',serif;font-weight:400;font-size:30px;letter-spacing:0;color:var(--hm-ink);margin-right:4px;display:inline-block;min-width:1.4em;}
+.ba-line{position:relative;flex:1;max-width:180px;height:1px;background:rgba(20,17,15,.14);overflow:hidden;}
+.ba-line i{position:absolute;inset:0;background:var(--hm-ink);transform-origin:0 50%;transform:scaleX(.25);transition:transform 1s var(--hm-ease);}
+.ba-piece{margin-top:34px;padding-top:28px;border-top:1px solid rgba(20,17,15,.1);max-width:420px;}
+.ba-piece-label{display:block;font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:var(--hm-gold);margin-bottom:10px;}
+.ba-piece-name{display:block;font-family:'Playfair Display',serif;font-size:clamp(20px,1.8vw,26px);line-height:1.25;color:var(--hm-ink);text-decoration:none;transition:opacity .5s var(--hm-ease),transform .6s var(--hm-ease);}
+.ba-piece-price{display:block;margin-top:8px;font-size:13px;letter-spacing:.06em;color:var(--hm-soft);transition:opacity .5s var(--hm-ease);}
+.ba-piece-price s{opacity:.55;margin-left:8px;}
+.ba-shop{margin-top:22px;}
+.ba-piece.swap .ba-piece-name{opacity:0;transform:translateY(14px);}
+.ba-piece.swap .ba-piece-price{opacity:0;}
+
+.ba-stage-wrap{position:relative;}
+.ba-stage{position:relative;aspect-ratio:1/1;overflow:hidden;border-radius:4px;background:#e9dfd0;cursor:ew-resize;touch-action:pan-y;user-select:none;-webkit-user-select:none;box-shadow:0 40px 90px -40px rgba(40,28,16,.45);}
+.ba-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;pointer-events:none;-webkit-user-drag:none;}
+.ba-before-clip{position:absolute;inset:0;clip-path:inset(0 calc(100% - var(--pos)) 0 0);will-change:clip-path;}
+html[dir="rtl"] .ba-before-clip{clip-path:inset(0 0 0 calc(100% - var(--pos)));}
+.ba-handle{position:absolute;top:0;bottom:0;left:var(--pos);width:0;pointer-events:none;z-index:3;}
+html[dir="rtl"] .ba-handle{left:auto;right:var(--pos);}
+.ba-handle::before{content:'';position:absolute;top:0;bottom:0;left:-.5px;width:1px;background:rgba(255,255,255,.9);box-shadow:0 0 18px rgba(0,0,0,.25);}
+.ba-knob{position:absolute;top:50%;left:0;width:64px;height:64px;margin:-32px 0 0 -32px;border-radius:50%;display:grid;place-items:center;
+  background:rgba(255,255,255,.22);backdrop-filter:blur(10px) saturate(1.3);-webkit-backdrop-filter:blur(10px) saturate(1.3);
+  border:1px solid rgba(255,255,255,.75);box-shadow:0 10px 30px rgba(0,0,0,.18);transition:transform .5s var(--hm-ease),background .4s;}
+.ba-knob svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.4;stroke-linecap:round;stroke-linejoin:round;}
+.ba-stage:hover .ba-knob,.ba-stage.dragging .ba-knob{transform:scale(1.12);background:rgba(255,255,255,.34);}
+.ba-stage.dragging .ba-knob{transform:scale(.92);}
+.ba-tag{position:absolute;top:22px;z-index:2;font-size:10px;letter-spacing:.38em;text-transform:uppercase;color:#fff;padding:9px 14px;background:rgba(20,17,15,.28);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);transition:opacity .4s;pointer-events:none;}
+.ba-tag-b{left:22px;} .ba-tag-a{right:22px;}
+html[dir="rtl"] .ba-tag-b{left:auto;right:22px;} html[dir="rtl"] .ba-tag-a{right:auto;left:22px;}
+/* keyboard / screen-reader control only — pointer and touch go to the stage itself, so vertical page scrolling on phones is never captured */
+.ba-range{position:absolute;inset:0;width:100%;height:100%;opacity:0;margin:0;z-index:4;pointer-events:none;-webkit-appearance:none;appearance:none;background:none;}
+.ba-range:focus-visible + .ba-curtain{outline:2px solid var(--hm-gold);outline-offset:4px;}
+/* room-change curtain: a panel sweeps across, the next room arrives under it */
+.ba-curtain{position:absolute;inset:0;z-index:5;background:var(--hm-ink);transform:scaleX(0);transform-origin:100% 50%;pointer-events:none;}
+.ba-stage.changing .ba-curtain{animation:baCurtain 1.15s var(--hm-ease-io) both;}
+@keyframes baCurtain{0%{transform:scaleX(0);transform-origin:0 50%;}46%{transform:scaleX(1);transform-origin:0 50%;}54%{transform:scaleX(1);transform-origin:100% 50%;}100%{transform:scaleX(0);transform-origin:100% 50%;}}
+.ba-stage.changing .ba-img{animation:baZoom 1.4s var(--hm-ease) both;}
+@keyframes baZoom{0%,45%{transform:scale(1.12);}100%{transform:scale(1);}}
+
+.ba-thumbs{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:16px;}
+.ba-thumb{position:relative;aspect-ratio:1/1;padding:0;border:0;background:#e9dfd0;cursor:pointer;overflow:hidden;border-radius:3px;}
+.ba-thumb img{width:100%;height:100%;object-fit:cover;display:block;filter:grayscale(.35) brightness(.92);transform:scale(1.04);transition:filter .6s var(--hm-ease),transform .9s var(--hm-ease);}
+.ba-thumb::after{content:'';position:absolute;left:0;right:0;bottom:0;height:2px;background:var(--hm-ink);transform:scaleX(0);transform-origin:0 50%;transition:transform .8s var(--hm-ease);}
+.ba-thumb:hover img{filter:none;transform:scale(1.1);}
+.ba-thumb[aria-selected="true"] img{filter:none;transform:scale(1);}
+.ba-thumb[aria-selected="true"]::after{transform:scaleX(1);}
+.ba-thumb span{position:absolute;left:10px;top:8px;font-family:'Playfair Display',serif;font-size:13px;color:#fff;text-shadow:0 1px 8px rgba(0,0,0,.35);}
+
+@media (max-width:900px){
+  .ba-inner{grid-template-columns:1fr;}
+  .ba-stage-wrap{order:2;} .ba-copy{order:1;}
+  .ba-lede{max-width:none;}
+  .ba-piece{max-width:none;}
+  .ba-knob{width:54px;height:54px;margin:-27px 0 0 -27px;}
+  .ba-tag{top:14px;font-size:9px;padding:7px 10px;} .ba-tag-b{left:14px;} .ba-tag-a{right:14px;}
+  .ba-thumbs{gap:8px;}
+}
+
+/* ======================= BRAND STATEMENT ======================= */
+.hm-statement{background:var(--hm-ink);color:#fff;padding:clamp(110px,16vw,230px) 0;text-align:center;position:relative;overflow:hidden;}
+.hm-statement::before{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 60% 50% at 50% 0%,rgba(176,141,87,.14),transparent 70%);pointer-events:none;}
+.hm-statement-eyebrow{position:relative;font-size:10.5px;letter-spacing:.46em;text-transform:uppercase;color:var(--hm-gold);margin:0 0 clamp(36px,5vw,60px);}
+.hm-statement-text{position:relative;width:min(1100px,100% - 32px);margin:0 auto;font-family:'Playfair Display',serif;font-weight:400;
+  font-size:clamp(24px,3.3vw,50px);line-height:1.32;letter-spacing:-.01em;color:#fff;}
+html[lang="ar"] .hm-statement-text{font-family:'Cairo','Playfair Display',serif;line-height:1.7;letter-spacing:0;}
+.hm-statement-text .w{display:inline-block;opacity:.14;transform:translate3d(0,.18em,0);filter:blur(3px);transition:opacity .7s var(--hm-ease),transform .9s var(--hm-ease),filter .7s var(--hm-ease);}
+.hm-statement-text .w.on{opacity:1;transform:none;filter:none;}
+.hm-statement-text .w.gold{font-style:italic;color:#d9bd8c;}
+
+@media (prefers-reduced-motion:reduce){
+  html.hm-on .hm-rv,html.hm-on .hm-img,html.hm-on .hm-img img,html.hm-on .hm-img > .cat-card-img,html.hm-on .hm-split .hm-line > span{opacity:1;transform:none;clip-path:none;transition:none;}
+  .hm-statement-text .w{opacity:1;transform:none;filter:none;transition:none;}
+  .ba-stage.changing .ba-curtain,.ba-stage.changing .ba-img{animation:none;}
+}
