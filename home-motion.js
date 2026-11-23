@@ -19,13 +19,13 @@
 
   /* ------------------------------------------------------------------
      Before / After rooms. "slug" = the product shown in the After photo.
-     Images live in before-after/ (900px webp).
+     Images live in before-after/ (square webp). Each Before is the product's own photo with the piece removed (LaMa inpainting), so both halves match pixel for pixel.
      ------------------------------------------------------------------ */
   var ROOMS = [
     { slug: 'modern-colorful-abstract-painting-with-gold-frame-110-90-cm', room: { en: 'Entrance console', ar: 'كونسول المدخل' } },
-    { slug: 'hammered-gold-floor-pots-modern-decorative-metal-planters', room: { en: 'Hallway corner', ar: 'ركن الممر' } },
+    { slug: 'golden-teal-bloom-metal-wall-art-120-70-cm-the-pink-room', room: { en: 'Console wall', ar: 'حائط الكونسول' } },
     { slug: 'sculptural-glass-sphere-floor-lamp-size-h-180-cm', room: { en: 'Living room', ar: 'غرفة المعيشة' } },
-    { slug: 'handmade-christmas-centerpiece-in-hammered-gold-bowl-red-green', room: { en: 'Christmas table', ar: 'طاولة الكريسماس' } }
+    { slug: 'royal-reindeer-christmas-statue-white-gold-40-cm', room: { en: 'Christmas mantel', ar: 'ركن الكريسماس' } }
   ];
   var T = AR ? {
     eyebrow: 'قبل &nbsp;/&nbsp; بعد', title: 'قطعة واحدة.<br><em>غرفة مختلفة.</em>',
@@ -62,7 +62,7 @@
     var tagB = $('baTagB'), tagA = $('baTagA'), piece = document.querySelector('.ba-piece');
     var cur = -1, pos = 50, target = 50, anim = false, introDone = false;
 
-    function src(i, kind) { return 'before-after/room-' + (i + 1) + '-' + kind + '.webp'; }
+    function src(i, kind) { return 'before-after/room-' + (i + 1) + '-' + kind + '.webp?v=2'; }
 
     // smooth follow: the handle eases toward the pointer instead of snapping
     function loop() {
