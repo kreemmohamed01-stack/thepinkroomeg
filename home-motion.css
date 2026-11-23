@@ -15,7 +15,6 @@
 }
 
 /* ---------- hero: frame tightens + film zooms as you scroll away ---------- */
-.video-hero{will-change:clip-path;}
 .video-hero .video-hero-media{transform-origin:50% 40%;will-change:transform;}
 .video-hero .video-hero-content{will-change:transform,opacity;}
 
@@ -111,8 +110,8 @@ html[dir="rtl"] .ba-tag-b{left:auto;right:22px;} html[dir="rtl"] .ba-tag-a{right
 .hm-statement-text{position:relative;width:min(1100px,100% - 32px);margin:0 auto;font-family:'Playfair Display',serif;font-weight:400;
   font-size:clamp(24px,3.3vw,50px);line-height:1.32;letter-spacing:-.01em;color:#fff;}
 html[lang="ar"] .hm-statement-text{font-family:'Cairo','Playfair Display',serif;line-height:1.7;letter-spacing:0;}
-.hm-statement-text .w{display:inline-block;opacity:.14;transform:translate3d(0,.18em,0);filter:blur(3px);transition:opacity .7s var(--hm-ease),transform .9s var(--hm-ease),filter .7s var(--hm-ease);}
-.hm-statement-text .w.on{opacity:1;transform:none;filter:none;}
+.hm-statement-text .w{display:inline-block;opacity:.14;transform:translate3d(0,.18em,0);transition:opacity .6s ease,transform .8s var(--hm-ease);}
+.hm-statement-text .w.on{opacity:1;transform:none;}
 .hm-statement-text .w.gold{font-style:italic;color:#d9bd8c;}
 
 @media (prefers-reduced-motion:reduce){
@@ -128,9 +127,9 @@ html.hm-on .hm-cat{opacity:0;transform:translate3d(0,48px,0);
 html.hm-on .hm-cat.hm-cat-in{opacity:1;transform:none;}
 html.hm-on .hm-cat.hm-cat-done{transition:transform .8s var(--hm-ease),box-shadow .8s ease;}
 /* photo: unveils top-to-bottom behind a soft mask while settling from a slow zoom */
-html.hm-on .hm-cat .cat-card-img{inset:-6% 0;--cs:1.22;
+html.hm-on .hm-cat .cat-card-img{--cs:1.22;
   clip-path:inset(0 0 100% 0);
-  transform:translate3d(0,var(--py,0px),0) scale(var(--cs));
+  transform:scale(var(--cs));
   transition:clip-path 1.7s var(--hm-ease-io) calc(var(--cd,0s) + .1s),transform 2.8s var(--hm-ease) calc(var(--cd,0s) + .1s);}
 html.hm-on .hm-cat.hm-cat-in .cat-card-img{clip-path:inset(0 0 0 0);--cs:1;}
 html.hm-on .hm-cat.hm-cat-done .cat-card-img{transition:transform 1.6s var(--hm-ease);}

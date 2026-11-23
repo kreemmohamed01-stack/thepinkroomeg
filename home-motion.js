@@ -222,18 +222,17 @@
     if (!hero || reduce) return;
     var h = hero.offsetHeight || vh;
     var y = window.scrollY - hero.offsetTop;
+    if (y > h * 1.1 && heroLast >= 1) return;
     var p = Math.max(0, Math.min(1, y / (h * 0.9)));
     if (Math.abs(p - heroLast) < 0.001) return;
     heroLast = p;
     var e = 1 - Math.pow(1 - p, 2);                       // ease-out
     if (p <= 0) {
-      hero.style.clipPath = ''; heroMedia.style.transform = '';
+      heroMedia.style.transform = '';
       heroContent.style.transform = ''; heroContent.style.opacity = '';
       if (heroOverlay) heroOverlay.style.opacity = '';
       return;
     }
-    var side = (e * 5).toFixed(2), bottom = (e * 9).toFixed(2), rad = (e * 28).toFixed(1);
-    hero.style.clipPath = 'inset(0 ' + side + '% ' + bottom + '% ' + side + '% round 0 0 ' + rad + 'px ' + rad + 'px)';
     heroMedia.style.transform = 'translate3d(0,' + (p * h * 0.22).toFixed(1) + 'px,0) scale(' + (1 + e * 0.14).toFixed(4) + ')';
     heroContent.style.transform = 'translate3d(-50%,' + (-p * h * 0.32).toFixed(1) + 'px,0)';
     heroContent.style.opacity = Math.max(0, 1 - p * 1.7).toFixed(3);
@@ -325,7 +324,6 @@
     var vh = window.innerHeight;
     paintHero(vh);
     paintStatement(vh);
-    paintCats(vh);
   }
   function onScroll() { if (!ticking) { ticking = true; raf(frame); } }
 
@@ -379,8 +377,7 @@
     window.addEventListener('resize', function () { heroLast = -1; onScroll(); });
     onScroll();
     // smooth scroll waits for the page to settle so it never touches load speed
-    if (document.readyState === 'complete') setTimeout(initLenis, 600);
-    else window.addEventListener('load', function () { setTimeout(initLenis, 600); });
+    // native scrolling: Lenis removed — it made scrolling feel heavy over the hero video
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
 })();
