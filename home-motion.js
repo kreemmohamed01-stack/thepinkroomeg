@@ -212,30 +212,39 @@
     }
   }
 
-  /* ================= 2. hero scroll-out ================= */
+  /* ================= 2. hero: it stays in place while the page slides up over it ================= */
   var hero = document.querySelector('.video-hero');
   var heroMedia = hero && hero.querySelector('.video-hero-media');
   var heroContent = hero && hero.querySelector('.video-hero-content');
-  var heroOverlay = hero && hero.querySelector('.video-hero-overlay');
-  var heroLast = -1;
+  var heroNext = hero && hero.nextElementSibling;
+  while (heroNext && (heroNext.offsetHeight === 0 || heroNext.tagName === 'SCRIPT')) heroNext = heroNext.nextElementSibling;
+  var heroShade = null, heroLast = -1;
+  function initHero() {
+    if (!hero || reduce || !heroNext) return;
+    doc.classList.add('hm-stack');
+    heroShade = document.createElement('div'); heroShade.className = 'hm-hero-shade'; heroShade.setAttribute('aria-hidden', 'true');
+    hero.appendChild(heroShade);
+    sizeHero();
+  }
+  function sizeHero() {
+    if (!heroShade) return;
+    // a hero taller than the screen pins by its bottom edge so none of it is hidden
+    hero.style.top = Math.min(0, window.innerHeight - hero.offsetHeight) + 'px';
+    heroLast = -1;
+  }
   function paintHero(vh) {
-    if (!hero || reduce) return;
+    if (!heroShade) return;
     var h = hero.offsetHeight || vh;
-    var y = window.scrollY - hero.offsetTop;
-    if (y > h * 1.1 && heroLast >= 1) return;
-    var p = Math.max(0, Math.min(1, y / (h * 0.9)));
-    if (Math.abs(p - heroLast) < 0.001) return;
+    var nextTop = heroNext.getBoundingClientRect().top;
+    var p = Math.max(0, Math.min(1, (h + hero.getBoundingClientRect().top - nextTop) / h));
+    if (nextTop > vh + 50 && p === 0 && heroLast === 0) return;
+    if (Math.abs(p - heroLast) < 0.002) return;
     heroLast = p;
-    var e = 1 - Math.pow(1 - p, 2);                       // ease-out
-    if (p <= 0) {
-      heroMedia.style.transform = '';
-      heroContent.style.transform = ''; heroContent.style.opacity = '';
-      if (heroOverlay) heroOverlay.style.opacity = '';
-      return;
-    }
-    heroMedia.style.transform = 'translate3d(0,' + (p * h * 0.22).toFixed(1) + 'px,0) scale(' + (1 + e * 0.14).toFixed(4) + ')';
-    heroContent.style.transform = 'translate3d(-50%,' + (-p * h * 0.32).toFixed(1) + 'px,0)';
-    heroContent.style.opacity = Math.max(0, 1 - p * 1.7).toFixed(3);
+    var e = p * p * (3 - 2 * p);                           // smoothstep
+    heroMedia.style.transform = p ? 'scale(' + (1 + e * 0.08).toFixed(4) + ')' : '';
+    heroContent.style.transform = p ? 'translate3d(-50%,' + (-e * h * 0.18).toFixed(1) + 'px,0) scale(' + (1 - e * 0.06).toFixed(4) + ')' : '';
+    heroContent.style.opacity = p ? Math.max(0, 1 - p * 1.6).toFixed(3) : '';
+    heroShade.style.opacity = (e * 0.72).toFixed(3);
   }
 
   /* ================= 3. reveals ================= */
@@ -264,16 +273,10 @@
 
   function initReveals() {
     if (!revealIO || reduce) { doc.classList.remove('hm-on'); return; }
-    tag('.cats-title, .ts-header, .rooms-title, .journal-title, .journal-eyebrow', 'hm-rv');
-    tag('.trust-item', 'hm-rv', 0.1);
-    tag('.room-card', 'hm-rv', 0.08);
+    tag('.cats-title, .rooms-title, .journal-title, .journal-eyebrow', 'hm-rv');
     tag('.ba-stage-wrap', 'hm-rv', 0, 0.1);
     tag('.ba-thumb', 'hm-rv', 0.07, 0.35);
     [].forEach.call(document.querySelectorAll('.hm-rv, .hm-split'), function (el) { revealIO.observe(el); });
-    // product cards arrive after the catalogue loads
-    if (typeof PRODUCTS_READY !== 'undefined') PRODUCTS_READY.then(function () {
-      setTimeout(function () { tag('#tsGrid > *', 'hm-rv', 0.08); }, 60);
-    });
   }
 
 
@@ -315,6 +318,156 @@
       var k = ((r.top + r.height / 2) - vh / 2) / vh;          // -0.5 .. 0.5 across the screen
       catCards[i].style.setProperty('--py', (k * -5).toFixed(2) + '%');
     }
+  }
+
+  /* ================= staggered release helper: things entering together go one after another ================= */
+  function stagger(els, step, onIn, opts) {
+    if (!('IntersectionObserver' in window) || reduce) { els.forEach(function (el) { onIn(el, 0); }); return; }
+    var queue = [], timer = null, last = 0;
+    function flush() {
+      timer = null;
+      queue.sort(function (a, b) { return els.indexOf(a) - els.indexOf(b); });
+      var now = performance.now(), wait = Math.max(0, last - now) / 1000;
+      queue.forEach(function (el, i) { var d = wait + i * step; onIn(el, d); last = now + (d + step) * 1000; });
+      queue = [];
+    }
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (en) { if (en.isIntersecting) { io.unobserve(en.target); queue.push(en.target); } });
+      if (queue.length && !timer) timer = setTimeout(flush, 40);
+    }, opts || { rootMargin: '0px 0px -8% 0px', threshold: 0.12 });
+    els.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ================= TOP SELLERS: editorial gallery ================= */
+  function initTopSellers() {
+    var sec = $('tsx'), rail = $('tsxRail'); if (!sec || !rail) return;
+    var I = window.TPR_I18N, t = I && I.t && I.t('tsTitleHtml');
+    if (t && t !== 'tsTitleHtml') $('tsxTitle').innerHTML = t;
+    splitLines($('tsxTitle'));
+    function money(n) { return 'EGP ' + Math.round(Number(n) || 0).toLocaleString('en-US'); }
+    function thumb(src, w) { return window.tprThumb ? window.tprThumb(src, w) : src; }
+    function esc(x) { return String(x == null ? '' : x).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
+    function render() {
+      var ids = (typeof TOP_SELLER_IDS !== 'undefined' && TOP_SELLER_IDS.length) ? TOP_SELLER_IDS : [];
+      var list = (typeof PRODUCTS !== 'undefined' && PRODUCTS) || [];
+      var picks = ids.map(function (id) { for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i]; }).filter(Boolean);
+      if (!picks.length) { sec.style.display = 'none'; return; }
+      var view = AR ? 'شوف القطعة' : 'View<br>piece', sale = (I && I.t && I.t('saleTag')) || 'SALE';
+      rail.innerHTML = picks.map(function (p, i) {
+        var imgs = p.images || [], a = imgs[0] || 'logo-beige.png', b = imgs[1];
+        var focus = p.imageFocus && p.imageFocus[a] ? ' style="object-position:' + esc(p.imageFocus[a]) + '"' : '';
+        var onSale = p.salePrice != null && p.price != null && p.salePrice < p.price;
+        var price = onSale ? money(p.salePrice) + '<s>' + money(p.price) + '</s>' : money(p.salePrice != null ? p.salePrice : p.price);
+        var name = String(p.name || '').split(/\s+[–|]\s+/)[0];
+        return '<a class="tsx-card" href="product.html?slug=' + encodeURIComponent(p.slug) + '" draggable="false">' +
+          '<div class="tsx-media">' +
+            '<img class="a" src="' + esc(thumb(a, 700)) + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" draggable="false"' + focus + '>' +
+            (b ? '<img class="b" src="' + esc(thumb(b, 700)) + '" alt="" loading="lazy" decoding="async" draggable="false">' : '') +
+            '<span class="tsx-num">' + (i < 9 ? '0' : '') + (i + 1) + '</span>' +
+            (onSale ? '<span class="tsx-tag">' + esc(sale) + '</span>' : '') +
+            '<button type="button" class="tsx-wish" aria-label="Add to wishlist" data-id="' + esc(p.id) + '"><svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"/></svg></button>' +
+            '<span class="tsx-view" aria-hidden="true">' + view + '</span>' +
+          '</div>' +
+          '<div class="tsx-info"><div><h3 class="tsx-name">' + esc(name) + '</h3><p class="tsx-cat">' + esc(p.categoryName || '') + '</p></div><p class="tsx-price">' + price + '</p></div>' +
+        '</a>';
+      }).join('');
+      $('tsxTotal').textContent = (picks.length < 10 ? '0' : '') + picks.length;
+
+      [].forEach.call(rail.querySelectorAll('.tsx-wish'), function (btn) {
+        if (window.TPR && window.TPR.isWished && window.TPR.isWished(btn.dataset.id)) btn.classList.add('liked');
+        btn.addEventListener('click', function (e) {
+          e.preventDefault(); e.stopPropagation();
+          var liked = window.TPR ? window.TPR.toggleWishlist(btn.dataset.id) : !btn.classList.contains('liked');
+          btn.classList.toggle('liked', !!liked);
+        });
+      });
+
+      var cards = [].slice.call(rail.children);
+      stagger(cards, 0.12, function (c, d) {
+        c.style.setProperty('--cd', d.toFixed(2) + 's'); c.classList.add('in');
+        setTimeout(function () { c.classList.add('done'); }, (d + 2.3) * 1000);
+      }, { rootMargin: '0px 0px -6% 0px', threshold: 0.05 });
+      update();
+    }
+
+    // progress line + counter + arrows (one rAF per scroll burst)
+    var bar = $('tsxBar'), now = $('tsxNow'), prev = $('tsxPrev'), next = $('tsxNext'), pend = false;
+    function update() {
+      pend = false;
+      var max = rail.scrollWidth - rail.clientWidth, x = Math.abs(rail.scrollLeft);
+      var p = max > 0 ? x / max : 1;
+      bar.style.transform = 'scaleX(' + Math.max(0.06, p).toFixed(3) + ')';
+      var cards = rail.children, n = cards.length, w = n ? cards[0].offsetWidth : 1;
+      var gap = n > 1 ? cards[1].offsetLeft - cards[0].offsetLeft : w;
+      var i = Math.min(n - 1, Math.round(x / (gap || 1)));
+      if (p > 0.985) i = n - 1;
+      now.textContent = (i < 9 ? '0' : '') + (i + 1);
+      prev.disabled = x < 4; next.disabled = x > max - 4;
+    }
+    rail.addEventListener('scroll', function () { if (!pend) { pend = true; raf(update); } }, { passive: true });
+    window.addEventListener('resize', function () { raf(update); });
+    function step(dir) {
+      var c = rail.children[0]; if (!c) return;
+      var gap = rail.children[1] ? rail.children[1].offsetLeft - c.offsetLeft : c.offsetWidth;
+      var sign = doc.dir === 'rtl' ? -1 : 1;
+      rail.scrollBy({ left: dir * sign * gap, behavior: 'smooth' });
+    }
+    prev.addEventListener('click', function () { step(-1); });
+    next.addEventListener('click', function () { step(1); });
+
+    // desktop: drag the rail with the mouse, with a little momentum on release
+    if (matchMedia('(hover:hover) and (pointer:fine)').matches) {
+      var down = false, moved = 0, sx = 0, sl = 0, lastX = 0, v = 0, lastT = 0;
+      rail.addEventListener('pointerdown', function (e) {
+        if (e.pointerType !== 'mouse' || e.button !== 0 || e.target.closest('.tsx-wish')) return;
+        down = true; moved = 0; sx = lastX = e.clientX; sl = rail.scrollLeft; v = 0; lastT = performance.now();
+      });
+      window.addEventListener('pointermove', function (e) {
+        if (!down) return;
+        var dx = e.clientX - sx; moved = Math.max(moved, Math.abs(dx));
+        if (moved > 6 && !rail.classList.contains('drag')) rail.classList.add('drag');
+        if (moved > 6) {
+          rail.scrollLeft = sl - dx;
+          var t = performance.now(); v = (e.clientX - lastX) / Math.max(1, t - lastT); lastX = e.clientX; lastT = t;
+        }
+      });
+      window.addEventListener('pointerup', function () {
+        if (!down) return; down = false;
+        if (!rail.classList.contains('drag')) return;
+        var vel = v * 16;
+        (function glide() {
+          if (Math.abs(vel) < 0.5) { rail.classList.remove('drag'); return; }
+          rail.scrollLeft -= vel; vel *= 0.92; raf(glide);
+        })();
+      });
+    }
+
+    if (typeof PRODUCTS_READY !== 'undefined') {
+      Promise.all([PRODUCTS_READY, typeof SITE_STRUCTURE_READY !== 'undefined' ? SITE_STRUCTURE_READY : Promise.resolve()]).then(render);
+    }
+  }
+
+  /* ================= TRUST BAND: dividers draw, icons draw themselves ================= */
+  function initTrust() {
+    var band = document.querySelector('.tx'); if (!band) return;
+    [].forEach.call(band.querySelectorAll('.tx-icon *'), function (el) { el.setAttribute('pathLength', '1'); });
+    if (!('IntersectionObserver' in window) || reduce) { band.classList.add('in'); return; }
+    var io = new IntersectionObserver(function (es) {
+      if (es[0].isIntersecting) { band.classList.add('in'); io.disconnect(); }
+    }, { threshold: 0.3 });
+    io.observe(band);
+  }
+
+  /* ================= SHOP BY ROOM: tiles unveil one by one ================= */
+  function initRooms() {
+    if (reduce || !('IntersectionObserver' in window)) return;
+    var cards = [].slice.call(document.querySelectorAll('.rooms .room-card'));
+    cards.forEach(function (c) { c.classList.add('hm-room'); });
+    stagger(cards, 0.14, function (c, d) {
+      c.style.setProperty('--cd', d.toFixed(2) + 's'); c.classList.add('in');
+      // hand the card back to its own hover styles once the entrance is over
+      setTimeout(function () { c.classList.remove('hm-room', 'in'); c.style.removeProperty('--cd'); }, (d + 2.6) * 1000);
+    });
   }
 
   /* ================= scroll loop (one rAF per frame) ================= */
@@ -373,8 +526,12 @@
     initStatement();
     initReveals();
     initCats();
+    initTopSellers();
+    initTrust();
+    initRooms();
+    initHero();
     window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', function () { heroLast = -1; onScroll(); });
+    window.addEventListener('resize', function () { sizeHero(); onScroll(); });
     onScroll();
     // smooth scroll waits for the page to settle so it never touches load speed
     // native scrolling: Lenis removed — it made scrolling feel heavy over the hero video
