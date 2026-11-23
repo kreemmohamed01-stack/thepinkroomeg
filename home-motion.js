@@ -358,7 +358,7 @@
         var focus = p.imageFocus && p.imageFocus[a] ? ' style="object-position:' + esc(p.imageFocus[a]) + '"' : '';
         var onSale = p.salePrice != null && p.price != null && p.salePrice < p.price;
         var price = onSale ? money(p.salePrice) + '<s>' + money(p.price) + '</s>' : money(p.salePrice != null ? p.salePrice : p.price);
-        var name = String(p.name || '').split(/\s+[–|]\s+/)[0];
+        var name = String(p.name || '').split(/\s+-\s+size|\s+\|\s+|\s+–\s+/i)[0].trim();
         return '<a class="tsx-card" href="product.html?slug=' + encodeURIComponent(p.slug) + '" draggable="false">' +
           '<div class="tsx-media">' +
             '<img class="a" src="' + esc(thumb(a, 700)) + '" alt="' + esc(p.name) + '" loading="lazy" decoding="async" draggable="false"' + focus + '>' +
