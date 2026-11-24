@@ -237,6 +237,11 @@
     var h = hero.offsetHeight || vh;
     var nextTop = heroNext.getBoundingClientRect().top;
     var p = Math.max(0, Math.min(1, (h + hero.getBoundingClientRect().top - nextTop) / h));
+    // fully covered: stop decoding the video (frees CPU/GPU for smooth scrolling), resume on the way back
+    if (heroMedia.tagName === 'VIDEO' && heroMedia.src) {
+      if (p > 0.97) { if (!heroMedia.paused) { heroMedia.pause(); heroMedia._hmP = 1; } }
+      else if (heroMedia._hmP) { heroMedia._hmP = 0; var q = heroMedia.play(); if (q && q.catch) q.catch(function () {}); }
+    }
     if (nextTop > vh + 50 && p === 0 && heroLast === 0) return;
     if (Math.abs(p - heroLast) < 0.002) return;
     heroLast = p;
