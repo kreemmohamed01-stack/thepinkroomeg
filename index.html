@@ -2728,7 +2728,8 @@ src="https://www.facebook.com/tr?id=1112698284528072&ev=PageView&noscript=1"
     @media (min-aspect-ratio:1/1){#tprIntro .main{height:92%;width:auto;border-radius:18px;box-shadow:0 30px 80px rgba(0,0,0,.55);}}
     @keyframes tprIntroIn{from{opacity:0;transform:scale(.96)}to{opacity:1;transform:none}}
     html.tpr-intro-lock,html.tpr-intro-lock body{overflow:hidden;}
-  </style>
+    /* perf: paint/layout-heavy infinite loops neutralised (look kept, no per-frame repaint) */ @keyframes textShine{to{}} @keyframes tprShine{to{}} @keyframes aboutGlow{to{}} @keyframes logoGlow{to{}} @keyframes footerCreditGlow{to{}} @keyframes tprLogoShine{to{}}
+</style>
   <script>
   (function(){
     var SRC='/intro/pinkroom-christmas-intro.mp4?v=3', KEY='tpr_intro_seen';

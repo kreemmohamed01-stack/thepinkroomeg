@@ -686,3 +686,5 @@ html body .footer-credit .footer-credit-name:hover::after{width:100%;}
 html body .tpr-menu .footer-credit{padding:26px 0 6px;}
 html body .tpr-menu .footer-credit .footer-credit-name{font-size:16px;}
 @media (prefers-reduced-motion:reduce){html body .footer-credit .footer-credit-name::after{transition:none;}}
+
+/* perf: paint/layout-heavy infinite loops neutralised (look kept, no per-frame repaint) */ @keyframes textShine{to{}} @keyframes tprShine{to{}} @keyframes aboutGlow{to{}} @keyframes logoGlow{to{}} @keyframes footerCreditGlow{to{}} @keyframes tprLogoShine{to{}}
