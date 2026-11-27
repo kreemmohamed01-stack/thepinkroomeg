@@ -54,7 +54,7 @@ module.exports = async (req, res) => {
       sql`
         SELECT item->>'id' AS product_id, item->>'name' AS name,
                sum((item->>'qty')::numeric)::int AS qty,
-               sum((item->>'qty')::numeric * (item->>'price')::numeric)::float AS revenue
+               COALESCE(sum((item->>'qty')::numeric * (item->>'price')::numeric) FILTER (WHERE payment_status = 'paid'), 0)::float AS revenue
         FROM orders, jsonb_array_elements(items) AS item
         WHERE created_at >= now() - interval '90 days'
         GROUP BY item->>'id', item->>'name'

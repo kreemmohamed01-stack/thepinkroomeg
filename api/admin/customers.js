@@ -30,7 +30,7 @@ async function listCustomers(req, res) {
         (array_agg(customer_phone ORDER BY created_at DESC))[1] AS phone,
         (array_agg(customer->>'name' ORDER BY created_at DESC))[1] AS name,
         count(*)::int AS total_orders,
-        COALESCE(sum((pricing->>'total')::numeric), 0)::float AS total_spent,
+        COALESCE(sum((pricing->>'total')::numeric) FILTER (WHERE payment_status = 'paid'), 0)::float AS total_spent, count(*) FILTER (WHERE payment_status = 'paid')::int AS paid_orders,
         min(created_at) AS first_order_at,
         max(created_at) AS last_order_at
       FROM orders
@@ -56,7 +56,7 @@ async function listCustomers(req, res) {
     phone: r.phone,
     totalOrders: r.total_orders,
     totalSpent: r.total_spent,
-    avgOrderValue: r.total_orders ? r.total_spent / r.total_orders : 0,
+    avgOrderValue: r.paid_orders ? r.total_spent / r.paid_orders : 0,
     firstOrderAt: new Date(r.first_order_at).getTime(),
     lastOrderAt: new Date(r.last_order_at).getTime(),
     type: r.total_orders > 1 ? 'returning' : 'new'
@@ -76,7 +76,7 @@ async function getCustomer(req, res) {
         (array_agg(customer ORDER BY created_at DESC))[1] AS latest_customer,
         (array_agg(shipping_address ORDER BY created_at DESC))[1] AS latest_address,
         count(*)::int AS total_orders,
-        COALESCE(sum((pricing->>'total')::numeric), 0)::float AS total_spent,
+        COALESCE(sum((pricing->>'total')::numeric) FILTER (WHERE payment_status = 'paid'), 0)::float AS total_spent, count(*) FILTER (WHERE payment_status = 'paid')::int AS paid_orders,
         min(created_at) AS first_order_at,
         max(created_at) AS last_order_at
       FROM orders
@@ -107,7 +107,7 @@ async function getCustomer(req, res) {
       city: [address.city, address.governorate].filter(Boolean).join(', '),
       totalOrders: p.total_orders,
       totalSpent: p.total_spent,
-      avgOrderValue: p.total_orders ? p.total_spent / p.total_orders : 0,
+      avgOrderValue: p.paid_orders ? p.total_spent / p.paid_orders : 0,
       firstOrderAt: new Date(p.first_order_at).getTime(),
       lastOrderAt: new Date(p.last_order_at).getTime(),
       type: p.total_orders > 1 ? 'returning' : 'new'
