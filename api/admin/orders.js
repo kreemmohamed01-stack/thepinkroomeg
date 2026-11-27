@@ -84,7 +84,7 @@ async function listOrders(req, res) {
     sql`
       SELECT
         count(*)::int AS total_orders,
-        COALESCE(sum((pricing->>'total')::numeric), 0)::float AS total_revenue,
+        COALESCE(sum((pricing->>'total')::numeric) FILTER (WHERE payment_status = 'paid'), 0)::float AS total_revenue,
         count(*) FILTER (WHERE order_status = 'confirmed')::int AS confirmed_count,
         count(*) FILTER (WHERE order_status = 'processing')::int AS processing_count,
         count(*) FILTER (WHERE order_status = 'shipped')::int AS shipped_count,

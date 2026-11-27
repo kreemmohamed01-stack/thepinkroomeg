@@ -17,9 +17,9 @@ module.exports = async (req, res) => {
       productsCount, hiddenProducts,
       recentOrders, recentCustomers, bestSellers
     ] = await Promise.all([
-      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders`,
-      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders WHERE created_at >= date_trunc('month', now())`,
-      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders WHERE created_at >= date_trunc('month', now()) - interval '1 month' AND created_at < date_trunc('month', now())`,
+      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders WHERE payment_status = 'paid'`,
+      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders WHERE payment_status = 'paid' AND created_at >= date_trunc('month', now())`,
+      sql`SELECT COALESCE(sum((pricing->>'total')::numeric), 0)::float AS n FROM orders WHERE payment_status = 'paid' AND created_at >= date_trunc('month', now()) - interval '1 month' AND created_at < date_trunc('month', now())`,
 
       sql`SELECT count(*)::int AS n FROM orders`,
       sql`SELECT count(*)::int AS n FROM orders WHERE created_at >= date_trunc('month', now())`,

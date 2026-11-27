@@ -51,7 +51,7 @@ async function rangeAnalytics(req, res) {
     deviceRows, countryRows, recentVisitorRows
   ] = await Promise.all([
     sql`
-      SELECT count(*)::int AS orders, COALESCE(sum((pricing->>'total')::numeric), 0)::float AS revenue
+      SELECT count(*)::int AS orders, count(*) FILTER (WHERE payment_status = 'paid')::int AS paid_orders, COALESCE(sum((pricing->>'total')::numeric) FILTER (WHERE payment_status = 'paid'), 0)::float AS revenue
       FROM orders WHERE created_at >= ${start} AND created_at < ${end}
     `,
     sql`
@@ -145,7 +145,7 @@ async function rangeAnalytics(req, res) {
     ok: true,
     range: { label: range.label, start: start.getTime(), end: end.getTime() },
     revenue, orders,
-    aov: orders ? revenue / orders : 0,
+    aov: orderStats[0].paid_orders ? revenue / orderStats[0].paid_orders : 0,
     visitors,
     // "conversion" here is a simple orders/visitors ratio, not a true
     // funnel — there's no per-session purchase attribution, just
@@ -202,7 +202,7 @@ module.exports = async (req, res) => {
         FROM generate_series(date_trunc('month', now()) - interval '11 months', date_trunc('month', now()), interval '1 month') AS gs
         LEFT JOIN (
           SELECT date_trunc('month', created_at) AS month,
-                 sum((pricing->>'total')::numeric) AS revenue,
+                 sum((pricing->>'total')::numeric) FILTER (WHERE payment_status = 'paid') AS revenue,
                  count(*) AS orders
           FROM orders
           WHERE created_at >= date_trunc('month', now()) - interval '11 months'
