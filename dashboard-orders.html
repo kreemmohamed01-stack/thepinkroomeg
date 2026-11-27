@@ -12,6 +12,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="dashboard-ui.css">
+<style>#dbStats{grid-template-columns:repeat(4,1fr);} #dbStats .db-stat{display:block !important;} @media (max-width:1020px){#dbStats{grid-template-columns:repeat(2,1fr);}}</style>
 </head>
 <body>
 
@@ -88,10 +89,12 @@ const state = { page: 1, q: '', status: '', searchTimer: null };
 function renderStats(s){
   const cards = [
     { label:'TOTAL ORDERS', value: s.total_orders, gold:false },
-    { label:'TOTAL REVENUE', value: money(s.total_revenue), gold:true },
+    { label:'ALL ORDERS VALUE', value: money(s.all_orders_value), gold:true },
+    { label:'DELIVERED ORDERS', value: s.delivered_count, gold:false },
+    { label:'DELIVERED REVENUE', value: money(s.delivered_revenue), gold:true },
+    { label:'PAID REVENUE', value: money(s.total_revenue), gold:false },
     { label:'AWAITING PAYMENT', value: s.pending_payment_count, gold:false },
-    { label:'SHIPPED', value: s.shipped_count, gold:false },
-    { label:'DELIVERED', value: s.delivered_count, gold:false }
+    { label:'SHIPPED', value: s.shipped_count, gold:false }
   ];
   $('dbStats').innerHTML = cards.map(c => `
     <div class="db-stat ${c.gold?'gold':''}"><p>${c.label}</p><h3>${c.value}</h3></div>
